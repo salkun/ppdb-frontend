@@ -755,7 +755,9 @@ Struktur data siswa didesain modular guna mendukung formulir pendaftaran bertaha
     "gender": "Laki-laki",
     "religion": "Islam",
     "place_of_birth": "Jakarta",
-    "date_of_birth": "2008-05-14"
+    "date_of_birth": "2008-05-14",
+    "birth_order": 2,
+    "siblings_count": 3
   },
   "address": {
     "id": "a9876543-210f-edcb-a987-6543210fedcb",
@@ -787,7 +789,8 @@ Struktur data siswa didesain modular guna mendukung formulir pendaftaran bertaha
         "occupation_code": "02",
         "income_code": "03",
         "phone_number": "081311223344",
-        "whatsapp_number": "081311223344"
+        "whatsapp_number": "081311223344",
+        "email": "bambang.sudarsono@example.com"
       }
     }
   ]
@@ -821,7 +824,9 @@ Struktur data siswa didesain modular guna mendukung formulir pendaftaran bertaha
   "gender": "Laki-laki",
   "religion": "Islam",
   "place_of_birth": "Jakarta",
-  "date_of_birth": "2008-05-14"
+  "date_of_birth": "2008-05-14",
+  "birth_order": 2,
+  "siblings_count": 3
 }
 ```
 
@@ -907,6 +912,7 @@ Struktur data siswa didesain modular guna mendukung formulir pendaftaran bertaha
 | `address` | string | Tidak | Alamat tempat tinggal |
 | `phone_number` | string | Tidak | Nomor telepon rumah/kantor |
 | `whatsapp_number` | string | Tidak | Nomor kontak WhatsApp |
+| `email` | string | Tidak | Alamat email orang tua |
 
 ```json
 {
@@ -920,7 +926,8 @@ Struktur data siswa didesain modular guna mendukung formulir pendaftaran bertaha
   "income_code": "03",
   "address": "Jl. Merdeka No. 45",
   "phone_number": "081311223344",
-  "whatsapp_number": "081311223344"
+  "whatsapp_number": "081311223344",
+  "email": "bambang.sudarsono@example.com"
 }
 ```
 
@@ -1971,7 +1978,9 @@ Modul PPDB dirancang menggunakan arsitektur **Staging Area** yang memisahkan sel
     "gender": "Laki-laki",
     "religion": "Islam",
     "place_of_birth": "Jakarta",
-    "date_of_birth": "2008-05-14"
+    "date_of_birth": "2008-05-14",
+    "birth_order": 2,
+    "siblings_count": 3
   },
   "address": {
     "street_address": "Jl. Merdeka No. 45",
@@ -2000,7 +2009,8 @@ Modul PPDB dirancang menggunakan arsitektur **Staging Area** yang memisahkan sel
         "occupation_code": "02",
         "income_code": "03",
         "phone_number": "081311223344",
-        "whatsapp_number": "081311223344"
+        "whatsapp_number": "081311223344",
+        "email": "bambang.sudarsono@example.com"
       }
     }
   ]

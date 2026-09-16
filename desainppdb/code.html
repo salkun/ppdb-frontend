@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Chivo:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#005ab4",
+            "primary-container": "#0a73e0",
+            "primary-dark": "#00438c",
+            "primary-light": "#d6e3ff",
+            "primary-subtle": "#eff4fc",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#fefcff",
+            
+            "accent-red": "#dc2626",
+            "accent-red-light": "#fee2e2",
+            "accent-red-subtle": "#fff1f2",
+            "accent-yellow": "#eab308",
+            "accent-yellow-light": "#fef9c3",
+            "accent-yellow-dark": "#a16207",
+            "accent-green": "#16a34a",
+            "accent-green-light": "#dcfce7",
+            
+            "surface": "#f8faff",
+            "surface-pure": "#ffffff",
+            "surface-subtle": "#f1f5fa",
+            "surface-container": "#e6edf8",
+            "surface-container-low": "#edf3fc",
+            "surface-container-high": "#dfe7f3",
+            "on-surface": "#131b26",
+            "on-surface-variant": "#434e5e",
+            "outline": "#717d8f",
+            "outline-variant": "#cbd5e1"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            "sans": ["Plus Jakarta Sans", "sans-serif"],
+            "headline": ["Chivo", "sans-serif"],
+            "display": ["Chivo", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface font-sans text-on-surface antialiased">
+<!-- NAVBAR -->
+<header class="fixed top-0 w-full z-50 bg-surface-pure/95 backdrop-blur-md border-b border-surface-container shadow-[0_2px_12px_rgba(0,43,90,0.06)]">
+<div class="h-20 max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+<!-- School Logo & Branding (Blue dominant with subtle colorful accents) -->
+<a class="flex items-center gap-3 group" href="#">
+<div class="w-11 h-11 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-md shadow-primary/25 group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[26px]">school</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-[17px] leading-tight text-on-surface group-hover:text-primary transition-colors">SMP Full Day Al-Muhajirin</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-block w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
+<span class="text-xs font-bold text-primary tracking-wide">PPDB TP 2026–2027</span>
+</div>
+</div>
+</a>
+<!-- Navigation Links -->
+<nav class="hidden lg:flex items-center gap-7">
+<a aria-current="page" class="text-primary font-bold text-sm tracking-wide border-b-2 border-primary pb-0.5" data-path="beranda" href="#">Beranda</a>
+<a class="text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" data-path="informasi" href="#informasi">Informasi</a>
+<a class="text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" data-path="persyaratan" href="#persyaratan">Persyaratan Softfile</a>
+<a class="text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" data-path="program" href="#program">Program</a>
+<a class="text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" data-path="biaya" href="#biaya">Biaya</a>
+<a class="text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" data-path="alur" href="#alur">Alur</a>
+</nav>
+<!-- Action Button (Dominant Blue with Gold Accent Badge) -->
+<div class="flex items-center gap-3">
+<a class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-primary hover:bg-primary-dark text-on-primary text-sm font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg transition-all duration-200" href="#biaya">
+<span>Daftar Sekarang</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<div class="hidden sm:flex w-9 h-9 rounded-xl bg-primary-light text-primary items-center justify-center font-bold text-xs" title="Portal Santri">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full pt-20 bg-surface min-h-[calc(100vh-80px)]">
+<div class="flex flex-col w-full">
+<!-- HERO SECTION (Dominant Blue with Colorful Accents) -->
+<div class="relative w-full overflow-hidden bg-gradient-to-b from-primary-subtle/80 via-surface to-surface">
+<!-- Ambient Blue & Colorful Glows -->
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[360px] bg-gradient-to-b from-primary/15 via-primary-light/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-20 right-10 w-64 h-64 bg-accent-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute top-40 left-10 w-64 h-64 bg-accent-green/10 rounded-full blur-3xl pointer-events-none"></div>
+<section class="relative max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16 lg:pt-14 lg:pb-20">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+<!-- Hero Left Column -->
+<div class="lg:col-span-7 flex flex-col items-start gap-4">
+<!-- Badges Container (Red attention + Yellow highlight + Green success) -->
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-accent-red-light border border-accent-red/20 text-accent-red rounded-full text-xs font-extrabold uppercase tracking-wide">
+<span class="w-2 h-2 rounded-full bg-accent-red animate-ping"></span>
+                  PPDB TP 2026–2027
+                </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-accent-yellow-light border border-accent-yellow/40 text-accent-yellow-dark rounded-full text-xs font-bold">
+<span class="material-symbols-outlined text-[15px] text-accent-yellow-dark">star</span>
+                  Gelombang 1 Dibuka
+                </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 bg-accent-green-light border border-accent-green/30 text-accent-green rounded-full text-xs font-bold">
+<span class="material-symbols-outlined text-[15px]">cloud_done</span>
+                  100% Digital Softfile
+                </span>
+</div>
+<!-- Main Headline -->
+<h1 class="font-headline text-[38px] leading-[44px] sm:text-[54px] sm:leading-[60px] font-black text-on-surface tracking-tight">
+                Penerimaan Santri Baru <br/>
+<span class="text-primary bg-gradient-to-r from-primary via-primary-container to-blue-600 bg-clip-text text-transparent">SMP Full Day Al-Muhajirin</span>
+</h1>
+<!-- Subtitle -->
+<p class="text-[17px] leading-relaxed text-on-surface-variant max-w-xl">
+                Mulai langkah pendidikan terbaik bersama lingkungan belajar yang berkarakter islami, religius, unggul akademik &amp; teknologi, serta siap menghadapi tantangan masa depan.
+              </p>
+<!-- CTA Buttons (Primary Blue + Secondary White + Green WhatsApp Direct) -->
+<div class="flex flex-wrap items-center gap-3 pt-2 w-full sm:w-auto">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-primary hover:bg-primary-dark text-on-primary font-bold text-sm rounded-xl shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200" href="#biaya">
+<span>Daftar Sekarang</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-surface-pure hover:bg-surface-subtle text-primary border border-outline-variant/60 font-bold text-sm rounded-xl shadow-sm hover:shadow transition-all duration-200" href="#persyaratan">
+<span class="material-symbols-outlined text-[20px] text-primary">upload_file</span>
+<span>Cek Berkas Softfile</span>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3.5 bg-accent-green-light hover:bg-green-200 text-accent-green border border-accent-green/30 font-bold text-sm rounded-xl transition-all duration-200" href="https://wa.me/6287821055283" rel="noopener" target="_blank">
+<span class="material-symbols-outlined text-[19px]">chat</span>
+<span>Konsultasi WA</span>
+</a>
+</div>
+<!-- Quick Highlight Badges (Blue, Green, Red, Yellow) -->
+<div class="pt-4 flex flex-wrap items-center gap-2">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-light/60 border border-primary/20 text-primary font-semibold text-xs">
+<span class="material-symbols-outlined text-[17px] text-primary">verified</span>
+<span>Terakreditasi A (Unggul)</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-green-light border border-accent-green/20 text-accent-green font-semibold text-xs">
+<span class="material-symbols-outlined text-[17px]">menu_book</span>
+<span>Tahfizh &amp; Qur'ani</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-yellow-light border border-accent-yellow/40 text-accent-yellow-dark font-semibold text-xs">
+<span class="material-symbols-outlined text-[17px]">language</span>
+<span>TeachCast with Oxford</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-red-light border border-accent-red/20 text-accent-red font-semibold text-xs">
+<span class="material-symbols-outlined text-[17px]">schedule</span>
+<span>Full Day Terpadu</span>
+</div>
+</div>
+</div>
+<!-- Hero Graphic Showcase (Clean Modern Card with Photo & Stats) -->
+<div class="lg:col-span-5 relative mt-4 lg:mt-0">
+<div class="relative bg-surface-pure rounded-2xl p-4 lg:p-5 shadow-xl border border-surface-container">
+<!-- Image Container with blue badges -->
+<div class="aspect-[4/3] w-full rounded-xl overflow-hidden relative shadow-inner bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Modern Indonesian Islamic junior high school students in neat green uniforms engaged in enthusiastic collaborative learning inside an advanced high-tech classroom with Quran digital boards and tablets, soft morning sunlight, documentary style, clear architectural aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYsRsGLds_FuWAE6Hca3AHNWT2QrVG4pspY_xOQrvC9i93AC2nw6OUmQn2qdWDZna0QJ3S5A4tIp4KzvZRmd1guEliDkuGGoZSf6ntKrRZkdYjRNY2lkE0LgXQRALeU4NSD4Z6W4-NYBO4PA7NPmO5j1rT0j3yQq1V5OuUbeEksVSlCHlfpW4mMv3ogvUmSFdyrgd9E0a2dgyWC8vl8m22WsZ5UfZUOtQ2oU3mSJzpe5U8woxkB9tw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+<!-- Floating Top Badge on Image -->
+<div class="absolute top-3 left-3 bg-surface-pure/90 backdrop-blur-md text-primary font-bold text-xs px-2.5 py-1 rounded-md shadow flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-accent-green">check_circle</span>
+                    Pendaftaran Online 2026/2027
+                  </div>
+<!-- Overlay Bottom Details -->
+<div class="absolute bottom-3.5 left-4 right-4 text-surface-pure flex items-center justify-between">
+<div>
+<p class="text-base font-bold text-white drop-shadow">Lingkungan Akademik Unggul</p>
+<p class="text-xs text-white/90">Kampus Ciseureuh, Purwakarta — Berakhlak &amp; Berprestasi</p>
+</div>
+<div class="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[20px] text-accent-yellow">stars</span>
+</div>
+</div>
+</div>
+<!-- 3 Colorful Stats Cards Under Hero -->
+<div class="grid grid-cols-3 gap-2.5 mt-3.5">
+<div class="p-3 bg-primary-subtle rounded-xl text-center border border-primary/10">
+<span class="block font-headline text-2xl font-black text-primary">100%</span>
+<span class="text-[11px] font-bold text-on-surface-variant uppercase">Lulusan Unggul</span>
+</div>
+<div class="p-3 bg-accent-yellow-light/60 rounded-xl text-center border border-accent-yellow/30">
+<span class="block font-headline text-2xl font-black text-accent-yellow-dark">4 Track</span>
+<span class="text-[11px] font-bold text-on-surface-variant uppercase">Kelas Pilihan</span>
+</div>
+<div class="p-3 bg-accent-green-light/70 rounded-xl text-center border border-accent-green/20">
+<span class="block font-headline text-2xl font-black text-accent-green">15+</span>
+<span class="text-[11px] font-bold text-on-surface-variant uppercase">Ekstrakurikuler</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- SECTION 2: INFORMASI SINGKAT PPDB (3 Cards Clickable) -->
+<section class="w-full bg-surface-pure py-14 border-t border-surface-container" id="informasi">
+<div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col items-center text-center mb-10">
+<span class="text-xs font-extrabold uppercase tracking-widest text-primary bg-primary-subtle px-3 py-1 rounded-full border border-primary/20">Akses Cepat PPDB</span>
+<h2 class="font-headline text-3xl font-extrabold text-on-surface mt-2">Panduan Pokok Pendaftaran PPDB</h2>
+<p class="text-base text-on-surface-variant max-w-lg mt-1">Akses cepat ketentuan berkas digital, peminatan program studi, dan transparansi rincian biaya pendidikan.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Card 1: Persyaratan Digital Softfile (Blue Accent) -->
+<div class="group bg-surface-subtle hover:bg-surface-pure rounded-2xl p-6 border border-surface-container hover:border-primary/40 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-md shadow-primary/20">
+<span class="material-symbols-outlined text-[26px]">cloud_upload</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-extrabold text-primary uppercase tracking-wide bg-primary-light/50 px-2 py-0.5 rounded">
+<span>100% Soft File</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface mt-2">Persyaratan Berkas Digital</h3>
+<p class="text-sm text-on-surface-variant mt-2 leading-relaxed">
+                  Cukup siapkan file scan atau foto jelas dokumen resmi (KK, Akta Lahir, NISN) untuk diunggah langsung via portal.
+                </p>
+</div>
+<div class="pt-5 mt-2 border-t border-surface-container">
+<a class="inline-flex items-center gap-1.5 text-sm font-bold text-primary group-hover:text-primary-dark" href="#persyaratan">
+<span>Lihat Detail Softfile</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card 2: Program Pilihan (Yellow/Gold Accent) -->
+<div class="group bg-surface-subtle hover:bg-surface-pure rounded-2xl p-6 border border-surface-container hover:border-accent-yellow/60 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-accent-yellow text-on-surface flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-md">
+<span class="material-symbols-outlined text-[26px] text-amber-950">category</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-extrabold text-accent-yellow-dark uppercase tracking-wide bg-accent-yellow-light px-2 py-0.5 rounded">
+<span>Peminatan Bakat</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface mt-2">4 Pilihan Program</h3>
+<p class="text-sm text-on-surface-variant mt-2 leading-relaxed">
+                  Pilihan kelas Reguler, Bahasa (Oxford TeachCast), Tahfizh Al-Qur'an, dan Kelas ICT / Komputer Terapan.
+                </p>
+</div>
+<div class="pt-5 mt-2 border-t border-surface-container">
+<a class="inline-flex items-center gap-1.5 text-sm font-bold text-accent-yellow-dark group-hover:text-amber-900" href="#program">
+<span>Lihat Detail Program</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card 3: Biaya (Green Accent) -->
+<div class="group bg-surface-subtle hover:bg-surface-pure rounded-2xl p-6 border border-surface-container hover:border-accent-green/40 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-accent-green text-on-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-md shadow-accent-green/20">
+<span class="material-symbols-outlined text-[26px]">payments</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-extrabold text-accent-green uppercase tracking-wide bg-accent-green-light px-2 py-0.5 rounded">
+<span>Transparansi Finansial</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface mt-2">Rincian Biaya Transparan</h3>
+<p class="text-sm text-on-surface-variant mt-2 leading-relaxed">
+                  Rincian tabel biaya resmi transparan untuk santri Putra dan Putri dengan diskon khusus bagi alumni &amp; bersaudara.
+                </p>
+</div>
+<div class="pt-5 mt-2 border-t border-surface-container">
+<a class="inline-flex items-center gap-1.5 text-sm font-bold text-accent-green group-hover:text-green-800" href="#biaya">
+<span>Lihat Simulasi Biaya</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: PERSYARATAN PENDAFTARAN (100% SOFTFILE / DIGITAL - TANPA HARDFILE/FOTOKOPI) -->
+<section class="w-full py-16 bg-surface" id="persyaratan">
+<div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Banner Penegasan 100% Berkas Digital (Softfile) -->
+<div class="mb-8 rounded-2xl bg-gradient-to-r from-primary to-blue-700 p-5 sm:p-6 text-on-primary shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-blue-400/30">
+<div class="flex items-start sm:items-center gap-4">
+<div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-accent-yellow text-amber-950 flex items-center justify-center flex-shrink-0 shadow-lg">
+<span class="material-symbols-outlined text-[30px]">cloud_done</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<span class="px-2.5 py-0.5 rounded-full bg-accent-yellow text-amber-950 font-extrabold text-xs tracking-wider uppercase">PENTING &amp; PRAKTIS</span>
+<span class="px-2.5 py-0.5 rounded-full bg-accent-green-light text-accent-green font-bold text-xs">Bebas Ribet</span>
+</div>
+<h3 class="text-xl sm:text-2xl font-black font-headline text-white leading-tight">100% Berkas Digital (Soft File)</h3>
+<p class="text-sm sm:text-base text-blue-100 mt-1 max-w-2xl">
+<strong>Tidak perlu membawa berkas fisik atau fotokopi ke sekolah saat pendaftaran awal.</strong> Cukup unggah file scan atau foto jelas berkas asli melalui formulir pendaftaran online.
+                </p>
+</div>
+</div>
+<a class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-surface-pure text-primary font-bold text-sm rounded-xl shadow hover:bg-surface-subtle transition-colors flex-shrink-0" href="#biaya">
+<span class="material-symbols-outlined text-[18px]">upload</span>
+<span>Upload Berkas</span>
+</a>
+</div>
+<!-- Main Requirements Card -->
+<div class="bg-surface-pure rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-surface-container">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Title & Info Guide -->
+<div class="lg:col-span-5 flex flex-col gap-4">
+<div class="inline-flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wider bg-primary-subtle px-3 py-1 rounded-md border border-primary/20 w-fit">
+<span class="material-symbols-outlined text-[18px]">checklist</span>
+<span>Kelengkapan Berkas Digital</span>
+</div>
+<h2 class="font-headline text-3xl font-extrabold text-on-surface">Persyaratan Unggah Softfile</h2>
+<p class="text-base text-on-surface-variant leading-relaxed">
+                  Calon santri baru hanya perlu menyiapkan dokumen-dokumen utama berikut dalam bentuk digital. Pastikan teks terbaca jelas, tidak terpotong, dan tidak buram saat difoto atau discan.
+                </p>
+<!-- Softfile upload format card -->
+<div class="p-4 bg-surface-subtle rounded-xl border border-surface-container space-y-2.5">
+<div class="flex items-center gap-2 text-primary font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">info</span>
+<span>Format File yang Diterima</span>
+</div>
+<div class="flex flex-wrap gap-2 text-xs font-bold text-on-surface-variant">
+<span class="px-2.5 py-1 bg-surface-pure rounded-md border border-outline-variant/60 text-primary">PDF (Maks. 5 MB)</span>
+<span class="px-2.5 py-1 bg-surface-pure rounded-md border border-outline-variant/60 text-accent-green">JPG / JPEG (Jelas)</span>
+<span class="px-2.5 py-1 bg-surface-pure rounded-md border border-outline-variant/60 text-accent-yellow-dark">PNG (Jelas)</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed pt-1">
+                    Dokumen asli cukup diperlihatkan nanti saat sesi wawancara dan observasi santri baru tanpa perlu menyerahkan fotokopi legalisir.
+                  </p>
+</div>
+</div>
+<!-- Right Column: The 4 Softfile Requirement Items (Clean list, strictly digital) -->
+<div class="lg:col-span-7 flex flex-col gap-3.5">
+<!-- Item 1: Scan KK -->
+<div class="flex items-start sm:items-center gap-4 p-4 rounded-xl bg-surface-subtle hover:bg-primary-subtle/50 transition-colors border border-surface-container hover:border-primary/30">
+<div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 sm:mt-0">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-bold text-base text-on-surface">Scan / Foto Asli Kartu Keluarga (KK)</span>
+<span class="px-2 py-0.5 rounded bg-primary-light text-primary text-[11px] font-bold">Wajib (Softfile)</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">
+                      File format PDF atau foto JPG/PNG yang jelas, memperlihatkan seluruh nomor KK dan data anggota keluarga ber-barcode aktif.
+                    </p>
+</div>
+<div class="hidden sm:flex w-7 h-7 rounded-full bg-accent-green-light text-accent-green items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+</div>
+<!-- Item 2: Scan Akta Kelahiran -->
+<div class="flex items-start sm:items-center gap-4 p-4 rounded-xl bg-surface-subtle hover:bg-primary-subtle/50 transition-colors border border-surface-container hover:border-primary/30">
+<div class="w-10 h-10 rounded-xl bg-accent-green text-on-primary flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 sm:mt-0">
+<span class="material-symbols-outlined text-[20px]">description</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-bold text-base text-on-surface">Scan / Foto Asli Akta Kelahiran</span>
+<span class="px-2 py-0.5 rounded bg-accent-green-light text-accent-green text-[11px] font-bold">Wajib (Softfile)</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">
+                      File format PDF atau foto JPG/PNG asli untuk validasi tanggal lahir dan data kependudukan calon santri.
+                    </p>
+</div>
+<div class="hidden sm:flex w-7 h-7 rounded-full bg-accent-green-light text-accent-green items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+</div>
+<!-- Item 3: Bukti Digital NISN -->
+<div class="flex items-start sm:items-center gap-4 p-4 rounded-xl bg-surface-subtle hover:bg-primary-subtle/50 transition-colors border border-surface-container hover:border-primary/30">
+<div class="w-10 h-10 rounded-xl bg-accent-yellow text-amber-950 flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 sm:mt-0">
+<span class="material-symbols-outlined text-[20px]">pin</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-bold text-base text-on-surface">Tangkapan Layar / Bukti Cetak Digital NISN</span>
+<span class="px-2 py-0.5 rounded bg-accent-yellow-light text-accent-yellow-dark text-[11px] font-bold">Wajib (Softfile)</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">
+                      Screenshot status aktif Nomor Induk Siswa Nasional dari laman resmi Kemendikbudristek (nisn.data.kemdikbud.go.id) atau surat keterangan sekolah.
+                    </p>
+</div>
+<div class="hidden sm:flex w-7 h-7 rounded-full bg-accent-green-light text-accent-green items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+</div>
+<!-- Item 4: Pas Foto Digital -->
+<div class="flex items-start sm:items-center gap-4 p-4 rounded-xl bg-surface-subtle hover:bg-primary-subtle/50 transition-colors border border-surface-container hover:border-primary/30">
+<div class="w-10 h-10 rounded-xl bg-accent-red text-on-primary flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5 sm:mt-0">
+<span class="material-symbols-outlined text-[20px]">account_box</span>
+</div>
+<div class="flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-bold text-base text-on-surface">Pas Foto Digital Calon Siswa (Terbaru)</span>
+<span class="px-2 py-0.5 rounded bg-accent-red-light text-accent-red text-[11px] font-bold">Softfile Foto</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-0.5">
+                      File foto rapi (format JPG/PNG) ukuran 3x4 berlatar belakang merah atau biru, berpakaian sopan atau berseragam sekolah asal.
+                    </p>
+</div>
+<div class="hidden sm:flex w-7 h-7 rounded-full bg-accent-green-light text-accent-green items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">done</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: PROGRAM PILIHAN (4 Cards Berdampingan) -->
+<section class="w-full py-16 bg-surface-pure border-t border-surface-container" id="program">
+<div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col items-center text-center mb-12">
+<span class="text-xs font-extrabold uppercase tracking-widest text-primary bg-primary-subtle px-3 py-1 rounded-full border border-primary/20">Kurikulum Holistik Terpadu</span>
+<h2 class="font-headline text-3xl font-extrabold text-on-surface mt-2">4 Pilihan Program Unggulan</h2>
+<p class="text-base text-on-surface-variant max-w-xl mt-1">Didesain khusus untuk mengasah potensi intelektual, spiritual qur'ani, kecakapan bahasa global, dan literasi teknologi digital santri.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- 1. Kelas Reguler (Dominan Biru) -->
+<div class="bg-surface hover:bg-surface-pure rounded-2xl p-6 border border-surface-container hover:border-primary/50 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-md shadow-primary/25">
+<span class="material-symbols-outlined text-[26px]">school</span>
+</div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-bold text-primary">Program 01</span>
+<span class="px-2 py-0.5 rounded bg-primary-light text-primary text-[10px] font-extrabold">TERFAVORIT</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mt-1">Kelas Reguler</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                  Pembelajaran terpadu dengan kurikulum nasional merdeka dan penguatan dasar kepesantrenan Al-Muhajirin.
+                </p>
+</div>
+<div class="pt-4 mt-5 bg-primary-subtle -mx-6 -mb-6 p-4 rounded-b-2xl border-t border-primary/10 flex items-center gap-2 text-primary font-bold text-xs">
+<span class="material-symbols-outlined text-primary text-[16px]">verified</span>
+<span>Integrasi Kurikulum Merdeka</span>
+</div>
+</div>
+<!-- 2. Kelas Bahasa (TeachCast Oxford - Aksen Gold/Kuning) -->
+<div class="bg-surface hover:bg-surface-pure rounded-2xl p-6 border border-surface-container hover:border-accent-yellow/60 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-accent-yellow text-amber-950 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-md">
+<span class="material-symbols-outlined text-[26px]">translate</span>
+</div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-bold text-accent-yellow-dark">Program 02</span>
+<span class="px-2 py-0.5 rounded bg-accent-yellow-light text-accent-yellow-dark text-[10px] font-extrabold">INTERNATIONAL</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mt-1">Kelas Bahasa</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                  Penguatan aktif Bahasa Inggris dan Arab berstandar internasional bekerja sama resmi bersama Oxford TeachCast.
+                </p>
+</div>
+<div class="pt-4 mt-5 bg-accent-yellow-light/50 -mx-6 -mb-6 p-4 rounded-b-2xl border-t border-accent-yellow/20 flex items-center gap-2 text-accent-yellow-dark font-bold text-xs">
+<span class="material-symbols-outlined text-accent-yellow-dark text-[16px]">stars</span>
+<span>Native Speaker &amp; Lab Bahasa</span>
+</div>
+</div>
+<!-- 3. Kelas Tahfizh (Aksen Hijau Islami) -->
+<div class="bg-surface hover:bg-surface-pure rounded-2xl p-6 border border-surface-container hover:border-accent-green/50 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-accent-green text-on-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-md shadow-accent-green/20">
+<span class="material-symbols-outlined text-[26px]">menu_book</span>
+</div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-bold text-accent-green">Program 03</span>
+<span class="px-2 py-0.5 rounded bg-accent-green-light text-accent-green text-[10px] font-extrabold">QUR'ANI</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mt-1">Kelas Tahfizh</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                  Fokus intensif hafalan Al-Qur'an tartil &amp; mutqin, bimbingan tahsin bersanad, serta mutaba'ah halaqah berkala.
+                </p>
+</div>
+<div class="pt-4 mt-5 bg-accent-green-light/50 -mx-6 -mb-6 p-4 rounded-b-2xl border-t border-accent-green/20 flex items-center gap-2 text-accent-green font-bold text-xs">
+<span class="material-symbols-outlined text-accent-green text-[16px]">task_alt</span>
+<span>Target Minimal 3–5 Juz</span>
+</div>
+</div>
+<!-- 4. Kelas ICT / Komputer (Aksen Biru Teknologi & Aksen Merah Modern) -->
+<div class="bg-surface hover:bg-surface-pure rounded-2xl p-6 border border-surface-container hover:border-primary/50 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-primary-dark text-on-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-md shadow-primary-dark/20">
+<span class="material-symbols-outlined text-[26px]">terminal</span>
+</div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-bold text-primary-dark">Program 04</span>
+<span class="px-2 py-0.5 rounded bg-accent-red-light text-accent-red text-[10px] font-extrabold">DIGITAL</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mt-1">Kelas ICT / Komputer</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                  Penguasaan teknologi informasi, logika coding dasar, multimedia grafis, dan pemanfaatan AI yang bijak &amp; aplikatif.
+                </p>
+</div>
+<div class="pt-4 mt-5 bg-surface-subtle -mx-6 -mb-6 p-4 rounded-b-2xl border-t border-surface-container flex items-center gap-2 text-primary font-bold text-xs">
+<span class="material-symbols-outlined text-primary text-[16px]">computer</span>
+<span>Lab Modern &amp; Coding Project</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5: RINCIAN BIAYA PPDB (INTERACTIVE TAB) -->
+<section class="w-full py-16 bg-surface-subtle border-t border-surface-container" id="biaya">
+<div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Header -->
+<div class="flex flex-col items-center text-center mb-8">
+<span class="text-xs font-extrabold uppercase tracking-widest text-primary bg-primary-subtle px-3 py-1 rounded-full border border-primary/20">Transparansi Finansial</span>
+<h2 class="font-headline text-3xl font-extrabold text-on-surface mt-2">Rincian Biaya PPDB TP 2026–2027</h2>
+<p class="text-base text-on-surface-variant max-w-lg mt-1">Pilih tab peminatan untuk melihat tabel rincian biaya pendidikan secara lengkap antara santri Putra dan Putri.</p>
+</div>
+<!-- Segmented Tab Controls (Dominant Blue Active, Clear Hover) -->
+<div class="flex justify-center mb-8">
+<div class="inline-flex p-1.5 bg-surface-pure rounded-2xl shadow-sm border border-surface-container gap-1 max-w-full overflow-x-auto">
+<button class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 bg-primary text-on-primary shadow-md shadow-primary/20" id="tab-reguler" onclick="switchProgramTab('reguler')" type="button">
+                Kelas Reguler
+              </button>
+<button class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 text-on-surface-variant hover:text-primary hover:bg-surface-subtle" id="tab-bahasa" onclick="switchProgramTab('bahasa')" type="button">
+                Kelas Bahasa
+              </button>
+<button class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 text-on-surface-variant hover:text-primary hover:bg-surface-subtle" id="tab-tahfizh" onclick="switchProgramTab('tahfizh')" type="button">
+                Kelas Tahfizh
+              </button>
+<button class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 text-on-surface-variant hover:text-primary hover:bg-surface-subtle" id="tab-ict" onclick="switchProgramTab('ict')" type="button">
+                Kelas ICT
+              </button>
+</div>
+</div>
+<!-- Pricing Table Container -->
+<div class="bg-surface-pure rounded-2xl shadow-lg border border-surface-container overflow-hidden">
+<!-- Table Header Banner (Blue & Accents) -->
+<div class="px-6 py-4 bg-primary-subtle border-b border-primary/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center flex-shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+</div>
+<div>
+<span class="text-base font-bold text-on-surface" id="activeProgramName">Program: Kelas Reguler</span>
+<p class="text-xs text-on-surface-variant">Rincian resmi biaya masuk tahun ajaran pertama 2026–2027</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3 py-1 bg-surface-pure text-primary font-bold text-xs rounded-full border border-primary/20 shadow-xs">Putra &amp; Putri</span>
+<span class="px-3 py-1 bg-accent-yellow-light text-accent-yellow-dark font-bold text-xs rounded-full border border-accent-yellow/30">Gelombang 1</span>
+</div>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead>
+<tr class="bg-surface-subtle text-on-surface-variant text-xs uppercase tracking-wider font-extrabold border-b border-surface-container">
+<th class="py-3 px-6 text-center w-14">No</th>
+<th class="py-3 px-4">Rincian Komponen Biaya</th>
+<th class="py-3 px-4 text-right w-44">Putra</th>
+<th class="py-3 px-6 text-right w-44">Putri</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container text-on-surface text-sm" id="feeTableBody">
+<!-- Rendered via JS -->
+</tbody>
+<tfoot>
+<tr class="bg-primary/10 text-on-surface font-bold border-t-2 border-primary/20">
+<td class="py-4 px-6 text-primary font-black text-sm" colspan="2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">price_check</span>
+<span>TOTAL BIAYA PENDAFTARAN AWAL</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right font-black text-base text-primary" id="totalPutra">
+                      Rp12.850.000
+                    </td>
+<td class="py-4 px-6 text-right font-black text-base text-primary" id="totalPutri">
+                      Rp13.150.000
+                    </td>
+</tr>
+</tfoot>
+</table>
+</div>
+<!-- Quick Summary Badges Under Table (Blue & Green Accents) -->
+<div class="p-5 bg-surface-pure border-t border-surface-container">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="p-4 rounded-xl bg-primary-subtle border border-primary/20 flex items-center justify-between">
+<div>
+<span class="text-xs font-bold text-on-surface-variant">Total Estimasi Santri Putra:</span>
+<p class="text-2xl font-black text-primary" id="badgeTotalPutra">Rp12.850.000</p>
+</div>
+<div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">male</span>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-accent-green-light/60 border border-accent-green/20 flex items-center justify-between">
+<div>
+<span class="text-xs font-bold text-on-surface-variant">Total Estimasi Santri Putri:</span>
+<p class="text-2xl font-black text-accent-green" id="badgeTotalPutri">Rp13.150.000</p>
+</div>
+<div class="w-11 h-11 rounded-xl bg-accent-green/10 text-accent-green flex items-center justify-center">
+<span class="material-symbols-outlined text-[26px]">female</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Catatan Penting & Diskon Khusus (Merah & Kuning Accents) -->
+<div class="mt-6 bg-surface-pure rounded-2xl p-6 shadow-md border border-surface-container">
+<div class="flex items-center gap-2 text-accent-red font-bold text-base mb-4">
+<span class="material-symbols-outlined text-[22px]">notification_important</span>
+<span>Catatan Penting, Diskon Khusus &amp; Skema Pembayaran</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-on-surface-variant">
+<div class="space-y-3">
+<div class="flex items-start gap-2.5 p-3 rounded-xl bg-accent-red-subtle border border-accent-red/20">
+<span class="material-symbols-outlined text-accent-red text-[20px] flex-shrink-0 mt-0.5">stars</span>
+<div>
+<strong class="text-accent-red">Diskon Alumni SD Plus Al-Muhajirin:</strong>
+<p class="mt-0.5 text-on-surface">Potongan biaya registrasi alumni SD Plus Al-Muhajirin sebesar <span class="font-extrabold text-accent-red">Rp1.200.000</span>.</p>
+</div>
+</div>
+<div class="flex items-start gap-2.5 p-3 rounded-xl bg-accent-yellow-light/70 border border-accent-yellow/40">
+<span class="material-symbols-outlined text-accent-yellow-dark text-[20px] flex-shrink-0 mt-0.5">group</span>
+<div>
+<strong class="text-accent-yellow-dark">Diskon Kakak / Adik Santri:</strong>
+<p class="mt-0.5 text-on-surface">Potongan registrasi kakak non alumni SD Plus Al-Muhajirin sebesar <span class="font-extrabold text-accent-yellow-dark">Rp400.000</span>.</p>
+</div>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[18px] flex-shrink-0 mt-0.5">sports_soccer</span>
+<span><strong>Biaya Ekstrakurikuler:</strong> Iuran ekskul rutin per bulan sebesar <span class="text-on-surface font-semibold">Rp100.000</span>.</span>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] flex-shrink-0 mt-0.5">menu_book</span>
+<span><strong>Buku Pelajaran:</strong> Biaya belum termasuk Buku Paket dengan estimasi <span class="text-on-surface font-semibold">Rp1.600.000</span>.</span>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-accent-red text-[18px] flex-shrink-0 mt-0.5">timer</span>
+<span><strong>Batas Registrasi Ulang:</strong> Maksimal <strong class="text-accent-red">3 bulan</strong> setelah tanggal pengumuman kelulusan seleksi PPDB.</span>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-accent-green text-[18px] flex-shrink-0 mt-0.5">payments</span>
+<span><strong>Sistem Pembayaran Fleksibel:</strong> Dapat diangsur sesuai ketentuan tata usaha keuangan sekolah yayasan.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 6: ALUR PENDAFTARAN (4 Tahap - Disesuaikan Upload Softfile) -->
+<section class="w-full py-16 bg-surface-pure border-t border-surface-container" id="alur">
+<div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col items-center text-center mb-12">
+<span class="text-xs font-extrabold uppercase tracking-widest text-primary bg-primary-subtle px-3 py-1 rounded-full border border-primary/20">Tahapan Terstruktur</span>
+<h2 class="font-headline text-3xl font-extrabold text-on-surface mt-2">Alur Pendaftaran Mudah &amp; Cepat</h2>
+<p class="text-base text-on-surface-variant max-w-lg mt-1">Empat langkah sederhana menjadi santri berprestasi di SMP Full Day Al-Muhajirin Purwakarta.</p>
+</div>
+<!-- Timeline Grid (Blue + Yellow + Red + Green) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+<!-- Step 1: Daftar Online (Blue) -->
+<div class="relative bg-surface-subtle p-6 rounded-2xl border border-surface-container flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
+<div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-headline text-2xl font-black mb-4 shadow-md shadow-primary/25">
+                01
+              </div>
+<span class="text-[11px] font-extrabold text-primary uppercase tracking-wide">Tahap Pertama</span>
+<h3 class="text-lg font-bold text-on-surface mt-1">Daftar Akun Online</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                Isi identitas diri awal calon santri dan buat akun portal PPDB secara mandiri melalui website.
+              </p>
+</div>
+<!-- Step 2: Lengkapi Data & Upload Softfile (Yellow) -->
+<div class="relative bg-surface-subtle p-6 rounded-2xl border border-accent-yellow/40 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
+<div class="w-14 h-14 rounded-2xl bg-accent-yellow text-amber-950 flex items-center justify-center font-headline text-2xl font-black mb-4 shadow-md">
+                02
+              </div>
+<span class="text-[11px] font-extrabold text-accent-yellow-dark uppercase tracking-wide">Tahap Kedua</span>
+<h3 class="text-lg font-bold text-on-surface mt-1">Upload Softfile &amp; Program</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                Unggah file scan/foto jelas KK, Akta, NISN, Pas Foto digital dan tentukan pilihan kelas peminatan secara online.
+              </p>
+</div>
+<!-- Step 3: Verifikasi & Asesmen (Red/Coral) -->
+<div class="relative bg-surface-subtle p-6 rounded-2xl border border-surface-container flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
+<div class="w-14 h-14 rounded-2xl bg-accent-red text-on-primary flex items-center justify-center font-headline text-2xl font-black mb-4 shadow-md shadow-accent-red/25">
+                03
+              </div>
+<span class="text-[11px] font-extrabold text-accent-red uppercase tracking-wide">Tahap Ketiga</span>
+<h3 class="text-lg font-bold text-on-surface mt-1">Verifikasi &amp; Asesmen</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                Pemeriksaan softfile oleh panitia, dilanjutkan observasi minat bakat serta wawancara santri &amp; orang tua.
+              </p>
+</div>
+<!-- Step 4: Pengumuman & Registrasi (Green) -->
+<div class="relative bg-surface-subtle p-6 rounded-2xl border border-surface-container flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all">
+<div class="w-14 h-14 rounded-2xl bg-accent-green text-on-primary flex items-center justify-center font-headline text-2xl font-black mb-4 shadow-md shadow-accent-green/25">
+                04
+              </div>
+<span class="text-[11px] font-extrabold text-accent-green uppercase tracking-wide">Tahap Akhir</span>
+<h3 class="text-lg font-bold text-on-surface mt-1">Pengumuman &amp; Registrasi</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                Hasil seleksi diumumkan via akun portal, dilanjutkan proses konfirmasi daftar ulang administrasi santri baru.
+              </p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 7: CTA SECTION (Dominant Blue Banner with Yellow & Green Accents) -->
+<section class="w-full py-16 bg-surface border-t border-surface-container">
+<div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="relative rounded-3xl bg-gradient-to-br from-primary via-primary-container to-blue-800 text-on-primary p-8 sm:p-12 lg:p-16 overflow-hidden shadow-2xl">
+<!-- Colorful ambient glow orbs -->
+<div class="absolute -right-16 -bottom-16 w-80 h-80 rounded-full bg-accent-yellow/20 blur-3xl pointer-events-none"></div>
+<div class="absolute -left-10 -top-10 w-72 h-72 rounded-full bg-accent-green/20 blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center text-center max-w-2xl mx-auto">
+<div class="w-14 h-14 rounded-2xl bg-surface-pure/20 backdrop-blur-md text-surface-pure flex items-center justify-center mb-4 shadow-inner border border-white/20">
+<span class="material-symbols-outlined text-[30px] text-accent-yellow">school</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-accent-yellow text-amber-950 text-xs font-black uppercase tracking-wider mb-2">
+                KUOTA TERBATAS TIAP ROMBEL
+              </div>
+<h2 class="font-headline text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                Siap Bergabung Bersama SMP Full Day Al-Muhajirin?
+              </h2>
+<p class="text-base sm:text-lg text-blue-100 mt-3 max-w-xl leading-relaxed">
+                Pendaftaran sangat mudah dengan sistem <strong>100% softfile dokumen</strong>. Amankan kursi calon santri sebelum kuota tiap kelas peminatan terpenuhi!
+              </p>
+<!-- CTA Buttons (Red Highlight + Green WhatsApp + White) -->
+<div class="mt-8 flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-accent-red hover:bg-red-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-accent-red/30 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200" href="#biaya">
+<span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+<span>Daftar Sekarang Online</span>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-accent-green hover:bg-green-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-accent-green/30 hover:shadow-xl transition-all duration-200" href="https://wa.me/6287821055283" rel="noopener" target="_blank">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+<span>Konsultasi WhatsApp (0878-2105-5283)</span>
+</a>
+</div>
+<!-- Help note -->
+<p class="text-xs text-blue-200 mt-4 flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">contact_support</span>
+<span>Butuh panduan teknis formulir? Hubungi juga panitia admisi: <strong>0878-2228-2012</strong></span>
+</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Script Logika Interactive Tab Rincian Biaya -->
+<script>
+      const feeData = {
+        reguler: {
+          name: "Program: Kelas Reguler",
+          items: [
+            { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
+            { label: "TeachCast (Program Pengayaan)", putra: "Rp0", putri: "Rp0" },
+            { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp3.500.000", putri: "Rp3.500.000" },
+            { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
+            { label: "Kalender, Majalah, Buku Karya, Buku Hijrot, Rapor, Buku Doa, Foto, Kartu Pelajar", putra: "Rp850.000", putri: "Rp850.000" },
+            { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
+            { label: "Ujian Selama Setahun (PTS, PAS, Asesmen)", putra: "Rp950.000", putri: "Rp950.000" },
+            { label: "Kegiatan Kesiswaan & Asesmen Karakter", putra: "Rp1.100.000", putri: "Rp1.100.000" },
+            { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
+            { label: "Infaq Masjid & Pengembangan Ibadah", putra: "Rp500.000", putri: "Rp500.000" }
+          ],
+          totalPutra: "Rp12.850.000",
+          totalPutri: "Rp13.150.000"
+        },
+        bahasa: {
+          name: "Program: Kelas Bahasa (TeachCast Oxford)",
+          items: [
+            { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
+            { label: "TeachCast (Oxford Curriculum & Native Speaker)", putra: "Rp1.800.000", putri: "Rp1.800.000" },
+            { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp3.500.000", putri: "Rp3.500.000" },
+            { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
+            { label: "Kalender, Majalah, Buku Karya, Buku Hijrot, Rapor, Buku Doa, Foto, Kartu Pelajar", putra: "Rp850.000", putri: "Rp850.000" },
+            { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
+            { label: "Ujian Selama Setahun (PTS, PAS, Language Assessment)", putra: "Rp950.000", putri: "Rp950.000" },
+            { label: "Kegiatan Kesiswaan & Language Immersion Camp", putra: "Rp1.300.000", putri: "Rp1.300.000" },
+            { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
+            { label: "Infaq Masjid & Pengembangan Ibadah", putra: "Rp500.000", putri: "Rp500.000" }
+          ],
+          totalPutra: "Rp14.850.000",
+          totalPutri: "Rp15.150.000"
+        },
+        tahfizh: {
+          name: "Program: Kelas Tahfizh Al-Qur'an",
+          items: [
+            { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
+            { label: "TeachCast (Program Bahasa)", putra: "Rp0", putri: "Rp0" },
+            { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp3.500.000", putri: "Rp3.500.000" },
+            { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
+            { label: "Kalender, Majalah, Buku Karya, Mutaba'ah Tahfizh, Rapor, Mushaf Al-Qur'an", putra: "Rp950.000", putri: "Rp950.000" },
+            { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
+            { label: "Ujian & Tasmi' Qur'an Selama Setahun", putra: "Rp1.100.000", putri: "Rp1.100.000" },
+            { label: "Karantina Tahfizh & Dauroh Qur'ani", putra: "Rp1.450.000", putri: "Rp1.450.000" },
+            { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
+            { label: "Infaq Masjid & Sarana Halaqah", putra: "Rp500.000", putri: "Rp500.000" }
+          ],
+          totalPutra: "Rp13.450.000",
+          totalPutri: "Rp13.750.000"
+        },
+        ict: {
+          name: "Program: Kelas ICT & Digital Literasi",
+          items: [
+            { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
+            { label: "TeachCast (Program Bahasa)", putra: "Rp0", putri: "Rp0" },
+            { label: "Pengembangan Sarana Prasarana & Lab Komputer", putra: "Rp4.100.000", putri: "Rp4.100.000" },
+            { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
+            { label: "Kalender, Majalah, Modul Coding, Buku Hijrot, Rapor, Foto, Kartu Siswa RFID", putra: "Rp950.000", putri: "Rp950.000" },
+            { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
+            { label: "Ujian Berbasis Komputer & Asesmen Coding", putra: "Rp1.050.000", putri: "Rp1.050.000" },
+            { label: "Workshop Coding & Kompetisi Kesiswaan", putra: "Rp1.300.000", putri: "Rp1.300.000" },
+            { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
+            { label: "Infaq Masjid & Pengembangan Sarana Ibadah", putra: "Rp500.000", putri: "Rp500.000" }
+          ],
+          totalPutra: "Rp13.850.000",
+          totalPutri: "Rp14.150.000"
+        }
+      };
+
+      function renderTable(progKey) {
+        const data = feeData[progKey];
+        const tbody = document.getElementById("feeTableBody");
+        const activeProg = document.getElementById("activeProgramName");
+        const totalPutra = document.getElementById("totalPutra");
+        const totalPutri = document.getElementById("totalPutri");
+        const badgeTotalPutra = document.getElementById("badgeTotalPutra");
+        const badgeTotalPutri = document.getElementById("badgeTotalPutri");
+
+        if (!data || !tbody) return;
+
+        activeProg.innerText = data.name;
+        totalPutra.innerText = data.totalPutra;
+        totalPutri.innerText = data.totalPutri;
+        badgeTotalPutra.innerText = data.totalPutra;
+        badgeTotalPutri.innerText = data.totalPutri;
+
+        let rowsHtml = "";
+        data.items.forEach((item, index) => {
+          const isEven = index % 2 === 0;
+          const bgClass = isEven ? "bg-surface-pure" : "bg-surface-subtle/60";
+          rowsHtml += `
+            <tr class="${bgClass} hover:bg-primary-subtle/50 transition-colors">
+              <td class="py-2.5 px-6 text-center font-medium text-on-surface-variant">${index + 1}</td>
+              <td class="py-2.5 px-4 font-medium text-on-surface">${item.label}</td>
+              <td class="py-2.5 px-4 text-right text-on-surface font-semibold">${item.putra}</td>
+              <td class="py-2.5 px-6 text-right text-on-surface font-semibold">${item.putri}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = rowsHtml;
+      }
+
+      function switchProgramTab(selectedTab) {
+        const tabs = ["reguler", "bahasa", "tahfizh", "ict"];
+        tabs.forEach(tab => {
+          const btn = document.getElementById("tab-" + tab);
+          if (!btn) return;
+          if (tab === selectedTab) {
+            btn.className = "px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 bg-primary text-on-primary shadow-md shadow-primary/20";
+          } else {
+            btn.className = "px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 text-on-surface-variant hover:text-primary hover:bg-surface-subtle";
+          }
+        });
+        renderTable(selectedTab);
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        renderTable("reguler");
+      });
+      renderTable("reguler");
+    </script>
+</main>
+<!-- FOOTER (Dominant Dark Blue & Clean Educational Metadata) -->
+<footer class="w-full bg-[#0d1624] text-slate-300 py-14">
+<div class="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 pb-12 border-b border-slate-800">
+<!-- Institution Summary -->
+<div class="lg:col-span-5 flex flex-col gap-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[24px]">school</span>
+</div>
+<div>
+<span class="text-lg font-bold text-white leading-none">SMP Full Day Al-Muhajirin</span>
+<p class="text-xs text-slate-400 mt-1">Lembaga Pendidikan Terpadu Purwakarta</p>
+</div>
+</div>
+<p class="text-sm text-slate-400 max-w-md mt-2 leading-relaxed">
+            Mewujudkan generasi Muslim yang kokoh akidah, berakhlak mulia, cerdas berprestasi, dan siap berkompetisi global dalam naungan pendidikan bermutu.
+          </p>
+<div class="flex items-center gap-2 text-primary-light text-sm font-bold mt-2">
+<span class="material-symbols-outlined text-[20px] text-accent-yellow">language</span>
+<a class="hover:text-white transition-colors" href="https://smp2almuhajirin.sch.id" rel="noopener" target="_blank">smp2almuhajirin.sch.id</a>
+</div>
+</div>
+<!-- Campus Address -->
+<div class="lg:col-span-4 flex flex-col gap-2.5">
+<h3 class="text-base font-bold text-white">Alamat Kampus Resmi</h3>
+<div class="flex items-start gap-2.5 text-sm text-slate-300 mt-1">
+<span class="material-symbols-outlined text-primary-light text-[20px] flex-shrink-0 mt-0.5">location_on</span>
+<p>Jl. Ipik Gandamanah No. 33 Ciseureuh, Kec. Purwakarta, Kab. Purwakarta, Jawa Barat 41118</p>
+</div>
+<div class="flex items-start gap-2.5 text-xs text-slate-400 mt-1">
+<span class="material-symbols-outlined text-primary-light text-[18px] flex-shrink-0 mt-0.5">schedule</span>
+<p>Senin – Jumat: 07.30 – 15.30 WIB<br/>Sabtu: 08.00 – 12.00 WIB</p>
+</div>
+</div>
+<!-- Contact & WhatsApp (Green Accent) -->
+<div class="lg:col-span-3 flex flex-col gap-2.5">
+<h3 class="text-base font-bold text-white">Layanan Informasi &amp; WA</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-accent-green text-[20px]">chat</span>
+<a class="text-white hover:text-accent-green font-semibold" href="https://wa.me/6287821055283" rel="noopener" target="_blank">0878-2105-5283</a>
+</div>
+<div class="flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-accent-green text-[20px]">chat</span>
+<a class="text-white hover:text-accent-green font-semibold" href="https://wa.me/6287822282012" rel="noopener" target="_blank">0878-2228-2012</a>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+<span class="material-symbols-outlined text-primary-light text-[18px]">mail</span>
+<span>info@smp2almuhajirin.sch.id</span>
+</div>
+</div>
+</div>
+<!-- Bottom Bar -->
+<div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+<p class="text-center sm:text-left">Copyright © 2026 SMP Full Day Al-Muhajirin Purwakarta. Seluruh hak cipta dilindungi.</p>
+<div class="flex items-center gap-3">
+<span class="text-accent-yellow font-bold">Akreditasi A (Unggul)</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="text-primary-light font-bold">100% Berkas Digital</span>
+<span class="w-1 h-1 rounded-full bg-slate-600"></span>
+<span class="text-white font-semibold">PPDB TP 2026–2027</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

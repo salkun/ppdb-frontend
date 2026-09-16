@@ -1,137 +1,185 @@
 @extends('layouts.app')
 
-@section('title', 'Pendaftaran Akun Baru PPDB')
+@section('title', 'Pendaftaran Akun Baru PMB — SMPS2 Al-Muhajirin')
 
 @section('content')
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card card-custom p-4 p-md-5 border-0 shadow-lg">
-                <div class="text-center mb-4">
-                    <div class="navbar-brand-badge mx-auto mb-3" style="width: 55px; height: 55px; font-size: 1.6rem;">
-                        <i class="bi bi-person-plus-fill"></i>
+<div class="lp-auth-page" style="font-family: var(--font-landing);">
+    <div class="lp-auth-glow-1"></div>
+    <div class="lp-auth-glow-2"></div>
+
+    <div class="lp-auth-container" style="max-width: 540px;">
+        <div class="lp-auth-card">
+            <div class="lp-auth-card-top-accent"></div>
+
+            <div class="lp-auth-header">
+                <a href="{{ route('home') }}" class="lp-auth-icon-badge" title="Kembali ke Beranda">
+                    <span class="material-symbols-outlined" style="font-size: 28px;">how_to_reg</span>
+                </a>
+                <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 8px;">
+                    <span class="lp-badge lp-badge-blue" style="font-size: 11.5px;">
+                        Pendaftaran Siswa Baru
+                    </span>
+                    <span class="lp-badge lp-badge-yellow" style="font-size: 11.5px;">
+                        PMB TP {{ date('Y') }}–{{ date('Y') + 1 }}
+                    </span>
+                </div>
+                <h1 class="lp-auth-title">Buat Akun PMB Online</h1>
+                <p class="lp-auth-subtitle">Lengkapi formulir singkat berikut untuk membuat akun pendaftaran calon santri baru.</p>
+            </div>
+
+            @if(session('error'))
+                <div class="alert alert-danger d-flex align-items-center mb-4" style="border-radius: 12px; font-size: 13.5px;" role="alert">
+                    <span class="material-symbols-outlined me-2" style="font-size: 20px;">error</span>
+                    <div>{{ session('error') }}</div>
+                </div>
+            @endif
+
+            <form action="{{ route('register.submit') }}" method="POST">
+                @csrf
+
+                <!-- NIK Calon Siswa -->
+                <div class="lp-input-group">
+                    <label for="nik" class="lp-input-label">
+                        Nomor Induk Kependudukan (NIK) <span style="color: var(--lp-red);">*</span>
+                    </label>
+                    <div class="lp-input-wrapper">
+                        <span class="material-symbols-outlined lp-input-icon">badge</span>
+                        <input type="text" 
+                               class="lp-input-field @error('nik') is-invalid @enderror" 
+                               id="nik" 
+                               name="nik" 
+                               value="{{ old('nik') }}" 
+                               placeholder="16 digit NIK sesuai Kartu Keluarga" 
+                               maxlength="16" 
+                               inputmode="numeric"
+                               pattern="\d{16}"
+                               required 
+                               autofocus>
                     </div>
-                    <h3 class="fw-bold text-dark">Registrasi Akun PPDB</h3>
-                    <p class="text-muted small">Buat akun untuk memulai proses pendaftaran calon peserta didik baru.</p>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                        NIK digunakan sebagai identitas utama untuk login portal.
+                    </div>
+                    @error('nik')
+                        <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                <form action="{{ route('register.submit') }}" method="POST">
-                    @csrf
-
-                    <!-- NIK Calon Siswa -->
-                    <div class="mb-3">
-                        <label for="nik" class="form-label fw-semibold text-dark">
-                            Nomor Induk Kependudukan (NIK) <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-card-heading"></i></span>
-                            <input type="text" 
-                                   class="form-control border-start-0 ps-0 @error('nik') is-invalid @enderror" 
-                                   id="nik" 
-                                   name="nik" 
-                                   value="{{ old('nik') }}" 
-                                   placeholder="16 digit NIK sesuai Kartu Keluarga" 
-                                   maxlength="16" 
-                                   required 
-                                   pattern="\d{16}"
-                                   title="NIK harus 16 digit angka">
-                        </div>
-                        <div class="form-text text-muted small">NIK akan digunakan sebagai identitas utama login akun.</div>
-                        @error('nik')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
+                <!-- Nama Lengkap -->
+                <div class="lp-input-group">
+                    <label for="full_name" class="lp-input-label">
+                        Nama Lengkap Calon Siswa <span style="color: var(--lp-red);">*</span>
+                    </label>
+                    <div class="lp-input-wrapper">
+                        <span class="material-symbols-outlined lp-input-icon">person</span>
+                        <input type="text" 
+                               class="lp-input-field @error('full_name') is-invalid @enderror" 
+                               id="full_name" 
+                               name="full_name" 
+                               value="{{ old('full_name') }}" 
+                               placeholder="Nama lengkap sesuai akta kelahiran" 
+                               required>
                     </div>
+                    @error('full_name')
+                        <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
+                    @enderror
+                </div>
 
-                    <!-- Nama Lengkap -->
-                    <div class="mb-3">
-                        <label for="full_name" class="form-label fw-semibold text-dark">
-                            Nama Lengkap Calon Siswa <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-person"></i></span>
-                            <input type="text" 
-                                   class="form-control border-start-0 ps-0 @error('full_name') is-invalid @enderror" 
-                                   id="full_name" 
-                                   name="full_name" 
-                                   value="{{ old('full_name') }}" 
-                                   placeholder="Nama lengkap sesuai akta kelahiran" 
-                                   required>
-                        </div>
-                        @error('full_name')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
+                <!-- Email Aktif -->
+                <div class="lp-input-group">
+                    <label for="email" class="lp-input-label">
+                        Alamat Email Aktif <span style="color: var(--lp-red);">*</span>
+                    </label>
+                    <div class="lp-input-wrapper">
+                        <span class="material-symbols-outlined lp-input-icon">alternate_email</span>
+                        <input type="email" 
+                               class="lp-input-field @error('email') is-invalid @enderror" 
+                               id="email" 
+                               name="email" 
+                               value="{{ old('email') }}" 
+                               placeholder="contoh: wali@gmail.com" 
+                               inputmode="email"
+                               required>
                     </div>
-
-                    <!-- Email -->
-                    <div class="mb-3">
-                        <label for="email" class="form-label fw-semibold text-dark">
-                            Alamat Email Aktif <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope"></i></span>
-                            <input type="email" 
-                                   class="form-control border-start-0 ps-0 @error('email') is-invalid @enderror" 
-                                   id="email" 
-                                   name="email" 
-                                   value="{{ old('email') }}" 
-                                   placeholder="nama@email.com" 
-                                   required>
-                        </div>
-                        @error('email')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
+                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                        Untuk pengiriman kode verifikasi, jadwal observasi, dan pengumuman seleksi.
                     </div>
+                    @error('email')
+                        <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
+                    @enderror
+                </div>
 
-                    <!-- Password -->
-                    <div class="mb-3">
-                        <label for="password" class="form-label fw-semibold text-dark">
-                            Kata Sandi (Password) <span class="text-danger">*</span>
+                <!-- Password & Confirmation -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <label for="password" class="lp-input-label">
+                            Kata Sandi <span style="color: var(--lp-red);">*</span>
                         </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-lock"></i></span>
+                        <div class="lp-input-wrapper">
+                            <span class="material-symbols-outlined lp-input-icon">lock</span>
                             <input type="password" 
-                                   class="form-control border-start-0 ps-0 @error('password') is-invalid @enderror" 
+                                   class="lp-input-field @error('password') is-invalid @enderror" 
                                    id="password" 
                                    name="password" 
-                                   placeholder="Minimal 6 karakter" 
+                                   placeholder="Min. 6 karakter" 
                                    minlength="6" 
                                    required>
+                            <button type="button" class="lp-password-toggle" onclick="togglePasswordVisibility('password', this)" aria-label="Lihat kata sandi">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                            </button>
                         </div>
-                        @error('password')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
                     </div>
-
-                    <!-- Konfirmasi Password -->
-                    <div class="mb-4">
-                        <label for="password_confirmation" class="form-label fw-semibold text-dark">
-                            Ulangi Kata Sandi <span class="text-danger">*</span>
+                    <div class="col-sm-6">
+                        <label for="password_confirmation" class="lp-input-label">
+                            Ulangi Kata Sandi <span style="color: var(--lp-red);">*</span>
                         </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-shield-check"></i></span>
+                        <div class="lp-input-wrapper">
+                            <span class="material-symbols-outlined lp-input-icon">lock_reset</span>
                             <input type="password" 
-                                   class="form-control border-start-0 ps-0" 
+                                   class="lp-input-field" 
                                    id="password_confirmation" 
                                    name="password_confirmation" 
-                                   placeholder="Ketik ulang kata sandi di atas" 
-                                   minlength="6" 
+                                   placeholder="Ulangi sandi" 
                                    required>
+                            <button type="button" class="lp-password-toggle" onclick="togglePasswordVisibility('password_confirmation', this)" aria-label="Lihat konfirmasi kata sandi">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                            </button>
                         </div>
                     </div>
-
-                    <button type="submit" class="btn btn-teal w-100 py-2 fs-6 fw-bold">
-                        <i class="bi bi-check-circle me-1"></i> Buat Akun Pendaftaran
-                    </button>
-                </form>
-
-                <div class="text-center mt-4 pt-3 border-top">
-                    <p class="text-muted small mb-0">
-                        Sudah pernah membuat akun? 
-                        <a href="{{ route('login') }}" class="text-primary fw-bold text-decoration-none">Masuk di sini</a>
-                    </p>
+                    @error('password')
+                        <div class="col-12 text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
+                    @enderror
                 </div>
+
+                <button type="submit" class="lp-btn-submit">
+                    <span>Daftarkan Akun Siswa Baru</span>
+                    <span class="material-symbols-outlined" style="font-size: 19px;">arrow_forward</span>
+                </button>
+            </form>
+
+            <div class="lp-auth-footer">
+                <span style="font-size: 13.5px; color: var(--lp-on-surface-variant); display: block; margin-bottom: 6px;">
+                    Sudah memiliki akun pendaftaran sebelumnya?
+                </span>
+                <a href="{{ route('login') }}" style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; color: var(--lp-primary); text-decoration: none;">
+                    <span>Masuk ke Akun Portal Santri</span>
+                    <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, button) {
+        const input = document.getElementById(inputId);
+        const icon = button.querySelector('.material-symbols-outlined');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            input.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    }
+</script>
 @endsection

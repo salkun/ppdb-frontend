@@ -167,6 +167,8 @@ class PpdbFlowTest extends TestCase
             'religion' => 'Islam',
             'place_of_birth' => 'Jakarta',
             'date_of_birth' => '2008-05-14',
+            'birth_order' => 2,
+            'siblings_count' => 3,
 
             // Tahap 3
             'street_address' => 'Jl. Merdeka No. 45',
@@ -193,6 +195,7 @@ class PpdbFlowTest extends TestCase
             'father_income' => '03',
             'father_phone' => '081311223344',
             'father_whatsapp' => '081311223344',
+            'father_email' => 'bambang.sudarsono@example.com',
 
             // Tahap 5 - Ibu
             'mother_nik' => '3201011122330002',
@@ -203,6 +206,7 @@ class PpdbFlowTest extends TestCase
             'mother_income' => '06',
             'mother_phone' => '081311223355',
             'mother_whatsapp' => '081311223355',
+            'mother_email' => 'siti.aminah@example.com',
         ];
 
         $response = $this->withSession([
@@ -218,11 +222,17 @@ class PpdbFlowTest extends TestCase
             return $request->url() === config('ppdb.api_url') . '/api/ppdb/registration-form'
                 && $request->method() === 'PUT'
                 && isset($data['identity']['family_card_number'])
+                && isset($data['identity']['birth_order'])
+                && $data['identity']['birth_order'] === 2
+                && isset($data['identity']['siblings_count'])
+                && $data['identity']['siblings_count'] === 3
                 && isset($data['address']['street_address'])
                 && isset($data['contact']['mobile_number'])
                 && isset($data['student_parents'][0]['relationship_type'])
                 && $data['student_parents'][0]['relationship_type'] === 1
-                && $data['student_parents'][1]['relationship_type'] === 2;
+                && ($data['student_parents'][0]['parent']['email'] ?? '') === 'bambang.sudarsono@example.com'
+                && $data['student_parents'][1]['relationship_type'] === 2
+                && ($data['student_parents'][1]['parent']['email'] ?? '') === 'siti.aminah@example.com';
         });
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithFastApi;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +14,7 @@ class PpdbController extends Controller
     /**
      * Upload payment proof file to FastAPI.
      */
-    public function uploadPayment(Request $request)
+    public function uploadPayment(Request $request, TelegramNotificationService $telegramService)
     {
         $request->validate([
             'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
@@ -35,6 +36,26 @@ class PpdbController extends Controller
                 ->post($this->backendUrl() . '/api/ppdb/upload-payment');
 
             if ($response->successful()) {
+                // Kirim notifikasi ke Grup Telegram Panitia PPDB (Fail-safe)
+                try {
+                    $paymentData = $response->json();
+                    $registrationId = $paymentData['id'] ?? null;
+
+                    $studentData = [
+                        'full_name' => session('full_name', 'Calon Siswa'),
+                        'nik' => session('nik', '-'),
+                        'email' => session('email', '-'),
+                    ];
+
+                    $telegramService->sendPaymentProofNotification(
+                        $file,
+                        $studentData,
+                        $registrationId
+                    );
+                } catch (\Throwable $telegramException) {
+                    Log::warning('Notifikasi Telegram PPDB gagal dikirim: ' . $telegramException->getMessage());
+                }
+
                 return redirect()->route('dashboard')->with('success', 'Bukti pembayaran berhasil diunggah! Mohon menunggu verifikasi oleh panitia PPDB.');
             }
 
@@ -108,12 +129,15 @@ class PpdbController extends Controller
     {
         // 1. Validasi Input Form
         $validated = $request->validate([
-            // Tahap 1: Biodata Pokok
+            // Tahap 1: Biodata Pokok & Peminatan
             'nik' => ['required', 'string', 'digits:16'],
             'nisn' => ['required', 'string', 'digits:10'],
             'full_name' => ['required', 'string', 'max:150'],
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['nullable', 'string', 'max:100'],
+            'major' => ['required', 'string', 'in:reguler,bahasa,tahfidz,ict'],
+            'school_origin' => ['required', 'string', 'max:150'],
+            'school_origin_address' => ['required', 'string', 'max:255'],
 
             // Tahap 2: Identitas Tambahan
             'family_card_number' => ['required', 'string', 'digits:16'],
@@ -121,6 +145,8 @@ class PpdbController extends Controller
             'religion' => ['required', 'string'],
             'place_of_birth' => ['required', 'string', 'max:100'],
             'date_of_birth' => ['required', 'date'],
+            'birth_order' => ['required', 'integer', 'min:1'],
+            'siblings_count' => ['required', 'integer', 'min:1'],
 
             // Tahap 3: Alamat
             'street_address' => ['required', 'string', 'max:255'],
@@ -147,6 +173,7 @@ class PpdbController extends Controller
             'father_income' => ['required', 'string'],
             'father_phone' => ['nullable', 'string', 'max:20'],
             'father_whatsapp' => ['nullable', 'string', 'max:20'],
+            'father_email' => ['nullable', 'email', 'max:150'],
 
             // Data Ibu Kandung (Relationship Type 2)
             'mother_nik' => ['required', 'string', 'digits:16'],
@@ -157,6 +184,7 @@ class PpdbController extends Controller
             'mother_income' => ['required', 'string'],
             'mother_phone' => ['nullable', 'string', 'max:20'],
             'mother_whatsapp' => ['nullable', 'string', 'max:20'],
+            'mother_email' => ['nullable', 'email', 'max:150'],
 
             // Data Wali (Optional - Relationship Type 3)
             'has_guardian' => ['nullable'],
@@ -168,10 +196,21 @@ class PpdbController extends Controller
             'guardian_income' => ['nullable', 'required_if:has_guardian,1', 'string'],
             'guardian_phone' => ['nullable', 'string', 'max:20'],
             'guardian_whatsapp' => ['nullable', 'string', 'max:20'],
+            'guardian_email' => ['nullable', 'email', 'max:150'],
         ], [
+            'major.required' => 'Silakan pilih jurusan yang diminati (Reguler, Bahasa, Tahfidz, atau ICT).',
+            'major.in' => 'Pilihan jurusan tidak valid.',
+            'school_origin.required' => 'Nama asal sekolah wajib diisi.',
+            'school_origin_address.required' => 'Alamat sekolah asal wajib diisi.',
             'nik.digits' => 'NIK Siswa harus 16 digit.',
             'nisn.digits' => 'NISN harus 10 digit angka.',
             'family_card_number.digits' => 'Nomor Kartu Keluarga (KK) harus 16 digit.',
+            'birth_order.required' => 'Urutan anak ke-berapa wajib diisi.',
+            'birth_order.integer' => 'Urutan anak harus berupa angka.',
+            'birth_order.min' => 'Urutan anak minimal bernilai 1.',
+            'siblings_count.required' => 'Jumlah bersaudara wajib diisi.',
+            'siblings_count.integer' => 'Jumlah bersaudara harus berupa angka.',
+            'siblings_count.min' => 'Jumlah bersaudara minimal bernilai 1.',
             'father_nik.digits' => 'NIK Ayah harus 16 digit.',
             'mother_nik.digits' => 'NIK Ibu harus 16 digit.',
             'guardian_nik.digits' => 'NIK Wali harus 16 digit.',
@@ -190,6 +229,7 @@ class PpdbController extends Controller
                     'income_code' => $request->father_income,
                     'phone_number' => $request->father_phone ?: $request->father_whatsapp,
                     'whatsapp_number' => $request->father_whatsapp ?: $request->father_phone,
+                    'email' => $request->father_email ?: null,
                 ]
             ],
             [
@@ -203,6 +243,7 @@ class PpdbController extends Controller
                     'income_code' => $request->mother_income,
                     'phone_number' => $request->mother_phone ?: $request->mother_whatsapp,
                     'whatsapp_number' => $request->mother_whatsapp ?: $request->mother_phone,
+                    'email' => $request->mother_email ?: null,
                 ]
             ]
         ];
@@ -220,6 +261,7 @@ class PpdbController extends Controller
                     'income_code' => $request->guardian_income,
                     'phone_number' => $request->guardian_phone ?: $request->guardian_whatsapp,
                     'whatsapp_number' => $request->guardian_whatsapp ?: $request->guardian_phone,
+                    'email' => $request->guardian_email ?: null,
                 ]
             ];
         }
@@ -231,12 +273,17 @@ class PpdbController extends Controller
             'full_name' => $request->full_name,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name ?: '',
+            'major' => $request->major,
+            'school_origin' => $request->school_origin,
+            'school_origin_address' => $request->school_origin_address,
             'identity' => [
                 'family_card_number' => $request->family_card_number,
                 'gender' => $request->gender,
                 'religion' => $request->religion,
                 'place_of_birth' => $request->place_of_birth,
                 'date_of_birth' => $request->date_of_birth,
+                'birth_order' => (int) $request->birth_order,
+                'siblings_count' => (int) $request->siblings_count,
             ],
             'address' => [
                 'street_address' => $request->street_address,
@@ -262,7 +309,7 @@ class PpdbController extends Controller
                 ->put($this->backendUrl() . '/api/ppdb/registration-form', $nestedPayload);
 
             if ($response->successful()) {
-                return redirect()->route('dashboard')->with('success', 'Formulir pendaftaran Dapodik berhasil disimpan dan diperbarui!');
+                return redirect()->route('dashboard')->with('success', 'Formulir pendaftaran berhasil disimpan dan diperbarui!');
             }
 
             $errorMessage = $this->extractErrorMessage($response, 'Gagal menyimpan formulir pendaftaran.');

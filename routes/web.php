@@ -53,7 +53,15 @@ Route::prefix('admin')->group(function () {
         
         // Dashboard & Monitoring Pendaftar
         Route::get('/ppdb', [AdminPpdbController::class, 'index'])->name('admin.ppdb.index');
+        Route::get('/ppdb/export', [AdminPpdbController::class, 'export'])->name('admin.ppdb.export');
         Route::get('/ppdb/registrations/{id}', [AdminPpdbController::class, 'show'])->name('admin.ppdb.show');
+        
+        // Form Edit & Update Data Pendaftar
+        Route::get('/ppdb/registrations/{id}/edit', [AdminPpdbController::class, 'edit'])->name('admin.ppdb.edit');
+        Route::put('/ppdb/registrations/{id}', [AdminPpdbController::class, 'update'])->name('admin.ppdb.update');
+
+        // Hapus Data Pendaftar
+        Route::delete('/ppdb/registrations/{id}', [AdminPpdbController::class, 'destroy'])->name('admin.ppdb.destroy');
         
         // Verifikasi Pembayaran (Accept / Reject)
         Route::post('/ppdb/registrations/{id}/verify-payment', [AdminPpdbController::class, 'verifyPayment'])->name('admin.ppdb.verify-payment');

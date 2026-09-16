@@ -165,4 +165,107 @@ class AdminPpdbTest extends TestCase
         $response->assertRedirect('/admin/login');
         $this->assertNull(session('admin_api_token'));
     }
+
+    /**
+     * Test admin dossier show page renders complete parents data, email, and birth order.
+     */
+    public function test_admin_dossier_renders_parents_and_birth_order(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations/reg-uuid-101' => Http::response([
+                'id' => 'reg-uuid-101',
+                'account_id' => 'acc-uuid-101',
+                'payment_status' => 'paid',
+                'payment_amount' => 250000.0,
+                'payment_proof_path' => '/uploads/ppdb_payments/test.jpg',
+                'registration_status' => 'pending',
+                'created_at' => '2026-09-08T10:00:00Z',
+                'account' => [
+                    'nik' => '3201012345670001',
+                    'full_name' => 'Ahmad Fauzi Rahman',
+                    'email' => 'ahmad@example.com',
+                ],
+                'form_data' => [
+                    'nik' => '3201012345670001',
+                    'nisn' => '0051234567',
+                    'full_name' => 'Ahmad Fauzi Rahman',
+                    'first_name' => 'Ahmad',
+                    'last_name' => 'Fauzi Rahman',
+                    'identity' => [
+                        'family_card_number' => '3201010000000001',
+                        'gender' => 'Laki-laki',
+                        'religion' => 'Islam',
+                        'place_of_birth' => 'Jakarta',
+                        'date_of_birth' => '2008-05-14',
+                        'birth_order' => 2,
+                        'siblings_count' => 3,
+                    ],
+                    'address' => [
+                        'street_address' => 'Jl. Merdeka No. 45',
+                        'rt' => '002',
+                        'rw' => '005',
+                        'village' => 'Sukamaju',
+                        'district' => 'Cilodong',
+                        'postal_code' => '16415',
+                        'residence_type' => 'Bersama Orang Tua',
+                        'transportation_mode' => 'Sepeda Motor',
+                    ],
+                    'contact' => [
+                        'phone_number' => '021-77889900',
+                        'mobile_number' => '081234567890',
+                        'whatsapp_number' => '081234567890',
+                        'email' => 'ahmad.fauzi@student.sch.id',
+                    ],
+                    'student_parents' => [
+                        [
+                            'relationship_type' => 1,
+                            'parent' => [
+                                'nik' => '3201011122330001',
+                                'full_name' => 'Bambang Sudarsono',
+                                'birth_year' => '1978',
+                                'education_code' => '05',
+                                'occupation_code' => '02',
+                                'income_code' => '03',
+                                'phone_number' => '081311223344',
+                                'whatsapp_number' => '081311223344',
+                                'email' => 'bambang.sudarsono@example.com',
+                            ],
+                        ],
+                        [
+                            'relationship_type' => 2,
+                            'parent' => [
+                                'nik' => '3201012233440002',
+                                'full_name' => 'Siti Aminah',
+                                'birth_year' => '1982',
+                                'education_code' => '04',
+                                'occupation_code' => '03',
+                                'income_code' => '02',
+                                'phone_number' => '081399887766',
+                                'whatsapp_number' => '081399887766',
+                                'email' => 'siti.aminah@example.com',
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb/registrations/reg-uuid-101');
+
+        $response->assertStatus(200);
+        $response->assertSee('Ahmad Fauzi Rahman');
+        $response->assertSee('3201012345670001');
+        $response->assertSee('Anak ke-');
+        $response->assertSee('2');
+        $response->assertSee('3');
+        $response->assertSee('Bambang Sudarsono');
+        $response->assertSee('bambang.sudarsono@example.com');
+        $response->assertSee('PNS / TNI / Polri');
+        $response->assertSee('D1 / D2 / D3');
+        $response->assertSee('Siti Aminah');
+        $response->assertSee('siti.aminah@example.com');
+    }
 }

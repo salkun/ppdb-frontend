@@ -3,25 +3,30 @@
 @section('title', 'Dashboard Calon Siswa')
 
 @section('content')
-<div class="container py-4">
+<div class="container-xl py-3">
     <!-- Header Dashboard -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom gap-3" style="border-color: var(--border-light) !important;">
         <div>
-            <h3 class="fw-bold text-dark mb-1">
-                <i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard Pendaftaran
-            </h3>
-            <p class="text-muted mb-0">Selamat datang di portal pendaftaran peserta didik baru, <strong>{{ $user['full_name'] ?? 'Calon Siswa' }}</strong>.</p>
+            <div class="d-inline-flex align-items-center gap-2 mb-1">
+                <span class="badge-pastel badge-pastel-neutral">PORTAL SISWA</span>
+                <span class="font-mono-meta small text-secondary">TAHUN AJARAN {{ date('Y') }}/{{ date('Y') + 1 }}</span>
+            </div>
+            <h2 class="font-serif-heading fs-2 text-dark mb-0">Dashboard Pendaftaran</h2>
+            <p class="text-secondary small mb-0 mt-1">
+                Selamat datang, <strong class="text-dark">{{ $user['full_name'] ?? 'Calon Siswa' }}</strong>. Pantau status berkas dan pembayaran Anda.
+            </p>
         </div>
         <div>
-            <span class="badge bg-light text-dark border px-3 py-2 fs-6 rounded-pill">
-                <i class="bi bi-calendar3 me-1 text-primary"></i> {{ date('d F Y') }}
+            <span class="font-mono-meta small text-secondary p-2 bg-white rounded-1 border d-inline-flex align-items-center gap-1" style="border-color: var(--border-light) !important;">
+                <i class="ph-bold ph-calendar-blank"></i> {{ date('d F Y') }}
             </span>
         </div>
     </div>
 
     @if(isset($error) && !empty($error))
-        <div class="alert alert-danger shadow-sm border-0 rounded-3">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ $error }}
+        <div class="alert-document alert-danger mb-4 d-flex align-items-center">
+            <i class="ph-bold ph-warning-circle fs-5 me-2 flex-shrink-0"></i>
+            <div>{{ $error }}</div>
         </div>
     @endif
 
@@ -32,336 +37,342 @@
         $formData = $registration['form_data'] ?? null;
     @endphp
 
-    <!-- Status Cards Row -->
-    <div class="row g-4 mb-4">
-        <!-- 1. Status Pembayaran Card -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card card-custom h-100 p-3">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="text-muted small fw-semibold text-uppercase">Status Pembayaran</span>
-                    @if($paymentStatus === 'paid')
-                        <span class="badge bg-success badge-status"><i class="bi bi-check-circle-fill me-1"></i> LUNAS</span>
-                    @elseif($paymentStatus === 'pending_verification')
-                        <span class="badge bg-warning text-dark badge-status"><i class="bi bi-clock-history me-1"></i> VERIFIKASI</span>
-                    @elseif($paymentStatus === 'rejected')
-                        <span class="badge bg-danger badge-status"><i class="bi bi-x-circle-fill me-1"></i> DITOLAK</span>
-                    @else
-                        <span class="badge bg-danger bg-opacity-75 text-white badge-status"><i class="bi bi-exclamation-octagon-fill me-1"></i> BELUM BAYAR</span>
-                    @endif
+    <!-- 3 Bento Status Cards -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Status Pembayaran -->
+        <div class="col-md-4">
+            <div class="bento-card h-100 fade-in-entry d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="font-mono-meta text-secondary" style="font-size: 0.75rem;">PEMBAYARAN</span>
+                        @if($paymentStatus === 'paid')
+                            <span class="badge-pastel badge-pastel-green">LUNAS</span>
+                        @elseif($paymentStatus === 'pending_verification')
+                            <span class="badge-pastel badge-pastel-yellow">VERIFIKASI</span>
+                        @elseif($paymentStatus === 'rejected')
+                            <span class="badge-pastel badge-pastel-red">DITOLAK</span>
+                        @else
+                            <span class="badge-pastel badge-pastel-red">BELUM BAYAR</span>
+                        @endif
+                    </div>
+                    <h5 class="fw-semibold text-dark mb-1">
+                        @if($paymentStatus === 'paid')
+                            Terverifikasi Lunas
+                        @elseif($paymentStatus === 'pending_verification')
+                            Menunggu Verifikasi
+                        @elseif($paymentStatus === 'rejected')
+                            Pembayaran Ditolak
+                        @else
+                            Menunggu Pembayaran
+                        @endif
+                    </h5>
+                    <p class="text-secondary small mb-0">Biaya Administrasi: Rp 250.000</p>
                 </div>
-
-                <div class="d-flex align-items-center">
-                    <div class="rounded-3 p-3 me-3 
-                        {{ $paymentStatus === 'paid' ? 'bg-success bg-opacity-10 text-success' : ($paymentStatus === 'pending_verification' ? 'bg-warning bg-opacity-10 text-warning' : 'bg-danger bg-opacity-10 text-danger') }}">
-                        <i class="bi bi-cash-stack fs-2"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-dark">
-                            @if($paymentStatus === 'paid')
-                                Terverifikasi
-                            @elseif($paymentStatus === 'pending_verification')
-                                Menunggu Verifikasi
-                            @elseif($paymentStatus === 'rejected')
-                                Pembayaran Ditolak
-                            @else
-                                Belum Dibayar
-                            @endif
-                        </h5>
-                        <small class="text-muted">Biaya Administrasi: Rp 250.000</small>
-                    </div>
+                <div class="pt-3 mt-3 border-top d-flex align-items-center justify-content-between small text-secondary" style="border-color: var(--border-light) !important;">
+                    <span>Tujuan Transfer</span>
+                    <span class="font-mono-meta fw-medium text-dark">BANK BRI</span>
                 </div>
             </div>
         </div>
 
-        <!-- 2. Status Formulir Dapodik Card -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card card-custom h-100 p-3">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="text-muted small fw-semibold text-uppercase">Formulir Dapodik</span>
-                    @if($paymentStatus !== 'paid')
-                        <span class="badge bg-secondary badge-status"><i class="bi bi-lock-fill me-1"></i> TERKUNCI</span>
-                    @elseif(!empty($formData))
-                        <span class="badge bg-success badge-status"><i class="bi bi-check-all me-1"></i> LENGKAP</span>
-                    @else
-                        <span class="badge bg-primary badge-status"><i class="bi bi-pencil-fill me-1"></i> BELUM DIISI</span>
-                    @endif
+        <!-- 2. Status Formulir Pendaftaran -->
+        <div class="col-md-4">
+            <div class="bento-card h-100 fade-in-entry d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="font-mono-meta text-secondary" style="font-size: 0.75rem;">FORMULIR PENDAFTARAN</span>
+                        @if($paymentStatus !== 'paid')
+                            <span class="badge-pastel badge-pastel-neutral">TERKUNCI</span>
+                        @elseif(!empty($formData))
+                            <span class="badge-pastel badge-pastel-green">LENGKAP</span>
+                        @else
+                            <span class="badge-pastel badge-pastel-blue">SIAP DIISI</span>
+                        @endif
+                    </div>
+                    <h5 class="fw-semibold text-dark mb-1">
+                        @if($paymentStatus !== 'paid')
+                            Formulir Terkunci
+                        @elseif(!empty($formData))
+                            Biodata Tersimpan
+                        @else
+                            Siap Dilengkapi
+                        @endif
+                    </h5>
+                    <p class="text-secondary small mb-0">
+                        @if($paymentStatus !== 'paid')
+                            Terbuka otomatis setelah pembayaran lunas
+                        @elseif(!empty($formData))
+                            Seluruh data tersimpan di sistem
+                        @else
+                            Silakan mulai melengkapi biodata Anda
+                        @endif
+                    </p>
                 </div>
-
-                <div class="d-flex align-items-center">
-                    <div class="rounded-3 p-3 me-3 
-                        {{ $paymentStatus !== 'paid' ? 'bg-secondary bg-opacity-10 text-secondary' : (!empty($formData) ? 'bg-success bg-opacity-10 text-success' : 'bg-primary bg-opacity-10 text-primary') }}">
-                        <i class="bi bi-file-earmark-text fs-2"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-dark">
-                            @if($paymentStatus !== 'paid')
-                                Terkunci
-                            @elseif(!empty($formData))
-                                Sudah Diisi
-                            @else
-                                Siap Diisi
-                            @endif
-                        </h5>
-                        <small class="text-muted">
-                            @if($paymentStatus !== 'paid')
-                                Selesaikan pembayaran dahulu
-                            @elseif(!empty($formData))
-                                Data tersimpan di sistem
-                            @else
-                                Segera lengkapi data Anda
-                            @endif
-                        </small>
-                    </div>
+                <div class="pt-3 mt-3 border-top d-flex align-items-center justify-content-between small text-secondary" style="border-color: var(--border-light) !important;">
+                    <span>Standar Data</span>
+                    <span class="font-mono-meta fw-medium text-dark">Data Pokok Siswa</span>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Status Seleksi Card -->
-        <div class="col-md-12 col-lg-4">
-            <div class="card card-custom h-100 p-3">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="text-muted small fw-semibold text-uppercase">Status Penerimaan</span>
-                    @if($registrationStatus === 'accepted')
-                        <span class="badge bg-success badge-status"><i class="bi bi-patch-check-fill me-1"></i> DITERIMA</span>
-                    @elseif($registrationStatus === 'rejected')
-                        <span class="badge bg-danger badge-status"><i class="bi bi-x-octagon-fill me-1"></i> TIDAK LOLOS</span>
-                    @else
-                        <span class="badge bg-info text-dark badge-status"><i class="bi bi-hourglass-split me-1"></i> SELEKSI</span>
-                    @endif
+        <!-- 3. Status Penerimaan -->
+        <div class="col-md-4">
+            <div class="bento-card h-100 fade-in-entry d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="font-mono-meta text-secondary" style="font-size: 0.75rem;">SELEKSI AKADEMIK</span>
+                        @if($registrationStatus === 'accepted')
+                            <span class="badge-pastel badge-pastel-green">DITERIMA</span>
+                        @elseif($registrationStatus === 'rejected')
+                            <span class="badge-pastel badge-pastel-red">TIDAK LOLOS</span>
+                        @else
+                            <span class="badge-pastel badge-pastel-blue">PROSES SELEKSI</span>
+                        @endif
+                    </div>
+                    <h5 class="fw-semibold text-dark mb-1">
+                        @if($registrationStatus === 'accepted')
+                            Resmi Diterima
+                        @elseif($registrationStatus === 'rejected')
+                            Tidak Lolos Seleksi
+                        @else
+                            Dalam Peninjauan
+                        @endif
+                    </h5>
+                    <p class="text-secondary small mb-0">
+                        @if($registrationStatus === 'accepted')
+                            Akun siswa resmi otomatis diterbitkan
+                        @else
+                            Keputusan resmi dewan panitia PPDB
+                        @endif
+                    </p>
                 </div>
-
-                <div class="d-flex align-items-center">
-                    <div class="rounded-3 p-3 me-3 
-                        {{ $registrationStatus === 'accepted' ? 'bg-success bg-opacity-10 text-success' : ($registrationStatus === 'rejected' ? 'bg-danger bg-opacity-10 text-danger' : 'bg-info bg-opacity-10 text-info') }}">
-                        <i class="bi bi-mortarboard fs-2"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-dark">
-                            @if($registrationStatus === 'accepted')
-                                Resmi Diterima
-                            @elseif($registrationStatus === 'rejected')
-                                Tidak Lolos Seleksi
-                            @else
-                                Dalam Peninjauan
-                            @endif
-                        </h5>
-                        <small class="text-muted">
-                            @if($registrationStatus === 'accepted')
-                                Akun SIAKAD otomatis dibuat
-                            @else
-                                Keputusan panitia PPDB
-                            @endif
-                        </small>
-                    </div>
+                <div class="pt-3 mt-3 border-top d-flex align-items-center justify-content-between small text-secondary" style="border-color: var(--border-light) !important;">
+                    <span>Tahun Ajaran</span>
+                    <span class="font-mono-meta fw-medium text-dark">{{ date('Y') }}/{{ date('Y') + 1 }}</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Locking System Alert & Actions -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            @if($paymentStatus === 'unpaid' || $paymentStatus === 'rejected')
-                <!-- Kasus 1 & 4: UNPAID / REJECTED - Alert Merah & Form Upload Aktif -->
-                <div class="alert alert-danger border-0 shadow-sm p-4 rounded-4 mb-4">
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-exclamation-triangle-fill fs-2 text-danger me-3"></i>
-                        <div>
-                            <h5 class="alert-heading fw-bold">Perhatian: Biaya Pendaftaran Belum Terverifikasi</h5>
-                            <p class="mb-2">
-                                @if($paymentStatus === 'rejected')
-                                    Bukti transfer yang Anda kirimkan sebelumnya <strong>ditolak</strong> oleh panitia verifikasi. Silakan unggah bukti transfer yang valid.
-                                @else
-                                    Untuk membuka akses ke pengisian formulir biodata pokok, alamat, dan data orang tua (Dapodik), Anda diwajibkan melakukan pembayaran biaya pendaftaran sebesar <strong>Rp 250.000,-</strong> dan mengunggah bukti transfer pada form di bawah.
-                                @endif
-                            </p>
-                            <div class="small bg-white bg-opacity-75 p-2 rounded-2 border border-danger-subtle text-dark">
-                                Rekening Tujuan: <strong>BANK BRI 0123-01-000456-53-8 (PPDB SEKOLAH UNGGULAN)</strong>
-                            </div>
-                        </div>
+    <!-- Status Action Notice -->
+    @if($paymentStatus === 'unpaid' || $paymentStatus === 'rejected')
+        <div class="bento-card mb-4 border-1 p-4 fade-in-entry" style="border-color: rgba(159, 47, 45, 0.25) !important; background-color: #FFFDFD;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge-pastel badge-pastel-red">PERHATIAN</span>
+                        <strong class="text-dark">Selesaikan Pembayaran Biaya Pendaftaran</strong>
                     </div>
+                    <p class="text-secondary small mb-0" style="max-width: 680px;">
+                        @if($paymentStatus === 'rejected')
+                            Bukti transfer sebelumnya ditolak panitia karena tidak valid atau nominal tidak sesuai. Silakan kirimkan kembali bukti transfer yang sah.
+                        @else
+                            Untuk membuka pengisian formulir data pokok dan orang tua, silakan lakukan transfer sebesar <strong>Rp 250.000,-</strong> ke rekening sekolah dan unggah bukti transfer pada panel di samping.
+                        @endif
+                    </p>
                 </div>
-            @elseif($paymentStatus === 'pending_verification')
-                <!-- Kasus 2: PENDING VERIFICATION - Alert Kuning -->
-                <div class="alert alert-warning border-0 shadow-sm p-4 rounded-4 mb-4">
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-clock-history fs-2 text-warning me-3"></i>
-                        <div>
-                            <h5 class="alert-heading fw-bold">Bukti Pembayaran Sedang Diverifikasi Panitia</h5>
-                            <p class="mb-0">
-                                Bukti transfer Anda telah berhasil dikirimkan ke sistem kami dan saat ini sedang ditinjau oleh staf administrasi sekolah. Proses ini membutuhkan waktu paling lambat 1x24 jam kerja. Setelah status berubah menjadi <strong>LUNAS (PAID)</strong>, seluruh menu formulir pendaftaran akan terbuka otomatis.
-                            </p>
-                        </div>
-                    </div>
+                <div class="text-md-end flex-shrink-0">
+                    <span class="font-mono-meta small text-secondary d-block">REKENING RESMI SEKOLAH</span>
+                    <kbd class="kbd-key mt-1 d-inline-block">BRI 0123-01-000456-53-8</kbd>
                 </div>
-            @elseif($paymentStatus === 'paid')
-                <!-- Kasus 3: PAID - Alert Hijau & Buka Akses Formulir -->
-                <div class="alert alert-success border-0 shadow-sm p-4 rounded-4 mb-4">
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-check-circle-fill fs-2 text-success me-3"></i>
-                        <div class="flex-grow-1">
-                            <h5 class="alert-heading fw-bold">Pembayaran Anda Telah Terverifikasi (Lunas)!</h5>
-                            <p class="mb-3">
-                                Seluruh hak akses formulir pendaftaran telah terbuka. Silakan melengkapi seluruh isian data pokok calon siswa, identitas tambahan, alamat, kontak, dan data orang tua sesuai standar Dapodik Kemendikbudristek.
-                            </p>
-                            <a href="{{ route('ppdb.form') }}" class="btn btn-teal fw-bold px-4 py-2">
-                                <i class="bi bi-file-earmark-person-fill me-2"></i> 
-                                {{ !empty($formData) ? 'Perbarui / Lihat Formulir Pendaftaran' : 'Buka & Isi Formulir Pendaftaran Sekarang' }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @endif
+            </div>
         </div>
-    </div>
+    @elseif($paymentStatus === 'pending_verification')
+        <div class="bento-card mb-4 border-1 p-4 fade-in-entry" style="border-color: rgba(149, 100, 0, 0.25) !important; background-color: #FFFEFA;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge-pastel badge-pastel-yellow">DALAM PENINJAUAN</span>
+                        <strong class="text-dark">Bukti Pembayaran Sedang Diverifikasi</strong>
+                    </div>
+                    <p class="text-secondary small mb-0" style="max-width: 700px;">
+                        Bukti transfer Anda telah diterima sistem dan saat ini sedang dalam proses verifikasi oleh panitia administrasi sekolah. Setelah berstatus lunas, pengisian formulir akan terbuka secara otomatis.
+                    </p>
+                </div>
+                <div class="font-mono-meta small text-secondary flex-shrink-0">
+                    ESTIMASI: MAKS. 1X24 JAM
+                </div>
+            </div>
+        </div>
+    @elseif($paymentStatus === 'paid')
+        <div class="bento-card mb-4 border-1 p-4 fade-in-entry" style="border-color: rgba(52, 101, 56, 0.25) !important; background-color: #FAFCFA;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge-pastel badge-pastel-green">LUNAS</span>
+                        <strong class="text-dark">Pembayaran Terverifikasi — Akses Formulir Terbuka</strong>
+                    </div>
+                    <p class="text-secondary small mb-0" style="max-width: 680px;">
+                        Akses pengisian formulir pendaftaran telah dibuka. Pastikan Anda melengkapi seluruh data calon siswa dan orang tua dengan data yang valid.
+                    </p>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="{{ route('ppdb.form') }}" class="btn-minimal-primary py-2 px-3 text-decoration-none">
+                        <i class="ph-bold ph-pencil-simple me-1"></i>
+                        {{ !empty($formData) ? 'Periksa / Ubah Formulir' : 'Isi Formulir Sekarang' }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
 
-    <!-- Main Content Section: Profil & Upload Pembayaran -->
+    <!-- Main Grid: Info Akun & Form Bukti Bayar -->
     <div class="row g-4">
-        <!-- Kolom Kiri: Profil Akun & Data Pendaftar -->
+        <!-- Kolom Kiri: Informasi Calon Siswa & Form Tersimpan -->
         <div class="col-lg-6">
-            <div class="card card-custom h-100">
-                <div class="card-custom-header d-flex align-items-center">
-                    <i class="bi bi-person-badge-fill text-primary fs-5 me-2"></i>
-                    <span>Informasi Akun Calon Siswa</span>
-                </div>
-                <div class="card-body p-4">
-                    <div class="table-responsive">
-                        <table class="table table-borderless align-middle mb-0">
-                            <tbody>
-                                <tr class="border-bottom">
-                                    <td class="text-muted" style="width: 40%;">ID Pendaftaran</td>
-                                    <td class="fw-bold text-dark font-monospace small">{{ $registration['id'] ?? '-' }}</td>
-                                </tr>
-                                <tr class="border-bottom">
-                                    <td class="text-muted">NIK Calon Siswa</td>
-                                    <td class="fw-bold text-dark">{{ $user['nik'] ?? '-' }}</td>
-                                </tr>
-                                <tr class="border-bottom">
-                                    <td class="text-muted">Nama Lengkap</td>
-                                    <td class="fw-bold text-dark">{{ $user['full_name'] ?? '-' }}</td>
-                                </tr>
-                                <tr class="border-bottom">
-                                    <td class="text-muted">Email Terdaftar</td>
-                                    <td class="text-dark">{{ $user['email'] ?? '-' }}</td>
-                                </tr>
-                                <tr class="border-bottom">
-                                    <td class="text-muted">Tanggal Registrasi</td>
-                                    <td class="text-dark">{{ isset($registration['created_at']) ? date('d F Y, H:i', strtotime($registration['created_at'])) . ' WIB' : '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted">Status Akun</td>
-                                    <td><span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Aktif</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+            <div class="bento-card h-100 fade-in-entry">
+                <div class="bento-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="ph-bold ph-user-focus fs-5 text-dark"></i>
+                        <h6 class="fw-semibold text-dark mb-0">Identitas Calon Siswa</h6>
                     </div>
-
-                    @if(!empty($formData))
-                        <div class="mt-4 pt-3 border-top">
-                            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-check2-all text-success me-1"></i> Data Formulir Tersimpan:</h6>
-                            <p class="small text-muted mb-3">Formulir Dapodik Anda telah tersimpan dengan rincian:</p>
-                            <div class="row g-2 small">
-                                <div class="col-6"><strong>NISN:</strong> {{ $formData['nisn'] ?? '-' }}</div>
-                                <div class="col-6"><strong>Jenis Kelamin:</strong> {{ $formData['identity']['gender'] ?? '-' }}</div>
-                                <div class="col-6"><strong>Tempat Lahir:</strong> {{ $formData['identity']['place_of_birth'] ?? '-' }}</div>
-                                <div class="col-6"><strong>Tanggal Lahir:</strong> {{ $formData['identity']['date_of_birth'] ?? '-' }}</div>
-                            </div>
-                        </div>
-                    @endif
+                    <span class="badge-pastel badge-pastel-neutral">DATA AKUN</span>
                 </div>
+
+                <div class="space-y-3 small">
+                    <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--border-light) !important;">
+                        <span class="text-secondary">NIK Siswa:</span>
+                        <span class="font-mono-meta text-dark fw-medium">{{ $user['nik'] ?? '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--border-light) !important;">
+                        <span class="text-secondary">Nama Lengkap:</span>
+                        <span class="text-dark fw-medium">{{ $user['full_name'] ?? '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--border-light) !important;">
+                        <span class="text-secondary">Email Terdaftar:</span>
+                        <span class="text-dark fw-medium">{{ $user['email'] ?? '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom" style="border-color: var(--border-light) !important;">
+                        <span class="text-secondary">Tanggal Registrasi:</span>
+                        <span class="font-mono-meta text-dark">{{ isset($registration['created_at']) ? date('d F Y, H:i', strtotime($registration['created_at'])) . ' WIB' : '-' }}</span>
+                    </div>
+                </div>
+
+                @if(!empty($formData))
+                    <div class="mt-4 pt-3 border-top" style="border-color: var(--border-light) !important;">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="font-mono-meta small text-secondary text-uppercase">RINGKASAN FORMULIR TERSIMPAN</span>
+                            <span class="badge-pastel badge-pastel-green">LENGKAP</span>
+                        </div>
+                        <div class="row g-2 small">
+                            <div class="col-6">
+                                <span class="text-secondary d-block" style="font-size: 0.78rem;">NISN:</span>
+                                <span class="font-mono-meta text-dark fw-medium">{{ $formData['nisn'] ?? '-' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-secondary d-block" style="font-size: 0.78rem;">Jenis Kelamin:</span>
+                                <span class="text-dark fw-medium">{{ $formData['identity']['gender'] ?? '-' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-secondary d-block" style="font-size: 0.78rem;">Tempat Lahir:</span>
+                                <span class="text-dark fw-medium">{{ $formData['identity']['place_of_birth'] ?? '-' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-secondary d-block" style="font-size: 0.78rem;">Tanggal Lahir:</span>
+                                <span class="font-mono-meta text-dark fw-medium">{{ $formData['identity']['date_of_birth'] ?? '-' }}</span>
+                            </div>
+                            @php
+                                $bOrder = $formData['identity']['birth_order'] ?? ($formData['birth_order'] ?? null);
+                                $sCount = $formData['identity']['siblings_count'] ?? ($formData['siblings_count'] ?? '-');
+                            @endphp
+                            @if(!is_null($bOrder))
+                                <div class="col-12 mt-2 pt-2 border-top" style="border-color: var(--border-light) !important;">
+                                    <span class="text-secondary d-block" style="font-size: 0.78rem;">Urutan Kelahiran:</span>
+                                    <span class="text-dark fw-medium">Anak ke-{{ $bOrder }} dari {{ $sCount }} bersaudara</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 
-        <!-- Kolom Kanan: Form Upload Pembayaran (Unlocked saat unpaid/rejected) -->
+        <!-- Kolom Kanan: Upload / Status Bukti Bayar -->
         <div class="col-lg-6">
-            <div class="card card-custom h-100">
-                <div class="card-custom-header d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-upload text-primary fs-5 me-2"></i>
-                        <span>Unggah Bukti Pembayaran</span>
+            <div class="bento-card h-100 fade-in-entry">
+                <div class="bento-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="ph-bold ph-receipt fs-5 text-dark"></i>
+                        <h6 class="fw-semibold text-dark mb-0">Bukti Pembayaran</h6>
                     </div>
                     @if($paymentStatus === 'paid')
-                        <span class="badge bg-success-subtle text-success border border-success-subtle">Terverifikasi</span>
+                        <span class="badge-pastel badge-pastel-green">TERVERIFIKASI</span>
                     @endif
                 </div>
-                <div class="card-body p-4">
-                    @if($paymentStatus === 'paid')
-                        <!-- Saat Paid: Tampilkan konfirmasi & pratinjau bukti bayar -->
-                        <div class="text-center py-4">
-                            <div class="text-success mb-3">
-                                <i class="bi bi-patch-check-fill" style="font-size: 3.5rem;"></i>
-                            </div>
-                            <h5 class="fw-bold text-dark">Bukti Pembayaran Terverifikasi</h5>
-                            <p class="text-muted small mb-3">
-                                Pembayaran Anda telah disetujui oleh panitia PPDB. Tidak diperlukan pengunggahan berkas bukti bayar ulang.
-                            </p>
-                            @if(!empty($paymentProof))
-                                <a href="{{ $backendUrl . $paymentProof }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                    <i class="bi bi-file-earmark-image me-1"></i> Lihat Bukti Bayar yang Diunggah
+
+                @if($paymentStatus === 'paid')
+                    <div class="text-center py-4">
+                        <div class="mb-3 d-inline-flex align-items-center justify-content-center p-3 rounded-circle" style="background: var(--pastel-green); color: var(--pastel-green-text); width: 56px; height: 56px;">
+                            <i class="ph-bold ph-check fs-2"></i>
+                        </div>
+                        <h6 class="fw-semibold text-dark mb-1">Bukti Pembayaran Telah Divalidasi</h6>
+                        <p class="text-secondary small mb-3" style="max-width: 360px; margin-inline: auto;">
+                            Pembayaran Anda telah diverifikasi resmi oleh panitia PPDB. Silakan lanjutkan pengisian formulir pendaftaran.
+                        </p>
+                        @if(!empty($paymentProof))
+                            <a href="{{ $backendUrl . $paymentProof }}" target="_blank" class="btn-minimal-secondary py-2 px-3 text-decoration-none" style="font-size: 0.82rem;">
+                                <i class="ph-bold ph-file-arrow-up me-1"></i> Lihat Berkas Bukti Transfer
+                            </a>
+                        @endif
+                    </div>
+                @elseif($paymentStatus === 'pending_verification')
+                    <div class="text-center py-3">
+                        <div class="mb-3 d-inline-flex align-items-center justify-content-center p-3 rounded-circle" style="background: var(--pastel-yellow); color: var(--pastel-yellow-text); width: 52px; height: 52px;">
+                            <i class="ph-bold ph-clock fs-3"></i>
+                        </div>
+                        <h6 class="fw-semibold text-dark mb-1">Berkas Sedang Ditinjau Panitia</h6>
+                        <p class="text-secondary small mb-3">
+                            Bukti transfer Anda telah tersimpan di sistem. Jika diperlukan perbaikan berkas, Anda dapat mengunggah kembali di bawah ini:
+                        </p>
+                        @if(!empty($paymentProof))
+                            <div class="mb-3">
+                                <a href="{{ $backendUrl . $paymentProof }}" target="_blank" class="btn-minimal-secondary py-1 px-3 d-inline-flex text-decoration-none" style="font-size: 0.8rem;">
+                                    <i class="ph-bold ph-eye me-1"></i> Buka Berkas Terakhir
                                 </a>
-                            @endif
-                        </div>
-                    @elseif($paymentStatus === 'pending_verification')
-                        <!-- Saat Pending Verification: Tampilkan status menunggu & pratinjau berkas -->
-                        <div class="text-center py-4">
-                            <div class="text-warning mb-3">
-                                <i class="bi bi-hourglass-top" style="font-size: 3.5rem;"></i>
                             </div>
-                            <h5 class="fw-bold text-dark">Sedang Dalam Pemeriksaan</h5>
-                            <p class="text-muted small mb-3">
-                                Berkas bukti transfer telah kami terima. Jika ada perbaikan bukti bayar, Anda dapat mengunggah kembali di bawah ini:
-                            </p>
-                            @if(!empty($paymentProof))
-                                <div class="mb-3">
-                                    <a href="{{ $backendUrl . $paymentProof }}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                                        <i class="bi bi-eye me-1"></i> Periksa Berkas Terakhir
-                                    </a>
-                                </div>
-                            @endif
+                        @endif
 
-                            <!-- Form Upload Ulang jika diperlukan -->
-                            <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data" class="text-start mt-4 pt-3 border-top">
-                                @csrf
-                                <label for="file" class="form-label small fw-semibold text-dark">Ganti / Unggah Ulang Bukti Bayar:</label>
-                                <div class="input-group mb-2">
-                                    <input type="file" class="form-control form-control-sm" id="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
-                                    <button class="btn btn-navy btn-sm" type="submit">Unggah Ulang</button>
-                                </div>
-                                <div class="form-text small text-muted">Format: JPG, PNG, WEBP, PDF (Maks 5MB)</div>
-                            </form>
-                        </div>
-                    @else
-                        <!-- Saat Unpaid / Rejected: Form Aktif untuk Upload -->
-                        <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data" class="text-start mt-4 pt-3 border-top" style="border-color: var(--border-light) !important;">
                             @csrf
-                            <p class="text-muted small mb-3">
-                                Silakan unggah foto struk ATM, bukti transfer mobile banking, atau bukti setoran tunai bank (format JPG, PNG, WEBP, atau PDF, maks. 5MB).
-                            </p>
-
-                            <div class="mb-4">
-                                <label for="file" class="form-label fw-semibold text-dark">
-                                    Pilih Berkas Bukti Transfer <span class="text-danger">*</span>
-                                </label>
-                                <input type="file" 
-                                       class="form-control @error('file') is-invalid @enderror" 
-                                       id="file" 
-                                       name="file" 
-                                       accept=".jpg,.jpeg,.png,.webp,.pdf" 
-                                       required>
-                                @error('file')
-                                    <div class="text-danger small mt-1">{{ $message }}</div>
-                                @enderror
-                                <div class="form-text small text-muted mt-2">
-                                    <i class="bi bi-info-circle me-1"></i> Pastikan foto bukti transfer terlihat jelas mencakup tanggal, nominal (Rp 250.000), dan nomor referensi transaksi.
-                                </div>
+                            <label for="file" class="form-label">Unggah Ulang Berkas Pengganti:</label>
+                            <input type="file" class="form-control mb-2" id="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="text-secondary small" style="font-size: 0.76rem;">JPG, PNG, WEBP, PDF (Maks. 5MB)</span>
+                                <button class="btn-minimal-primary py-1 px-3" type="submit" style="font-size: 0.82rem;">Kirim Ulang</button>
                             </div>
-
-                            <button type="submit" class="btn btn-teal w-100 py-2 fw-semibold">
-                                <i class="bi bi-cloud-arrow-up-fill me-1"></i> Kirim Bukti Pembayaran
-                            </button>
                         </form>
-                    @endif
-                </div>
+                    </div>
+                @else
+                    <!-- Form Upload Aktif Saat Unpaid / Rejected -->
+                    <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <p class="text-secondary small mb-3">
+                            Unggah foto struk ATM, bukti transfer mobile banking, atau bukti setoran bank (format JPG, PNG, WEBP, atau PDF, maks. 5MB).
+                        </p>
+
+                        <div class="mb-4">
+                            <label for="file" class="form-label">
+                                Pilih Berkas Bukti Transfer <span class="text-danger">*</span>
+                            </label>
+                            <input type="file" 
+                                   class="form-control @error('file') is-invalid @enderror" 
+                                   id="file" 
+                                   name="file" 
+                                   accept=".jpg,.jpeg,.png,.webp,.pdf" 
+                                   required>
+                            @error('file')
+                                <div class="text-danger small mt-1" style="font-size: 0.8rem;">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text mt-2">
+                                Pastikan tanggal, nominal (Rp 250.000), dan nomor referensi transaksi terlihat dengan jelas.
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-minimal-primary w-100 py-2">
+                            <i class="ph-bold ph-upload-simple me-1"></i> Unggah Bukti Pembayaran
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>

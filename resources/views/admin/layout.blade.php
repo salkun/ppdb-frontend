@@ -4,236 +4,206 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>@yield('title', 'Admin Panel PPDB') - SIAKAD Sekolah</title>
+    <title>@yield('title', 'Admin Panel PPDB') — Portal Sekolah</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Geist Sans, Newsreader Serif & Geist Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap 5.3 CSS & Icons -->
+    <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <style>
-        :root {
-            --sidebar-bg: #0f172a;
-            --sidebar-hover: #1e293b;
-            --sidebar-active: #0d9488;
-            --main-bg: #f8fafc;
-            --border-color: #e2e8f0;
-        }
+    <!-- Phosphor Icons (Lightweight CSS Font) -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--main-bg);
-            color: #1e293b;
-            min-height: 100vh;
-        }
+    <!-- Central PPDB Theme -->
+    <link rel="stylesheet" href="{{ asset('css/ppdb-theme.css') }}">
 
-        /* Sidebar Styling */
-        .admin-sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            min-height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .admin-sidebar-brand {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid #1e293b;
-            display: flex;
-            align-items: center;
-        }
-
-        .admin-nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            color: #94a3b8;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.92rem;
-            transition: all 0.2s ease;
-            border-left: 4px solid transparent;
-        }
-
-        .admin-nav-link:hover {
-            color: #ffffff;
-            background-color: var(--sidebar-hover);
-        }
-
-        .admin-nav-link.active {
-            color: #ffffff;
-            background-color: rgba(13, 148, 136, 0.15);
-            border-left-color: var(--sidebar-active);
-            font-weight: 600;
-        }
-
-        .admin-nav-link i {
-            font-size: 1.15rem;
-            margin-right: 0.75rem;
-            width: 22px;
-        }
-
-        /* Main Content Wrapper */
-        .admin-content-wrapper {
-            margin-left: 260px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Topbar */
-        .admin-topbar {
-            height: 68px;
-            background: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 900;
-        }
-
-        .card-custom {
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            background: #ffffff;
-            box-shadow: 0 4px 15px -3px rgba(15, 23, 42, 0.04);
-        }
-
-        .btn-teal {
-            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-            color: #ffffff;
-            border: none;
-            font-weight: 600;
-            border-radius: 8px;
-        }
-
-        .btn-teal:hover {
-            background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
-            color: #ffffff;
-        }
-
-        @media (max-width: 991.98px) {
-            .admin-sidebar {
-                margin-left: -260px;
-            }
-            .admin-sidebar.show {
-                margin-left: 0;
-            }
-            .admin-content-wrapper {
-                margin-left: 0;
-            }
-        }
-    </style>
     @stack('styles')
 </head>
 <body>
-
-    <!-- Sidebar Admin -->
-    <aside class="admin-sidebar" id="adminSidebar">
-        <div class="admin-sidebar-brand">
-            <div class="rounded-3 bg-teal p-2 me-2 text-white bg-info bg-opacity-25" style="width: 38px; height: 38px; display:flex; align-items:center; justify-content:center;">
-                <i class="bi bi-shield-lock-fill text-info fs-5"></i>
-            </div>
+    <div class="workspace-shell">
+        <!-- ============================================== -->
+        <!-- DESKTOP FIXED SIDEBAR -->
+        <!-- ============================================== -->
+        <aside class="admin-sidebar" id="adminSidebar">
             <div>
-                <span class="text-white fw-bold d-block" style="letter-spacing: 0.5px;">ADMIN PPDB</span>
-                <small class="text-muted" style="font-size: 0.72rem;">SIAKAD GATEWAY</small>
-            </div>
-        </div>
-
-        <div class="py-3">
-            <small class="text-uppercase text-secondary fw-bold px-4 mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 1px;">Menu Utama</small>
-            <a href="{{ route('admin.ppdb.index') }}" class="admin-nav-link {{ request()->routeIs('admin.ppdb.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill"></i> Data Pendaftar PPDB
-            </a>
-            <a href="{{ route('home') }}" target="_blank" class="admin-nav-link">
-                <i class="bi bi-box-arrow-up-right"></i> Lihat Portal Publik
-            </a>
-        </div>
-
-        <div class="mt-auto p-4 border-top border-secondary border-opacity-25" style="position: absolute; bottom: 0; width: 100%;">
-            <div class="d-flex align-items-center mb-3">
-                <i class="bi bi-person-circle fs-3 text-warning me-2"></i>
-                <div class="overflow-hidden">
-                    <span class="text-white small fw-bold d-block text-truncate">{{ session('admin_user.username', 'Administrator') }}</span>
-                    <span class="badge bg-success bg-opacity-25 text-success small py-0">Online</span>
-                </div>
-            </div>
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill">
-                    <i class="bi bi-box-arrow-right me-1"></i> Keluar Admin
-                </button>
-            </form>
-        </div>
-    </aside>
-
-    <!-- Content Wrapper -->
-    <div class="admin-content-wrapper">
-        <!-- Topbar -->
-        <header class="admin-topbar">
-            <div class="d-flex align-items-center">
-                <button class="btn btn-light d-lg-none me-2" type="button" onclick="document.getElementById('adminSidebar').classList.toggle('show')">
-                    <i class="bi bi-list fs-5"></i>
-                </button>
-                <h5 class="fw-bold mb-0 text-dark">@yield('header_title', 'Manajemen Pendaftaran Siswa Baru')</h5>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">
-                    <i class="bi bi-calendar3 me-1"></i> {{ date('d M Y') }}
-                </span>
-                <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3" target="_blank">
-                    <i class="bi bi-globe me-1"></i> Web PPDB
+                <!-- Brand Header -->
+                <a href="{{ route('admin.ppdb.index') }}" class="sidebar-brand">
+                    <div class="sidebar-brand-mark">
+                        <i class="ph-bold ph-shield-check"></i>
+                    </div>
+                    <div>
+                        <span class="font-mono-meta small fw-bold text-dark d-block" style="letter-spacing: 0.04em;">PPDB ADMIN</span>
+                        <span class="text-secondary" style="font-size: 0.7rem;">PANEL OPERATOR</span>
+                    </div>
                 </a>
+
+                <!-- Operator Profile Card -->
+                <div class="sidebar-operator-card">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold small text-white" style="width: 28px; height: 28px; background-color: var(--text-main); font-size: 0.75rem;">
+                            {{ strtoupper(substr(session('admin_user.username', 'A'), 0, 1)) }}
+                        </div>
+                        <div class="overflow-hidden flex-grow-1">
+                            <span class="text-dark small fw-semibold d-block text-truncate">
+                                {{ session('admin_user.username', 'Administrator') }}
+                            </span>
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="d-inline-block rounded-circle" style="width: 6px; height: 6px; background-color: #346538;"></span>
+                                <span class="font-mono-meta text-secondary" style="font-size: 0.68rem;">ONLINE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Sections -->
+                <div class="mt-3">
+                    <span class="font-mono-meta text-secondary px-2 mb-1 d-block text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.06em;">MENU OPERATOR</span>
+                    <ul class="nav-sidebar">
+                        <li>
+                            <a class="nav-sidebar-link {{ request()->routeIs('admin.ppdb.*') ? 'active' : '' }}" href="{{ route('admin.ppdb.index') }}">
+                                <i class="ph-bold ph-users-three"></i>
+                                <span>Data Pendaftar PPDB</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-sidebar-link" href="{{ route('home') }}" target="_blank">
+                                <i class="ph-bold ph-arrow-square-out"></i>
+                                <span>Portal Siswa Publik</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </header>
 
-        <!-- Flash Messages -->
-        <div class="container-fluid px-4 mt-4">
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 d-flex align-items-center" role="alert">
-                    <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
-                    <div class="flex-grow-1">{{ session('success') }}</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
+            <!-- Sidebar Bottom Logout -->
+            <div class="pt-3 border-top" style="border-color: var(--border-light) !important;">
+                <form action="{{ route('admin.logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="nav-sidebar-link w-100 border-0 bg-transparent text-danger justify-content-start" style="cursor: pointer;">
+                        <i class="ph-bold ph-sign-out text-danger"></i>
+                        <span>Keluar Admin</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
 
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 d-flex align-items-center" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
-                    <div class="flex-grow-1">{{ session('error') }}</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <!-- ============================================== -->
+        <!-- MOBILE OFFCANVAS DRAWER -->
+        <!-- ============================================== -->
+        <div class="offcanvas offcanvas-start admin-drawer" tabindex="-1" id="adminMobileDrawer">
+            <div class="offcanvas-header pb-2 border-bottom" style="border-color: var(--border-light) !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="sidebar-brand-mark">
+                        <i class="ph-bold ph-shield-check"></i>
+                    </div>
+                    <span class="font-mono-meta fw-bold text-dark">PPDB ADMIN</span>
                 </div>
-            @endif
-
-            @if(session('warning'))
-                <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm rounded-3 d-flex align-items-center" role="alert">
-                    <i class="bi bi-exclamation-circle-fill fs-5 me-2 text-warning"></i>
-                    <div class="flex-grow-1">{{ session('warning') }}</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column justify-content-between px-0 py-3">
+                <div>
+                    <div class="sidebar-operator-card mx-2 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold small text-white" style="width: 28px; height: 28px; background-color: var(--text-main);">
+                                {{ strtoupper(substr(session('admin_user.username', 'A'), 0, 1)) }}
+                            </div>
+                            <span class="text-dark small fw-semibold text-truncate">{{ session('admin_user.username', 'Administrator') }}</span>
+                        </div>
+                    </div>
+                    <ul class="nav-sidebar px-2">
+                        <li>
+                            <a class="nav-sidebar-link {{ request()->routeIs('admin.ppdb.*') ? 'active' : '' }}" href="{{ route('admin.ppdb.index') }}">
+                                <i class="ph-bold ph-users-three"></i>
+                                <span>Data Pendaftar PPDB</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-sidebar-link" href="{{ route('home') }}" target="_blank">
+                                <i class="ph-bold ph-arrow-square-out"></i>
+                                <span>Portal Siswa Publik</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-            @endif
+                <div class="px-2 pt-3 border-top" style="border-color: var(--border-light) !important;">
+                    <form action="{{ route('admin.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-sidebar-link w-100 border-0 bg-transparent text-danger justify-content-start">
+                            <i class="ph-bold ph-sign-out text-danger"></i>
+                            <span>Keluar Admin</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <!-- Main Content Area -->
-        <main class="container-fluid px-4 py-3 flex-grow-1">
-            @yield('content')
-        </main>
+        <!-- ============================================== -->
+        <!-- MAIN WORKSPACE CONTENT -->
+        <!-- ============================================== -->
+        <div class="workspace-content">
+            <!-- Header Topbar -->
+            <header class="workspace-topbar">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-minimal-secondary d-lg-none py-1 px-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminMobileDrawer">
+                        <i class="ph-bold ph-list fs-5"></i>
+                    </button>
+                    <h5 class="font-serif-heading text-dark mb-0 fs-5">@yield('header_title', 'Manajemen Pendaftaran Siswa Baru')</h5>
+                </div>
 
-        <!-- Footer -->
-        <footer class="bg-white border-top py-3 px-4 text-muted small text-center text-md-start">
-            &copy; {{ date('Y') }} Sistem Informasi Akademik & PPDB Admin. Terhubung ke FastAPI Backend.
-        </footer>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="font-mono-meta small text-secondary p-1 px-2 bg-white rounded-1 border d-none d-sm-inline-flex align-items-center gap-1" style="border-color: var(--border-light) !important; font-size: 0.75rem;">
+                        <i class="ph-bold ph-calendar-blank"></i> {{ date('d M Y') }}
+                    </span>
+                    <a href="{{ route('home') }}" class="btn-minimal-secondary py-1 px-2" style="font-size: 0.78rem; min-height: 32px;" target="_blank">
+                        <i class="ph-bold ph-arrow-square-out"></i> Web Publik
+                    </a>
+                </div>
+            </header>
+
+            <!-- Alerts / Notifications -->
+            <div class="container-fluid px-3 px-lg-4 mt-3">
+                @if(session('success'))
+                    <div class="alert-document alert-success alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                        <i class="ph-bold ph-check-circle fs-5 me-2 flex-shrink-0 text-success"></i>
+                        <div class="flex-grow-1">{{ session('success') }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="alert-document alert-danger alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                        <i class="ph-bold ph-warning-circle fs-5 me-2 flex-shrink-0 text-danger"></i>
+                        <div class="flex-grow-1">{{ session('error') }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                    </div>
+                @endif
+
+                @if(session('warning'))
+                    <div class="alert-document alert-warning alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                        <i class="ph-bold ph-info fs-5 me-2 flex-shrink-0" style="color: #956400;"></i>
+                        <div class="flex-grow-1">{{ session('warning') }}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Page Body -->
+            <main class="container-fluid px-3 px-lg-4 py-2 flex-grow-1">
+                @yield('content')
+            </main>
+
+            <!-- Workspace Footer -->
+            <footer class="py-3 px-3 px-lg-4 border-top text-secondary small" style="border-color: var(--border-light) !important; font-size: 0.78rem;">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <span>&copy; {{ date('Y') }} Portal PPDB Online. Panel Administrasi Pendaftaran Siswa Baru.</span>
+                    <span class="font-mono-meta" style="font-size: 0.72rem;">SINKRONISASI: AKTIF</span>
+                </div>
+            </footer>
+        </div>
     </div>
 
     <!-- Bootstrap 5.3 JS Bundle -->
