@@ -956,6 +956,27 @@ kbd, .kbd-key {
     flex-shrink: 0;
 }
 
+/* Hide auth buttons on mobile — they live in the mobile drawer instead */
+.lp-nav-actions .lp-btn-login,
+.lp-nav-actions .lp-btn-primary {
+    display: none;
+}
+
+@media (min-width: 640px) {
+    /* Show login button on tablets */
+    .lp-nav-actions .lp-btn-login {
+        display: inline-flex;
+    }
+}
+
+@media (min-width: 1024px) {
+    /* Show both login + register buttons on desktop */
+    .lp-nav-actions .lp-btn-login,
+    .lp-nav-actions .lp-btn-primary {
+        display: inline-flex;
+    }
+}
+
 .lp-btn-login {
     display: inline-flex;
     align-items: center;
