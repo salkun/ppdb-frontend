@@ -24,7 +24,7 @@
                     </span>
                 </div>
                 <h1 class="lp-auth-title">Masuk ke Portal Murid</h1>
-                <p class="lp-auth-subtitle">Gunakan 16 digit NIK atau alamat email terdaftar beserta kata sandi akun Anda.</p>
+                <p class="lp-auth-subtitle">Masukkan alamat email dan kata sandi akun Anda untuk melanjutkan pendaftaran.</p>
             </div>
 
             @if(session('error'))
@@ -44,24 +44,24 @@
             <form action="{{ route('login.submit') }}" method="POST">
                 @csrf
 
-                <!-- NIK / Email Input -->
+                <!-- Email Input -->
                 <div class="lp-input-group">
-                    <label for="nik" class="lp-input-label">
-                        NIK Siswa atau Alamat Email <span style="color: var(--lp-red);">*</span>
+                    <label for="email" class="lp-input-label">
+                        Alamat Email Terdaftar <span style="color: var(--lp-red);">*</span>
                     </label>
                     <div class="lp-input-wrapper">
-                        <span class="material-symbols-outlined lp-input-icon">badge</span>
-                        <input type="text" 
-                               class="lp-input-field @error('nik') is-invalid @enderror" 
-                               id="nik" 
-                               name="nik" 
-                               value="{{ old('nik') }}" 
-                               placeholder="16 digit NIK atau email terdaftar" 
-                               inputmode="text"
+                        <span class="material-symbols-outlined lp-input-icon">alternate_email</span>
+                        <input type="email" 
+                               class="lp-input-field @error('email') is-invalid @enderror" 
+                               id="email" 
+                               name="email" 
+                               value="{{ old('email') }}" 
+                               placeholder="contoh: wali@gmail.com" 
+                               inputmode="email"
                                required 
                                autofocus>
                     </div>
-                    @error('nik')
+                    @error('email')
                         <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">
                             {{ $message }}
                         </div>

@@ -37,6 +37,8 @@ Route::middleware(['check.api.token'])->group(function () {
     Route::post('/ppdb/upload-payment', [PpdbController::class, 'uploadPayment'])->name('ppdb.upload-payment');
     Route::get('/ppdb/form', [PpdbController::class, 'showForm'])->name('ppdb.form');
     Route::post('/ppdb/form', [PpdbController::class, 'submitForm'])->name('ppdb.form.submit');
+    Route::get('/ppdb/test-card', [PpdbController::class, 'showTestCard'])->name('ppdb.test-card');
+    Route::get('/ppdb/upload-berkas', [PpdbController::class, 'showUpload'])->name('ppdb.upload');
 });
 
 // ==========================================
@@ -51,8 +53,28 @@ Route::prefix('admin')->group(function () {
     Route::middleware(['check.admin.token'])->group(function () {
         Route::post('/logout', [AdminPpdbController::class, 'logout'])->name('admin.logout');
         
-        // Dashboard & Monitoring Pendaftar
+        // Dashboard Utama
         Route::get('/ppdb', [AdminPpdbController::class, 'index'])->name('admin.ppdb.index');
+        Route::get('/ppdb/dashboard', [AdminPpdbController::class, 'index'])->name('admin.ppdb.dashboard');
+        
+        // Modul Data Siswa
+        Route::get('/ppdb/students', [AdminPpdbController::class, 'students'])->name('admin.ppdb.students');
+        
+        // Modul Data User Akun
+        Route::get('/ppdb/users', [AdminPpdbController::class, 'users'])->name('admin.ppdb.users');
+        Route::post('/ppdb/users', [AdminPpdbController::class, 'storeUser'])->name('admin.ppdb.users.store');
+        Route::get('/ppdb/users/template', [AdminPpdbController::class, 'downloadUserTemplate'])->name('admin.ppdb.users.template');
+        Route::post('/ppdb/users/import', [AdminPpdbController::class, 'importUsers'])->name('admin.ppdb.users.import');
+        Route::put('/ppdb/users/{id}', [AdminPpdbController::class, 'updateUser'])->name('admin.ppdb.users.update');
+        Route::delete('/ppdb/users/{id}', [AdminPpdbController::class, 'destroyUser'])->name('admin.ppdb.users.destroy');
+        
+        // Modul Data Berkas
+        Route::get('/ppdb/documents', [AdminPpdbController::class, 'documents'])->name('admin.ppdb.documents');
+        
+        // Modul Verifikasi Pembayaran
+        Route::get('/ppdb/payments', [AdminPpdbController::class, 'payments'])->name('admin.ppdb.payments');
+        
+        // Ekspor & Dossier
         Route::get('/ppdb/export', [AdminPpdbController::class, 'export'])->name('admin.ppdb.export');
         Route::get('/ppdb/registrations/{id}', [AdminPpdbController::class, 'show'])->name('admin.ppdb.show');
         

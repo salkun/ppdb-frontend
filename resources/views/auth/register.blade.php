@@ -37,29 +37,27 @@
             <form action="{{ route('register.submit') }}" method="POST">
                 @csrf
 
-                <!-- NIK Calon Siswa -->
+                <!-- Email Aktif -->
                 <div class="lp-input-group">
-                    <label for="nik" class="lp-input-label">
-                        Nomor Induk Kependudukan (NIK) <span style="color: var(--lp-red);">*</span>
+                    <label for="email" class="lp-input-label">
+                        Alamat Email Aktif <span style="color: var(--lp-red);">*</span>
                     </label>
                     <div class="lp-input-wrapper">
-                        <span class="material-symbols-outlined lp-input-icon">badge</span>
-                        <input type="text" 
-                               class="lp-input-field @error('nik') is-invalid @enderror" 
-                               id="nik" 
-                               name="nik" 
-                               value="{{ old('nik') }}" 
-                               placeholder="16 digit NIK sesuai Kartu Keluarga" 
-                               maxlength="16" 
-                               inputmode="numeric"
-                               pattern="\d{16}"
+                        <span class="material-symbols-outlined lp-input-icon">alternate_email</span>
+                        <input type="email" 
+                               class="lp-input-field @error('email') is-invalid @enderror" 
+                               id="email" 
+                               name="email" 
+                               value="{{ old('email') }}" 
+                               placeholder="contoh: wali@gmail.com" 
+                               inputmode="email"
                                required 
                                autofocus>
                     </div>
                     <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
-                        NIK digunakan sebagai identitas utama untuk login portal.
+                        Email digunakan untuk login portal, verifikasi, dan pengumuman seleksi.
                     </div>
-                    @error('nik')
+                    @error('email')
                         <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
                     @enderror
                 </div>
@@ -80,30 +78,6 @@
                                required>
                     </div>
                     @error('full_name')
-                        <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Email Aktif -->
-                <div class="lp-input-group">
-                    <label for="email" class="lp-input-label">
-                        Alamat Email Aktif <span style="color: var(--lp-red);">*</span>
-                    </label>
-                    <div class="lp-input-wrapper">
-                        <span class="material-symbols-outlined lp-input-icon">alternate_email</span>
-                        <input type="email" 
-                               class="lp-input-field @error('email') is-invalid @enderror" 
-                               id="email" 
-                               name="email" 
-                               value="{{ old('email') }}" 
-                               placeholder="contoh: wali@gmail.com" 
-                               inputmode="email"
-                               required>
-                    </div>
-                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
-                        Untuk pengiriman kode verifikasi, jadwal observasi, dan pengumuman seleksi.
-                    </div>
-                    @error('email')
                         <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
                     @enderror
                 </div>

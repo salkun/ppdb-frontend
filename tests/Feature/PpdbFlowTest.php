@@ -40,6 +40,30 @@ class PpdbFlowTest extends TestCase
     }
 
     /**
+     * Test register sends email, full_name, and password without NIK.
+     */
+    public function test_register_creates_account_and_redirects_to_login(): void
+    {
+        Http::fake([
+            '*/api/ppdb/register-account' => Http::response([
+                'id' => 'mock-uuid-1234',
+                'email' => 'ahmad@example.com',
+                'full_name' => 'Ahmad Fauzi',
+            ], 201),
+        ]);
+
+        $response = $this->post('/register', [
+            'email' => 'ahmad@example.com',
+            'full_name' => 'Ahmad Fauzi',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+
+        $response->assertRedirect('/login');
+        $response->assertSessionHas('success');
+    }
+
+    /**
      * Test login sets session token and redirects to dashboard.
      */
     public function test_successful_login_stores_token_in_session(): void
@@ -49,20 +73,20 @@ class PpdbFlowTest extends TestCase
                 'access_token' => 'mocked-jwt-token-xyz',
                 'token_type' => 'bearer',
                 'account_id' => 'mock-uuid-1234',
-                'nik' => '3201012345670001',
                 'full_name' => 'Ahmad Fauzi',
                 'email' => 'ahmad@example.com',
             ], 200),
         ]);
 
         $response = $this->post('/login', [
-            'nik' => '3201012345670001',
+            'email' => 'ahmad@example.com',
             'password' => 'secret123',
         ]);
 
         $response->assertRedirect('/dashboard');
         $this->assertEquals('mocked-jwt-token-xyz', session('api_token'));
         $this->assertEquals('Ahmad Fauzi', session('full_name'));
+        $this->assertEquals('ahmad@example.com', session('email'));
     }
 
     /**
@@ -85,14 +109,14 @@ class PpdbFlowTest extends TestCase
         $response = $this->withSession([
             'api_token' => 'mocked-jwt-token-xyz',
             'account_id' => 'mock-uuid-1234',
-            'nik' => '3201012345670001',
             'full_name' => 'Ahmad Fauzi',
             'email' => 'ahmad@example.com',
         ])->get('/dashboard');
 
         $response->assertStatus(200);
         $response->assertSee('BELUM BAYAR');
-        $response->assertSee('3201012345670001');
+        $response->assertSee('Rp 400.000');
+        $response->assertSee('ahmad@example.com');
     }
 
     /**
@@ -133,7 +157,6 @@ class PpdbFlowTest extends TestCase
 
         $response = $this->withSession([
             'api_token' => 'mocked-jwt-token-xyz',
-            'nik' => '3201012345670001',
             'full_name' => 'Ahmad Fauzi',
             'email' => 'ahmad@example.com',
         ])->get('/ppdb/form');
@@ -160,6 +183,9 @@ class PpdbFlowTest extends TestCase
             'full_name' => 'Ahmad Fauzi Rahman',
             'first_name' => 'Ahmad',
             'last_name' => 'Fauzi Rahman',
+            'major' => 'reguler',
+            'school_origin' => 'SMP Negeri 1 Purwakarta',
+            'school_origin_address' => 'Jl. Veteran No. 12, Purwakarta',
 
             // Tahap 2
             'family_card_number' => '3201010000000001',
@@ -247,5 +273,88 @@ class PpdbFlowTest extends TestCase
 
         $response->assertRedirect('/login');
         $this->assertNull(session('api_token'));
+    }
+
+    /**
+     * Test test-card is locked when payment is unpaid.
+     */
+    public function test_test_card_is_locked_if_unpaid(): void
+    {
+        Http::fake([
+            '*/api/ppdb/my-registration' => Http::response([
+                'id' => 'mock-reg-id-999',
+                'payment_status' => 'unpaid',
+                'registration_status' => 'pending',
+                'form_data' => null,
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'api_token' => 'mocked-jwt-token-xyz',
+        ])->get('/ppdb/test-card');
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('warning');
+    }
+
+    /**
+     * Test test-card is locked when form data is empty even if paid.
+     */
+    public function test_test_card_is_locked_if_form_is_empty(): void
+    {
+        Http::fake([
+            '*/api/ppdb/my-registration' => Http::response([
+                'id' => 'mock-reg-id-999',
+                'payment_status' => 'paid',
+                'registration_status' => 'pending',
+                'form_data' => null,
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'api_token' => 'mocked-jwt-token-xyz',
+        ])->get('/ppdb/test-card');
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('warning');
+    }
+
+    /**
+     * Test test-card renders properly when paid and form is filled.
+     */
+    public function test_test_card_renders_when_paid_and_form_filled(): void
+    {
+        Http::fake([
+            '*/api/ppdb/my-registration' => Http::response([
+                'id' => 'REG-2026-001',
+                'payment_status' => 'paid',
+                'registration_status' => 'pending',
+                'form_data' => [
+                    'full_name' => 'Ahmad Fauzi',
+                    'nik' => '3201012345670001',
+                    'nisn' => '0051234567',
+                    'school_origin' => 'SMP Negeri 1',
+                    'major' => 'reguler',
+                    'identity' => [
+                        'gender' => 'Laki-laki',
+                        'place_of_birth' => 'Purwakarta',
+                        'date_of_birth' => '2008-05-14',
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'api_token' => 'mocked-jwt-token-xyz',
+            'full_name' => 'Ahmad Fauzi',
+            'email' => 'ahmad@example.com',
+        ])->get('/ppdb/test-card');
+
+        $response->assertStatus(200);
+        $response->assertSee('Kartu Tes Pendaftaran');
+        $response->assertSee('Ahmad Fauzi');
+        $response->assertSee('REG-2026-001');
+        $response->assertSee('3201012345670001');
+        $response->assertSee('Reguler');
     }
 }

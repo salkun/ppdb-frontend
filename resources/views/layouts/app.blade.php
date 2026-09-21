@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>@yield('title', 'Portal PMB Online') — Sistem Penerimaan Murid Baru</title>
+    <title>@yield('title', 'Portal SPMB Online') — Sistem Penerimaan Murid Baru</title>
 
     <!-- Google Fonts: Geist Sans, Geist Mono, Newsreader (Editorial Serif) + Landing Page Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,55 +29,57 @@
 
     @if(session()->has('api_token'))
         <!-- ======================================================== -->
-        <!-- AUTHENTICATED STUDENT PORTAL (SIDEBAR WORKSPACE LAYOUT)  -->
+        <!-- AUTHENTICATED STUDENT PORTAL (LP-THEMED DASHBOARD)      -->
         <!-- ======================================================== -->
-        <div class="workspace-shell">
-            <!-- 1. Permanent Desktop Sidebar -->
-            <aside class="app-sidebar">
+        <div class="db-shell">
+            <!-- 1. Desktop Sidebar (LP Theme) -->
+            <aside class="db-sidebar">
                 <div>
-                    <!-- Brand Identifier -->
-                    <a class="sidebar-brand" href="{{ route('dashboard') }}">
-                        <div class="sidebar-brand-mark">
-                            <i class="ph-bold ph-graduation-cap"></i>
+                    <!-- Brand -->
+                    <a class="db-sidebar-brand" href="{{ route('dashboard') }}">
+                        <div class="db-sidebar-brand-icon">
+                            <span class="material-symbols-outlined" style="font-size:24px;">school</span>
                         </div>
                         <div>
-                            <span class="d-block fw-bold text-dark lh-1" style="font-size: 0.95rem; letter-spacing: -0.01em;">PPDB Online</span>
-                            <span class="font-mono-meta text-secondary" style="font-size: 0.65rem; letter-spacing: 0.04em;">PORTAL SISWA</span>
+                            <span class="db-sidebar-brand-text">PPDB Online</span>
+                            <div class="db-sidebar-brand-sub">
+                                <span class="db-sidebar-brand-dot"></span>
+                                <span>PORTAL SISWA {{ date('Y') }}/{{ date('Y') + 1 }}</span>
+                            </div>
                         </div>
                     </a>
 
-                    <!-- Student Mini Profile Card -->
-                    <div class="sidebar-profile-card">
-                        <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="font-mono-meta small text-secondary" style="font-size: 0.68rem;">CALON SISWA</span>
-                            <span class="badge-pastel badge-pastel-green" style="font-size: 0.62rem; padding: 0.15rem 0.45rem;">AKTIF</span>
-                        </div>
-                        <strong class="text-dark d-block text-truncate small fw-semibold mb-1">{{ session('full_name', 'Calon Siswa') }}</strong>
-                        <div class="d-flex align-items-center justify-content-between">
-                            <span class="text-secondary small" style="font-size: 0.72rem;">NIK:</span>
-                            <kbd class="kbd-key" style="font-size: 0.7rem;">{{ session('nik', '-') }}</kbd>
-                        </div>
-                    </div>
-
-                    <!-- Vertical Navigation Menu -->
-                    <div class="mb-2">
-                        <span class="font-mono-meta text-secondary px-2 mb-1 d-block text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.06em;">MENU UTAMA</span>
-                        <ul class="nav-sidebar">
+                    <!-- Navigation -->
+                    <div style="margin-top: 1.25rem;">
+                        <div class="db-sidebar-nav-label">Menu Utama</div>
+                        <ul class="db-sidebar-nav">
                             <li>
-                                <a class="nav-sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                                    <i class="ph-bold ph-squares-four"></i>
-                                    <span>Dashboard & Status</span>
+                                <a class="db-sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                                    <span class="material-symbols-outlined">dashboard</span>
+                                    <span>Dashboard</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="nav-sidebar-link {{ request()->routeIs('ppdb.form') ? 'active' : '' }}" href="{{ route('ppdb.form') }}">
-                                    <i class="ph-bold ph-file-text"></i>
+                                <a class="db-sidebar-link {{ request()->routeIs('ppdb.form') ? 'active' : '' }}" href="{{ route('ppdb.form') }}">
+                                    <span class="material-symbols-outlined">edit_note</span>
                                     <span>Formulir Pendaftaran</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="nav-sidebar-link" href="{{ route('home') }}">
-                                    <i class="ph-bold ph-house"></i>
+                                <a class="db-sidebar-link {{ request()->routeIs('ppdb.upload') ? 'active' : '' }}" href="{{ route('ppdb.upload') }}">
+                                    <span class="material-symbols-outlined">cloud_upload</span>
+                                    <span>Upload Berkas</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="db-sidebar-link {{ request()->routeIs('ppdb.test-card') ? 'active' : '' }}" href="{{ route('ppdb.test-card') }}">
+                                    <span class="material-symbols-outlined">badge</span>
+                                    <span>Kartu Tes</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="db-sidebar-link" href="{{ route('home') }}">
+                                    <span class="material-symbols-outlined">info</span>
                                     <span>Informasi & Alur</span>
                                 </a>
                             </li>
@@ -85,16 +87,16 @@
                     </div>
                 </div>
 
-                <!-- Sidebar Footer: Help & Logout -->
-                <div class="sidebar-footer">
-                    <a href="https://wa.me/" target="_blank" class="nav-sidebar-link mb-1 text-decoration-none" style="font-size: 0.8rem;">
-                        <i class="ph-bold ph-chat-circle-dots"></i>
-                        <span>Bantuan Panitia PPDB</span>
+                <!-- Footer -->
+                <div class="db-sidebar-footer">
+                    <a href="https://wa.me/6287821055283" target="_blank" rel="noopener" class="db-sidebar-link">
+                        <span class="material-symbols-outlined">chat</span>
+                        <span>Bantuan WhatsApp</span>
                     </a>
-                    <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    <form action="{{ route('logout') }}" method="POST" style="margin:0;">
                         @csrf
-                        <button type="submit" class="nav-sidebar-link w-100 border-0 bg-transparent text-danger">
-                            <i class="ph-bold ph-sign-out text-danger"></i>
+                        <button type="submit" class="db-sidebar-link text-danger" style="width:100%;border:none;background:none;cursor:pointer;">
+                            <span class="material-symbols-outlined">logout</span>
                             <span>Keluar Sesi</span>
                         </button>
                     </form>
@@ -102,152 +104,130 @@
             </aside>
 
             <!-- 2. Mobile Offcanvas Drawer -->
-            <div class="offcanvas offcanvas-start offcanvas-sidebar p-3" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
-                <div class="offcanvas-header pb-3 border-bottom px-1" style="border-color: var(--border-light) !important;">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="sidebar-brand-mark">
-                            <i class="ph-bold ph-graduation-cap"></i>
+            <div class="offcanvas offcanvas-start p-3" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="width:300px;background:#fff;border-right:1px solid var(--lp-surface-container);font-family:var(--font-landing);">
+                <div class="offcanvas-header pb-3 border-bottom px-1" style="border-color:var(--lp-surface-container)!important;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="db-sidebar-brand-icon" style="width:38px;height:38px;">
+                            <span class="material-symbols-outlined" style="font-size:20px;">school</span>
                         </div>
                         <div>
-                            <span class="d-block fw-bold text-dark lh-1" style="font-size: 0.95rem;">PPDB Online</span>
-                            <span class="font-mono-meta text-secondary" style="font-size: 0.65rem;">PORTAL SISWA</span>
+                            <span style="font-weight:700;font-size:15px;color:var(--lp-on-surface);display:block;">PPDB Online</span>
+                            <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">Portal Siswa {{ date('Y') }}/{{ date('Y') + 1 }}</span>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup"></button>
                 </div>
-
                 <div class="offcanvas-body d-flex flex-column justify-content-between px-1 py-3">
                     <div>
-                        <!-- Profile Card Mobile -->
-                        <div class="sidebar-profile-card">
-                            <div class="d-flex align-items-center justify-content-between mb-1">
-                                <span class="font-mono-meta small text-secondary" style="font-size: 0.68rem;">CALON SISWA</span>
-                                <span class="badge-pastel badge-pastel-green" style="font-size: 0.62rem; padding: 0.15rem 0.45rem;">AKTIF</span>
-                            </div>
-                            <strong class="text-dark d-block text-truncate small fw-semibold mb-1">{{ session('full_name', 'Calon Siswa') }}</strong>
-                            <div class="d-flex align-items-center justify-content-between">
-                                <span class="text-secondary small" style="font-size: 0.72rem;">NIK:</span>
-                                <kbd class="kbd-key" style="font-size: 0.7rem;">{{ session('nik', '-') }}</kbd>
-                            </div>
-                        </div>
-
-                        <!-- Menu Items Mobile -->
-                        <ul class="nav-sidebar">
-                            <li>
-                                <a class="nav-sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                                    <i class="ph-bold ph-squares-four"></i>
-                                    <span>Dashboard & Status</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-sidebar-link {{ request()->routeIs('ppdb.form') ? 'active' : '' }}" href="{{ route('ppdb.form') }}">
-                                    <i class="ph-bold ph-file-text"></i>
-                                    <span>Formulir Pendaftaran</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="nav-sidebar-link" href="{{ route('home') }}">
-                                    <i class="ph-bold ph-house"></i>
-                                    <span>Informasi & Alur</span>
-                                </a>
-                            </li>
+                        <ul class="db-sidebar-nav">
+                            <li><a class="db-sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
+                            <li><a class="db-sidebar-link {{ request()->routeIs('ppdb.form') ? 'active' : '' }}" href="{{ route('ppdb.form') }}"><span class="material-symbols-outlined">edit_note</span><span>Formulir Pendaftaran</span></a></li>
+                            <li><a class="db-sidebar-link {{ request()->routeIs('ppdb.upload') ? 'active' : '' }}" href="{{ route('ppdb.upload') }}"><span class="material-symbols-outlined">cloud_upload</span><span>Upload Berkas</span></a></li>
+                            <li><a class="db-sidebar-link {{ request()->routeIs('ppdb.test-card') ? 'active' : '' }}" href="{{ route('ppdb.test-card') }}"><span class="material-symbols-outlined">badge</span><span>Kartu Tes</span></a></li>
+                            <li><a class="db-sidebar-link" href="{{ route('home') }}"><span class="material-symbols-outlined">info</span><span>Informasi & Alur</span></a></li>
                         </ul>
                     </div>
-
-                    <!-- Footer Mobile Drawer -->
-                    <div class="sidebar-footer">
-                        <a href="https://wa.me/" target="_blank" class="nav-sidebar-link mb-1 text-decoration-none">
-                            <i class="ph-bold ph-chat-circle-dots"></i>
-                            <span>Bantuan Panitia PPDB</span>
-                        </a>
-                        <form action="{{ route('logout') }}" method="POST" class="m-0">
-                            @csrf
-                            <button type="submit" class="nav-sidebar-link w-100 border-0 bg-transparent text-danger">
-                                <i class="ph-bold ph-sign-out text-danger"></i>
-                                <span>Keluar Sesi</span>
-                            </button>
+                    <div class="db-sidebar-footer">
+                        <a href="https://wa.me/6287821055283" target="_blank" rel="noopener" class="db-sidebar-link"><span class="material-symbols-outlined">chat</span><span>Bantuan WhatsApp</span></a>
+                        <form action="{{ route('logout') }}" method="POST" style="margin:0;">@csrf
+                            <button type="submit" class="db-sidebar-link text-danger" style="width:100%;border:none;background:none;cursor:pointer;"><span class="material-symbols-outlined">logout</span><span>Keluar Sesi</span></button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. Main Viewport & Workspace Canvas -->
-            <div class="app-main-viewport">
-                <!-- Topbar Context Bar -->
-                <header class="app-topbar">
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- Mobile Hamburger Button (< 992px) -->
-                        <button class="btn btn-minimal-secondary d-lg-none py-1 px-2 border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-                            <i class="ph-bold ph-list fs-5 text-dark"></i>
+            <!-- 3. Main Viewport -->
+            <div class="db-viewport">
+                <!-- Topbar -->
+                <header class="db-topbar">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <button class="d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" style="background:none;border:1px solid var(--lp-surface-container);border-radius:10px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;">
+                            <span class="material-symbols-outlined" style="font-size:22px;color:var(--lp-on-surface);">menu</span>
                         </button>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="font-mono-meta small text-secondary d-none d-sm-inline">PORTAL /</span>
-                            <span class="fw-semibold text-dark small">@yield('title', 'Portal Siswa')</span>
-                        </div>
+                        <span class="db-topbar-breadcrumb d-none d-sm-inline">Portal /</span>
+                        <span class="db-topbar-title">@yield('title', 'Dashboard')</span>
                     </div>
-
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="badge-pastel badge-pastel-neutral d-none d-sm-inline-flex">
-                            <i class="ph-bold ph-check"></i> SINKRON
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span class="db-badge db-badge-green d-none d-sm-inline-flex" style="font-size:10px;">
+                            <span class="material-symbols-outlined" style="font-size:14px;">check_circle</span> ONLINE
                         </span>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white font-mono-meta small fw-bold" style="width: 30px; height: 30px; background-color: var(--text-main); font-size: 0.75rem;">
-                                {{ strtoupper(substr(session('full_name', 'S'), 0, 1)) }}
-                            </div>
-                            <span class="small fw-semibold text-dark d-none d-md-inline text-truncate" style="max-width: 140px;">
-                                {{ session('full_name', 'Siswa') }}
-                            </span>
+                        <div class="db-topbar-avatar">
+                            {{ strtoupper(substr(session('full_name', 'S'), 0, 1)) }}
                         </div>
+                        <span style="font-size:13px;font-weight:600;color:var(--lp-on-surface);" class="d-none d-md-inline">{{ session('full_name', 'Siswa') }}</span>
                     </div>
                 </header>
 
-                <!-- Flash Notification Container -->
-                <div class="container-fluid px-3 px-md-4 pt-3">
+                <!-- Flash Notifications -->
+                <div style="max-width:1100px;width:100%;margin:0 auto;padding:0.75rem 1.5rem 0;">
                     @if(session('success'))
-                        <div class="alert-document alert-success alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
-                            <i class="ph-bold ph-check-circle fs-5 me-2 flex-shrink-0"></i>
-                            <div class="flex-grow-1">{{ session('success') }}</div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                        <div style="background:var(--lp-green-light);border:1px solid rgba(22,163,74,0.3);border-radius:12px;padding:0.85rem 1.25rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--lp-green);font-weight:600;" class="alert alert-dismissible fade show" role="alert">
+                            <span class="material-symbols-outlined" style="font-size:20px;">check_circle</span>
+                            <span style="flex:1;">{{ session('success') }}</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup" style="font-size:10px;"></button>
                         </div>
                     @endif
-
                     @if(session('error'))
-                        <div class="alert-document alert-danger alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
-                            <i class="ph-bold ph-warning-circle fs-5 me-2 flex-shrink-0"></i>
-                            <div class="flex-grow-1">{{ session('error') }}</div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                        <div style="background:var(--lp-red-light);border:1px solid rgba(220,38,38,0.3);border-radius:12px;padding:0.85rem 1.25rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--lp-red);font-weight:600;" class="alert alert-dismissible fade show" role="alert">
+                            <span class="material-symbols-outlined" style="font-size:20px;">error</span>
+                            <span style="flex:1;">{{ session('error') }}</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup" style="font-size:10px;"></button>
                         </div>
                     @endif
-
                     @if(session('warning'))
-                        <div class="alert-document alert-warning alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
-                            <i class="ph-bold ph-warning fs-5 me-2 flex-shrink-0"></i>
-                            <div class="flex-grow-1">{{ session('warning') }}</div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                        <div style="background:var(--lp-yellow-light);border:1px solid rgba(234,179,8,0.4);border-radius:12px;padding:0.85rem 1.25rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--lp-yellow-dark);font-weight:600;" class="alert alert-dismissible fade show" role="alert">
+                            <span class="material-symbols-outlined" style="font-size:20px;">warning</span>
+                            <span style="flex:1;">{{ session('warning') }}</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup" style="font-size:10px;"></button>
                         </div>
                     @endif
-
                     @if($errors->any())
-                        <div class="alert-document alert-danger alert-dismissible fade show mb-3" role="alert">
-                            <div class="d-flex align-items-center mb-1">
-                                <i class="ph-bold ph-x-circle fs-5 me-2"></i>
-                                <strong>Periksa kembali beberapa isian berikut:</strong>
+                        <div style="background:var(--lp-red-light);border:1px solid rgba(220,38,38,0.3);border-radius:12px;padding:0.85rem 1.25rem;margin-bottom:0.75rem;font-size:14px;color:var(--lp-red);" class="alert alert-dismissible fade show" role="alert">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-weight:700;">
+                                <span class="material-symbols-outlined" style="font-size:20px;">error</span>
+                                Periksa kembali isian berikut:
                             </div>
-                            <ul class="mb-0 ps-3 small">
+                            <ul style="margin:0;padding-left:1.25rem;font-weight:500;">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup" style="font-size:10px;"></button>
                         </div>
                     @endif
                 </div>
 
-                <!-- Main Content Yield -->
-                <main class="flex-grow-1 px-3 px-md-4 py-2">
+                <!-- Main Content -->
+                <main style="flex:1;font-family:var(--font-landing);">
                     @yield('content')
                 </main>
             </div>
+
+            <!-- 4. Mobile Bottom Tab Navigation -->
+            <nav class="db-mobile-tab-bar">
+                <div class="db-mobile-tab-inner">
+                    <a href="{{ route('dashboard') }}" class="db-mobile-tab {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ route('ppdb.form') }}" class="db-mobile-tab {{ request()->routeIs('ppdb.form') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined">edit_note</span>
+                        <span>Formulir</span>
+                    </a>
+                    <a href="{{ route('ppdb.upload') }}" class="db-mobile-tab {{ request()->routeIs('ppdb.upload') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined">cloud_upload</span>
+                        <span>Berkas</span>
+                    </a>
+                    <a href="{{ route('ppdb.test-card') }}" class="db-mobile-tab {{ request()->routeIs('ppdb.test-card') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined">badge</span>
+                        <span>Kartu Tes</span>
+                    </a>
+                    <a href="{{ route('home') }}" class="db-mobile-tab">
+                        <span class="material-symbols-outlined">info</span>
+                        <span>Info</span>
+                    </a>
+                </div>
+            </nav>
         </div>
     @else
         <!-- ======================================================== -->

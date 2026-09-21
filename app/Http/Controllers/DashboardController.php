@@ -31,7 +31,6 @@ class DashboardController extends Controller
                     'registration' => $registration,
                     'user' => [
                         'account_id' => session('account_id'),
-                        'nik' => session('nik'),
                         'full_name' => session('full_name'),
                         'email' => session('email'),
                     ],
@@ -45,7 +44,6 @@ class DashboardController extends Controller
                 'error' => $errorMessage,
                 'user' => [
                     'account_id' => session('account_id'),
-                    'nik' => session('nik'),
                     'full_name' => session('full_name'),
                     'email' => session('email'),
                 ],
@@ -59,7 +57,6 @@ class DashboardController extends Controller
                 'error' => 'Koneksi ke backend bermasalah: ' . $e->getMessage(),
                 'user' => [
                     'account_id' => session('account_id'),
-                    'nik' => session('nik'),
                     'full_name' => session('full_name'),
                     'email' => session('email'),
                 ],

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\UploadedFile;
 
 class AdminPpdbTest extends TestCase
 {
@@ -14,7 +15,8 @@ class AdminPpdbTest extends TestCase
     {
         $response = $this->get('/admin/login');
         $response->assertStatus(200);
-        $response->assertSee('Admin Portal PPDB');
+        $response->assertSee('SMPS2 Al-Muhajirin');
+        $response->assertSee('panitia PPDB');
     }
 
     /**
@@ -267,5 +269,371 @@ class AdminPpdbTest extends TestCase
         $response->assertSee('D1 / D2 / D3');
         $response->assertSee('Siti Aminah');
         $response->assertSee('siti.aminah@example.com');
+    }
+
+    /**
+     * Test admin students module renders.
+     */
+    public function test_admin_students_module_renders(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations*' => Http::response([
+                [
+                    'id' => 'reg-uuid-101',
+                    'payment_status' => 'paid',
+                    'registration_status' => 'pending',
+                    'account' => [
+                        'nik' => '3201012345670001',
+                        'full_name' => 'Ahmad Fauzi',
+                        'email' => 'ahmad@example.com',
+                    ],
+                    'form_data' => [
+                        'major' => 'tahfidz',
+                        'school_origin' => 'SD IT Al-Muhajirin',
+                    ],
+                ]
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb/students');
+
+        $response->assertStatus(200);
+        $response->assertSee('Ahmad Fauzi');
+        $response->assertSee('tahfidz');
+    }
+
+    /**
+     * Test admin users module renders.
+     */
+    public function test_admin_users_module_renders(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations*' => Http::response([
+                [
+                    'id' => 'reg-uuid-101',
+                    'account_id' => 'acc-101',
+                    'payment_status' => 'paid',
+                    'registration_status' => 'pending',
+                    'account' => [
+                        'nik' => '3201012345670001',
+                        'full_name' => 'Ahmad Fauzi',
+                        'email' => 'ahmad@example.com',
+                        'phone' => '081234567890',
+                    ],
+                    'form_data' => null,
+                ]
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb/users');
+
+        $response->assertStatus(200);
+        $response->assertSee('Ahmad Fauzi');
+        $response->assertSee('ahmad@example.com');
+    }
+
+    /**
+     * Test admin documents module renders.
+     */
+    public function test_admin_documents_module_renders(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations*' => Http::response([
+                [
+                    'id' => 'reg-uuid-101',
+                    'payment_status' => 'paid',
+                    'payment_proof_path' => '/uploads/proof.jpg',
+                    'account' => [
+                        'nik' => '3201012345670001',
+                        'full_name' => 'Ahmad Fauzi',
+                    ],
+                    'form_data' => [
+                        'major' => 'reguler',
+                    ],
+                ]
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb/documents');
+
+        $response->assertStatus(200);
+        $response->assertSee('Ahmad Fauzi');
+        $response->assertSee('Bukti Pembayaran');
+    }
+
+    /**
+     * Test admin payments module renders.
+     */
+    public function test_admin_payments_module_renders(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations*' => Http::response([
+                [
+                    'id' => 'reg-uuid-101',
+                    'payment_status' => 'pending_verification',
+                    'payment_amount' => 400000.0,
+                    'payment_proof_path' => '/uploads/proof.jpg',
+                    'account' => [
+                        'nik' => '3201012345670001',
+                        'full_name' => 'Ahmad Fauzi',
+                        'email' => 'ahmad@example.com',
+                    ],
+                ]
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb/payments?status=pending');
+
+        $response->assertStatus(200);
+        $response->assertSee('Ahmad Fauzi');
+        $response->assertSee('400.000');
+    }
+
+    /**
+     * Test admin can manually store a new applicant account.
+     */
+    public function test_admin_can_store_user_manually(): void
+    {
+        Http::fake([
+            '*/api/ppdb/register-account' => Http::response([
+                'id' => 'acc-uuid-201',
+                'full_name' => 'Dimas Arya',
+                'email' => 'dimas.arya@example.com',
+                'nik' => '3201019999990001',
+            ], 201),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->post('/admin/ppdb/users', [
+            'full_name' => 'Dimas Arya',
+            'email' => 'dimas.arya@example.com',
+            'nik' => '3201019999990001',
+            'password' => 'Siswa2026!',
+        ]);
+
+        $response->assertRedirect('/admin/ppdb/users');
+        $response->assertSessionHas('success');
+    }
+
+    /**
+     * Test admin can manually store user and mark paid instantly.
+     */
+    public function test_admin_can_store_user_manually_and_mark_paid(): void
+    {
+        Http::fake([
+            '*/api/ppdb/register-account' => Http::response([
+                'id' => 'acc-uuid-202',
+                'full_name' => 'Siti Fatimah',
+                'email' => 'siti.fatimah@example.com',
+            ], 201),
+            '*/api/ppdb/registrations*' => Http::response([
+                [
+                    'id' => 'reg-uuid-202',
+                    'account_id' => 'acc-uuid-202',
+                    'payment_status' => 'unpaid',
+                    'account' => [
+                        'email' => 'siti.fatimah@example.com',
+                    ],
+                ]
+            ], 200),
+            '*/api/ppdb/verify-payment/reg-uuid-202' => Http::response([
+                'id' => 'reg-uuid-202',
+                'payment_status' => 'paid',
+                'payment_amount' => 400000.0,
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->post('/admin/ppdb/users', [
+            'full_name' => 'Siti Fatimah',
+            'email' => 'siti.fatimah@example.com',
+            'password' => 'Siswa2026!',
+            'mark_as_paid' => '1',
+        ]);
+
+        $response->assertRedirect('/admin/ppdb/users');
+        $response->assertSessionHas('success');
+    }
+
+    /**
+     * Test admin can download import templates in XLSX and CSV.
+     */
+    public function test_admin_can_download_user_import_templates(): void
+    {
+        // Test CSV
+        $responseCsv = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb/users/template?format=csv');
+
+        $responseCsv->assertStatus(200);
+        $this->assertStringContainsString('text/csv', (string) $responseCsv->headers->get('content-type'));
+        $this->assertStringContainsString('Nama Lengkap', $responseCsv->getContent());
+
+        // Test XLSX
+        $responseXlsx = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb/users/template?format=xlsx');
+
+        $responseXlsx->assertStatus(200);
+        $this->assertStringContainsString('spreadsheetml.sheet', (string) $responseXlsx->headers->get('content-type'));
+    }
+
+    /**
+     * Test admin can import users via CSV file.
+     */
+    public function test_admin_can_import_users_via_csv(): void
+    {
+        Http::fake([
+            '*/api/ppdb/register-account' => Http::response([
+                'id' => 'mock-imported-acc',
+                'full_name' => 'Calon Siswa Import',
+            ], 201),
+        ]);
+
+        $csvData = "NIK,Nama Lengkap,Email,Password\n" .
+                   "3201015555550001,Budi Santoso,budi.santoso@example.com,Pass1234!\n" .
+                   "3201015555550002,Citra Lestari,citra.lestari@example.com,Pass1234!\n";
+
+        $file = UploadedFile::fake()->createWithContent('calon_siswa.csv', $csvData);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->post('/admin/ppdb/users/import', [
+            'file' => $file,
+            'default_password' => 'Ppdb2026!',
+        ]);
+
+        $response->assertRedirect('/admin/ppdb/users');
+        $response->assertSessionHas('success');
+        $response->assertSessionHas('import_summary');
+
+        $summary = session('import_summary');
+        $this->assertEquals(2, $summary['success_count']);
+        $this->assertEquals(0, $summary['failed_count']);
+    }
+
+    /**
+     * Test admin can import users via XLSX file.
+     */
+    public function test_admin_can_import_users_via_xlsx(): void
+    {
+        Http::fake([
+            '*/api/ppdb/register-account' => Http::response([
+                'id' => 'mock-imported-acc-xlsx',
+                'full_name' => 'Calon Siswa Excel',
+            ], 201),
+        ]);
+
+        $importService = new \App\Services\PpdbImportService();
+        $xlsxPath = $importService->generateTemplateXlsx();
+
+        $file = new UploadedFile(
+            $xlsxPath,
+            'calon_siswa.xlsx',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            null,
+            true
+        );
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->post('/admin/ppdb/users/import', [
+            'file' => $file,
+            'default_password' => 'Ppdb2026!',
+        ]);
+
+        if (file_exists($xlsxPath)) {
+            @unlink($xlsxPath);
+        }
+
+        $response->assertRedirect('/admin/ppdb/users');
+        $response->assertSessionHas('success');
+        $response->assertSessionHas('import_summary');
+
+        $summary = session('import_summary');
+        $this->assertEquals(3, $summary['success_count']);
+        $this->assertEquals(0, $summary['failed_count']);
+    }
+
+    /**
+     * Test admin can update a user account.
+     */
+    public function test_admin_can_update_user_account(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations/reg-uuid-101' => Http::response([
+                'id' => 'reg-uuid-101',
+                'account_id' => 'acc-uuid-101',
+                'payment_status' => 'unpaid',
+                'payment_amount' => 0.0,
+                'form_data' => [
+                    'full_name' => 'Ahmad Fauzi',
+                ],
+                'account' => [
+                    'nik' => '3201012345670001',
+                    'email' => 'ahmad@example.com',
+                ],
+            ], 200),
+            '*/api/ppdb/registrations/reg-uuid-101*' => Http::response([
+                'id' => 'reg-uuid-101',
+                'payment_status' => 'paid',
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->put('/admin/ppdb/users/reg-uuid-101', [
+            'full_name' => 'Ahmad Fauzi Updated',
+            'email' => 'ahmad.new@example.com',
+            'nik' => '3201012345679999',
+            'phone' => '081299998888',
+            'password' => 'NewPassword123!',
+            'payment_status' => 'paid',
+        ]);
+
+        $response->assertRedirect('/admin/ppdb/users');
+        $response->assertSessionHas('success');
+        $this->assertStringContainsString('NewPassword123!', session('success'));
+    }
+
+    /**
+     * Test admin can delete a user account.
+     */
+    public function test_admin_can_delete_user_account(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations/reg-uuid-101' => Http::response([
+                'message' => 'Registration deleted successfully',
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->delete('/admin/ppdb/users/reg-uuid-101');
+
+        $response->assertRedirect('/admin/ppdb/users');
+        $response->assertSessionHas('success');
     }
 }

@@ -16,21 +16,6 @@
         <div class="lp-hero-inner">
             {{-- Left Column --}}
             <div style="display:flex;flex-direction:column;align-items:flex-start;gap:1rem;">
-                {{-- Badges --}}
-                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;">
-                    <span class="lp-badge lp-badge-red">
-                        <span class="lp-badge-ping"></span>
-                        PMB TP {{ date('Y') }}–{{ date('Y') + 1 }}
-                    </span>
-                    <span class="lp-badge lp-badge-yellow">
-                        <span class="material-symbols-outlined" style="font-size:15px;">star</span>
-                        Gelombang 1 Dibuka
-                    </span>
-                    <span class="lp-badge lp-badge-green">
-                        <span class="material-symbols-outlined" style="font-size:15px;">cloud_done</span>
-                        100% Digital Softfile
-                    </span>
-                </div>
 
                 {{-- Headline --}}
                 <h1 class="lp-hero-title">
@@ -64,26 +49,6 @@
                             <span>Konsultasi WA</span>
                         </a>
                     @endif
-                </div>
-
-                {{-- Highlight Badges --}}
-                <div class="lp-highlight-badges">
-                    <div class="lp-highlight-badge" style="background:rgba(214,227,255,0.6);border-color:rgba(0,90,180,0.2);color:var(--lp-primary);">
-                        <span class="material-symbols-outlined" style="font-size:17px;">verified</span>
-                        <span>Terakreditasi A (Unggul)</span>
-                    </div>
-                    <div class="lp-highlight-badge" style="background:var(--lp-green-light);border-color:rgba(22,163,74,0.2);color:var(--lp-green);">
-                        <span class="material-symbols-outlined" style="font-size:17px;">menu_book</span>
-                        <span>Tahfizh &amp; Qur'ani</span>
-                    </div>
-                    <div class="lp-highlight-badge" style="background:var(--lp-yellow-light);border-color:rgba(234,179,8,0.4);color:var(--lp-yellow-dark);">
-                        <span class="material-symbols-outlined" style="font-size:17px;">language</span>
-                        <span>TeachCast with Oxford</span>
-                    </div>
-                    <div class="lp-highlight-badge" style="background:var(--lp-red-light);border-color:rgba(220,38,38,0.2);color:var(--lp-red);">
-                        <span class="material-symbols-outlined" style="font-size:17px;">schedule</span>
-                        <span>Full Day Terpadu</span>
-                    </div>
                 </div>
             </div>
 

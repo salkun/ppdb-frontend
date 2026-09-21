@@ -46,17 +46,21 @@ class TelegramNotificationService
             $nik = htmlspecialchars($studentData['nik'] ?? '-', ENT_QUOTES, 'UTF-8');
             $email = htmlspecialchars($studentData['email'] ?? '-', ENT_QUOTES, 'UTF-8');
             $uploadTime = now()->translatedFormat('d M Y, H:i') . ' WIB';
-            $nominal = 'Rp 250.000';
+            $nominal = 'Rp 400.000';
 
             // URL langsung ke detail pendaftar di admin panel
             $adminUrl = !empty($registrationId)
                 ? url('/admin/ppdb/registrations/' . $registrationId)
                 : url('/admin/ppdb');
 
+            $nikLine = (!empty($studentData['nik']) && $studentData['nik'] !== '-')
+                ? "• <b>NIK:</b> <code>" . htmlspecialchars($studentData['nik'], ENT_QUOTES, 'UTF-8') . "</code>\n"
+                : "";
+
             $caption = "📢 <b>NOTIFIKASI PEMBAYARAN PPDB BARU</b>\n\n"
                 . "Telah diterima unggahan bukti transfer pendaftaran:\n"
                 . "• <b>Nama Siswa:</b> {$fullName}\n"
-                . "• <b>NIK:</b> <code>{$nik}</code>\n"
+                . $nikLine
                 . "• <b>Email:</b> {$email}\n"
                 . "• <b>Nominal:</b> <b>{$nominal}</b> (Biaya Registrasi)\n"
                 . "• <b>Waktu:</b> {$uploadTime}\n\n"

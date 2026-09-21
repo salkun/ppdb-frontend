@@ -70,232 +70,224 @@
     }
 @endphp
 
+<!-- Navigation Bar -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <a href="{{ route('admin.ppdb.students') }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+        <span>Kembali ke Data Siswa</span>
+    </a>
+    <div class="d-flex align-items-center gap-2">
+        <a href="{{ route('admin.ppdb.edit', $registration['id']) }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+            <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+            <span>Edit Siswa</span>
+        </a>
+        <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#deleteShowModal">
+            <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+            <span>Hapus</span>
+        </button>
+        @if($rStatus !== 'accepted' && $pStatus === 'paid' && $hasForm)
+            <form action="{{ route('admin.ppdb.accept', $registration['id']) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menerima calon siswa ini? Seluruh data akan dimigrasikan permanen ke sistem sekolah.');" style="margin:0;">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1">
+                    <span class="material-symbols-outlined" style="font-size:18px;">verified</span>
+                    <span>Terima Siswa</span>
+                </button>
+            </form>
+        @endif
+    </div>
+</div>
+
 <!-- ============================================== -->
-<!-- HERO DOSSIER HEADER CARD -->
+<!-- 1. HERO IDENTITY CARD (BOOTSTRAP 5 CLEAN)      -->
 <!-- ============================================== -->
-<div class="dossier-hero">
-    <div class="d-flex flex-wrap justify-content-between align-items-start align-items-md-center gap-3">
-        <!-- Left: Avatar & Profile Info -->
+<div class="card border-0 shadow-sm rounded-3 bg-white p-3 p-md-4 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div class="d-flex align-items-center gap-3">
-            <div class="dossier-avatar">
+            <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold fs-4 flex-shrink-0 shadow-sm" style="width: 60px; height: 60px; background: linear-gradient(135deg, #005ab4, #003770);">
                 {{ $initials }}
             </div>
             <div>
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                    <span class="badge-pastel badge-pastel-neutral">CALON SISWA</span>
+                    <span class="badge bg-light text-secondary border fw-semibold">CALON SISWA</span>
+
                     @if($pStatus === 'paid')
-                        <span class="badge-pastel badge-pastel-green"><i class="ph-bold ph-check"></i> BIAYA LUNAS</span>
+                        <span class="badge bg-success-subtle text-success fw-semibold">BIAYA LUNAS</span>
                     @elseif($pStatus === 'pending_verification')
-                        <span class="badge-pastel badge-pastel-yellow"><i class="ph-bold ph-hourglass"></i> BUTUH VERIFIKASI BAYAR</span>
+                        <span class="badge bg-warning-subtle text-warning fw-semibold">BUTUH VERIFIKASI BAYAR</span>
                     @elseif($pStatus === 'rejected')
-                        <span class="badge-pastel badge-pastel-red"><i class="ph-bold ph-x"></i> PEMBAYARAN DITOLAK</span>
+                        <span class="badge bg-danger-subtle text-danger fw-semibold">PEMBAYARAN DITOLAK</span>
                     @else
-                        <span class="badge-pastel badge-pastel-neutral">BELUM BAYAR</span>
+                        <span class="badge bg-secondary-subtle text-secondary fw-semibold">BELUM BAYAR</span>
                     @endif
 
                     @if($rStatus === 'accepted')
-                        <span class="badge-pastel badge-pastel-green"><i class="ph-bold ph-seal-check"></i> RESMI DITERIMA</span>
+                        <span class="badge bg-success-subtle text-success fw-semibold">RESMI DITERIMA</span>
                     @elseif($rStatus === 'rejected')
-                        <span class="badge-pastel badge-pastel-red"><i class="ph-bold ph-x-circle"></i> TIDAK LOLOS</span>
+                        <span class="badge bg-danger-subtle text-danger fw-semibold">TIDAK LOLOS</span>
                     @else
-                        <span class="badge-pastel badge-pastel-blue">MENUNGGU SELEKSI</span>
+                        <span class="badge bg-primary-subtle text-primary fw-semibold">MENUNGGU SELEKSI</span>
                     @endif
 
                     @php
                         $rawMajor = $formData['major'] ?? ($registration['student']['major'] ?? null);
-                        $majorBadge = match(strtolower((string)$rawMajor)) {
-                            'reguler' => ['label' => 'JURUSAN REGULER', 'class' => 'badge-pastel-neutral', 'icon' => 'ph-book-open'],
-                            'bahasa' => ['label' => 'JURUSAN BAHASA', 'class' => 'badge-pastel-blue', 'icon' => 'ph-translate'],
-                            'tahfidz' => ['label' => 'JURUSAN TAHFIDZ', 'class' => 'badge-pastel-green', 'icon' => 'ph-scroll'],
-                            'ict' => ['label' => 'JURUSAN ICT (IT)', 'class' => 'badge-pastel-yellow', 'icon' => 'ph-laptop'],
+                        $majorLabel = match(strtolower((string)$rawMajor)) {
+                            'reguler' => 'JURUSAN REGULER',
+                            'bahasa' => 'JURUSAN BAHASA',
+                            'tahfidz' => 'JURUSAN TAHFIDZ',
+                            'ict' => 'JURUSAN ICT (IT)',
                             default => null
                         };
                     @endphp
-                    @if($majorBadge)
-                        <span class="badge-pastel {{ $majorBadge['class'] }} fw-semibold">
-                            <i class="ph-bold {{ $majorBadge['icon'] }}"></i> {{ $majorBadge['label'] }}
+                    @if($majorLabel)
+                        <span class="badge bg-light text-primary border fw-semibold">
+                            {{ $majorLabel }}
                         </span>
                     @endif
                 </div>
 
-                <h3 class="font-serif-heading fs-2 text-dark mb-1">{{ $name }}</h3>
+                <h4 class="fw-bold text-dark mb-1">{{ $name }}</h4>
 
-                <div class="d-flex flex-wrap align-items-center gap-3 text-secondary small font-mono-meta" style="font-size: 0.78rem;">
-                    <span><i class="ph-bold ph-identification-card me-1"></i>NIK: <strong class="text-dark">{{ $account['nik'] ?? ($formData['nik'] ?? '-') }}</strong></span>
+                <div class="d-flex flex-wrap align-items-center gap-2 text-muted small">
+                    <span>NIK: <strong class="text-dark">{{ $account['nik'] ?? ($formData['nik'] ?? '-') }}</strong></span>
                     <span>&bull;</span>
-                    <span><i class="ph-bold ph-envelope me-1"></i>{{ $account['email'] ?? '-' }}</span>
+                    <span>Email: <strong class="text-dark">{{ $account['email'] ?? '-' }}</strong></span>
                     <span>&bull;</span>
-                    <span><i class="ph-bold ph-calendar me-1"></i>Daftar: {{ isset($registration['created_at']) ? date('d M Y, H:i', strtotime($registration['created_at'])) . ' WIB' : '-' }}</span>
+                    <span>Daftar: {{ isset($registration['created_at']) ? date('d M Y, H:i', strtotime($registration['created_at'])) . ' WIB' : '-' }}</span>
                 </div>
             </div>
-        </div>
-
-        <!-- Right: Action Buttons -->
-        <div class="d-flex align-items-center gap-2">
-            <a href="{{ route('admin.ppdb.index') }}" class="btn-minimal-secondary py-2 px-3">
-                <i class="ph-bold ph-arrow-left"></i> Kembali
-            </a>
-
-            <a href="{{ route('admin.ppdb.edit', $registration['id']) }}" class="btn-minimal-secondary py-2 px-3 text-primary" title="Edit Data Pendaftar">
-                <i class="ph-bold ph-pencil-simple"></i> Edit
-            </a>
-
-            <button type="button" class="btn-minimal-secondary text-danger py-2 px-3 border-danger-subtle" data-bs-toggle="modal" data-bs-target="#deleteShowModal" title="Hapus Data Pendaftar">
-                <i class="ph-bold ph-trash"></i> Hapus
-            </button>
-
-            @if($rStatus !== 'accepted' && $pStatus === 'paid' && $hasForm)
-                <form action="{{ route('admin.ppdb.accept', $registration['id']) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menerima calon siswa ini? Seluruh data akan dimigrasikan permanen ke sistem database sekolah.');">
-                    @csrf
-                    <button type="submit" class="btn-minimal-primary py-2 px-3">
-                        <i class="ph-bold ph-check-circle"></i> Terima Siswa
-                    </button>
-                </form>
-            @endif
         </div>
     </div>
 </div>
 
 <!-- ============================================== -->
-<!-- MAIN SPLIT WORKSPACE -->
+<!-- 2. MAIN 2-COLUMN SPLIT WORKSPACE               -->
 <!-- ============================================== -->
 <div class="row g-4">
-    <!-- ============================================== -->
-    <!-- KOLOM KIRI: VERIFIKASI BIAYA & STATUS -->
-    <!-- ============================================== -->
-    <div class="col-lg-4 col-xl-4">
-        <!-- 1. Panel Verifikasi Pembayaran -->
-        <div class="bento-card mb-4">
-            <div class="bento-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="ph-bold ph-credit-card fs-5 text-dark"></i>
-                    <h6 class="fw-semibold text-dark mb-0">Biaya & Pembayaran</h6>
-                </div>
-                <span class="font-mono-meta small fw-semibold text-dark">RP 250.000</span>
+    <!-- Left Column: Pembayaran & Kelulusan -->
+    <div class="col-lg-4">
+        <!-- Panel 1: Biaya & Pembayaran -->
+        <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+            <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-primary" style="font-size:20px;">payments</span>
+                    Biaya & Pembayaran
+                </h6>
+                <span class="badge bg-primary-subtle text-primary fw-semibold">Rp 400.000</span>
             </div>
-
-            <!-- Struk / Bukti Transfer Box -->
-            <div class="mb-3">
-                <span class="text-secondary small d-block mb-2 font-mono-meta" style="font-size: 0.72rem;">BERKAS STRUK / TRANSFER</span>
-                @if($hasProof)
-                    <div class="proof-preview-box">
-                        @php
-                            $ext = pathinfo($paymentProof, PATHINFO_EXTENSION);
-                        @endphp
-                        @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp']))
-                            <img src="{{ $backendUrl . $paymentProof }}" 
-                                 alt="Struk Transfer Calon Siswa" 
-                                 class="proof-img mb-2"
-                                 data-bs-toggle="modal"
-                                 data-bs-target="#proofModal">
-                        @else
-                            <div class="py-4 text-secondary">
-                                <i class="ph-bold ph-file-pdf fs-1 d-block mb-1 text-dark"></i>
-                                <span class="small fw-semibold">Dokumen PDF Terlampir</span>
-                            </div>
-                        @endif
-                        <div class="d-flex gap-1">
-                            <a href="{{ $backendUrl . $paymentProof }}" target="_blank" class="btn-minimal-secondary w-100 py-1" style="font-size: 0.78rem;">
-                                <i class="ph-bold ph-arrow-square-out me-1"></i> Buka Layar Penuh
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Modal Zoom Struk -->
-                    <div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-lg">
-                            <div class="modal-content bento-card p-0 overflow-hidden border">
-                                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
-                                    <h6 class="fw-semibold text-dark mb-0">Pratinjau Berkas Bukti Transfer</h6>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="p-3 text-center bg-light">
-                                    <img src="{{ $backendUrl . $paymentProof }}" alt="Bukti Transfer" class="img-fluid rounded shadow-sm" style="max-height: 80vh;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @else
-                    <div class="p-3 border rounded-2 text-center text-secondary small" style="background-color: var(--surface-muted); border-color: var(--border-light) !important;">
-                        <i class="ph-bold ph-file-x fs-3 d-block mb-1 text-secondary"></i>
-                        Pendaftar belum mengunggah berkas transfer.
-                    </div>
-                @endif
-            </div>
-
-            <!-- Form Ubah Status Pembayaran -->
-            <form action="{{ route('admin.ppdb.verify-payment', $registration['id']) }}" method="POST" class="pt-3 border-top" style="border-color: var(--border-light) !important;">
-                @csrf
-                <div class="mb-2">
-                    <label class="form-label font-mono-meta small text-secondary mb-1" style="font-size: 0.72rem;">STATUS VERIFIKASI</label>
-                    <select class="form-select" name="payment_status" required>
-                        <option value="paid" {{ $pStatus === 'paid' ? 'selected' : '' }}>Setujui: Lunas (Tervalidasi)</option>
-                        <option value="rejected" {{ $pStatus === 'rejected' ? 'selected' : '' }}>Tolak: Bukti Tidak Valid</option>
-                    </select>
-                </div>
+            <div class="card-body p-3 px-md-4">
+                <!-- Struk Transfer Preview -->
                 <div class="mb-3">
-                    <label class="form-label font-mono-meta small text-secondary mb-1" style="font-size: 0.72rem;">NOMINAL TERVERIFIKASI (RP)</label>
-                    <input type="number" class="form-control font-mono-meta" name="payment_amount" value="{{ $registration['payment_amount'] ?: 250000 }}" required>
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-2">Berkas Bukti Transfer</label>
+                    @if($hasProof)
+                        <div class="p-2 border rounded-3 bg-light text-center">
+                            @php
+                                $ext = pathinfo($paymentProof, PATHINFO_EXTENSION);
+                            @endphp
+                            @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp']))
+                                <img src="{{ $backendUrl . $paymentProof }}" 
+                                     alt="Struk Transfer" 
+                                     class="img-fluid rounded mb-2 border cursor-pointer"
+                                     style="max-height: 180px; object-fit: contain; cursor: pointer;"
+                                     data-bs-toggle="modal"
+                                     data-bs-target="#proofModal">
+                            @else
+                                <div class="py-3 text-muted">
+                                    <span class="material-symbols-outlined fs-1 text-secondary">description</span>
+                                    <div class="small fw-semibold mt-1">Dokumen PDF Terlampir</div>
+                                </div>
+                            @endif
+                            <div>
+                                <a href="{{ $backendUrl . $paymentProof }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 py-1" style="font-size: 12px;">
+                                    Buka Ukuran Penuh &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Modal Zoom Struk -->
+                        <div class="modal fade" id="proofModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content border-0 shadow rounded-3">
+                                    <div class="modal-header border-bottom py-3">
+                                        <h6 class="modal-title fw-bold text-dark">Pratinjau Berkas Bukti Transfer</h6>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                    </div>
+                                    <div class="modal-body p-3 text-center bg-light">
+                                        <img src="{{ $backendUrl . $paymentProof }}" alt="Bukti Transfer" class="img-fluid rounded shadow-sm" style="max-height: 75vh;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="p-3 border rounded-3 text-center text-muted bg-light small">
+                            <span class="material-symbols-outlined d-block mb-1 text-secondary" style="font-size: 28px;">receipt_long</span>
+                            Pendaftar belum mengunggah berkas transfer.
+                        </div>
+                    @endif
                 </div>
-                <button type="submit" class="btn-minimal-primary w-100">
-                    <i class="ph-bold ph-check me-1"></i> Simpan Status Pembayaran
-                </button>
-            </form>
+
+                <!-- Form Verifikasi Pembayaran -->
+                <form action="{{ route('admin.ppdb.verify-payment', $registration['id']) }}" method="POST" class="pt-3 border-top">
+                    @csrf
+                    <div class="mb-2">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1">Status Verifikasi</label>
+                        <select class="form-select form-select-sm" name="payment_status" required>
+                            <option value="paid" {{ $pStatus === 'paid' ? 'selected' : '' }}>Setujui: Lunas (Tervalidasi)</option>
+                            <option value="rejected" {{ $pStatus === 'rejected' ? 'selected' : '' }}>Tolak: Bukti Tidak Valid</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1">Nominal Terverifikasi (Rp)</label>
+                        <input type="number" class="form-control form-control-sm" name="payment_amount" value="{{ (int)($registration['payment_amount'] ?: 400000) }}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100 fw-semibold">
+                        Simpan Status Pembayaran
+                    </button>
+                </form>
+            </div>
         </div>
 
-        <!-- 2. Panel Status Seleksi & Penerimaan -->
-        <div class="bento-card">
-            <div class="bento-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="ph-bold ph-seal-check fs-5 text-dark"></i>
-                    <h6 class="fw-semibold text-dark mb-0">Status Penerimaan</h6>
-                </div>
-                <span class="badge-pastel {{ $rStatus === 'accepted' ? 'badge-pastel-green' : ($rStatus === 'rejected' ? 'badge-pastel-red' : 'badge-pastel-blue') }}">
+        <!-- Panel 2: Status Penerimaan -->
+        <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+            <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-primary" style="font-size:20px;">verified</span>
+                    Status Penerimaan
+                </h6>
+                <span class="badge {{ $rStatus === 'accepted' ? 'bg-success-subtle text-success' : ($rStatus === 'rejected' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary') }} fw-semibold">
                     {{ strtoupper($rStatus) }}
                 </span>
             </div>
-
-            <div class="mb-3">
+            <div class="card-body p-3 px-md-4">
                 @if($rStatus === 'accepted')
-                    <div class="alert-document alert-success mb-3">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <i class="ph-bold ph-check-circle text-success fs-5"></i>
-                            <strong class="text-dark">Siswa Diterima Resmi</strong>
-                        </div>
-                        <p class="small text-secondary mb-0">
-                            Data calon peserta didik telah disahkan ke dalam sistem induk sekolah.
-                        </p>
+                    <div class="alert alert-success d-flex align-items-center gap-2 p-2 mb-3 rounded-3" style="font-size: 13px;">
+                        <span class="material-symbols-outlined text-success">check_circle</span>
+                        <div><strong>Siswa Resmi Diterima:</strong> Data telah tercatat ke dalam sistem sekolah.</div>
                     </div>
                 @elseif($rStatus === 'rejected')
-                    <div class="alert-document alert-danger mb-3">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <i class="ph-bold ph-x-circle text-danger fs-5"></i>
-                            <strong class="text-dark">Tidak Lolos Seleksi</strong>
-                        </div>
-                        <p class="small text-secondary mb-0">
-                            Berkas calon siswa tidak memenuhi ambang batas seleksi penerimaan.
-                        </p>
+                    <div class="alert alert-danger d-flex align-items-center gap-2 p-2 mb-3 rounded-3" style="font-size: 13px;">
+                        <span class="material-symbols-outlined text-danger">cancel</span>
+                        <div><strong>Tidak Lolos Seleksi:</strong> Calon siswa tidak memenuhi kriteria penerimaan.</div>
                     </div>
                 @else
-                    <p class="small text-secondary mb-3">
+                    <p class="text-muted small mb-3">
                         Menerima calon siswa akan otomatis menerbitkan akun siswa resmi dan mencatat seluruh berkas pendaftaran ke pangkalan data sekolah.
                     </p>
                 @endif
 
                 @if($rStatus !== 'accepted')
                     @if($pStatus !== 'paid')
-                        <button type="button" class="btn-minimal-secondary w-100 text-secondary" disabled>
-                            <i class="ph-bold ph-lock-key me-1"></i> Pembayaran Belum Lunas
+                        <button type="button" class="btn btn-light text-muted btn-sm w-100 border" disabled>
+                            Pembayaran Belum Lunas
                         </button>
                     @elseif(!$hasForm)
-                        <button type="button" class="btn-minimal-secondary w-100 text-secondary" disabled>
-                            <i class="ph-bold ph-file-x me-1"></i> Formulir Belum Diisi Siswa
+                        <button type="button" class="btn btn-light text-muted btn-sm w-100 border" disabled>
+                            Formulir Belum Diisi Siswa
                         </button>
                     @else
                         <form action="{{ route('admin.ppdb.accept', $registration['id']) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menerima calon siswa ini? Data akan diterbitkan resmi ke pangkalan data sekolah.');">
                             @csrf
-                            <button type="submit" class="btn-minimal-primary w-100 py-2">
-                                <i class="ph-bold ph-check-circle me-1"></i> Terima & Terbitkan Data Siswa
+                            <button type="submit" class="btn btn-success btn-sm w-100 fw-semibold py-2">
+                                Terima & Terbitkan Data Siswa
                             </button>
                         </form>
                     @endif
@@ -304,102 +296,91 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- KOLOM KANAN: DOSSIER INSPECTOR BERKAS -->
-    <!-- ============================================== -->
-    <div class="col-lg-8 col-xl-8">
-        <div class="bento-card p-0 overflow-hidden">
-            <!-- Dossier Inspector Navigation -->
-            <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2" style="border-color: var(--border-light) !important; background-color: var(--surface-bg);">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="ph-bold ph-folder-open fs-5 text-dark"></i>
-                    <h6 class="fw-semibold text-dark mb-0">Lembar Berkas Calon Siswa</h6>
+    <!-- Right Column: Dossier Inspector -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden mb-4">
+            <!-- Tabs Navigation -->
+            <div class="card-header bg-white border-bottom py-2 px-3 px-md-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 14px;">
+                    <span class="material-symbols-outlined text-primary" style="font-size:20px;">folder_open</span>
+                    Lembar Berkas Calon Siswa
                 </div>
 
                 @if($hasForm)
-                    <!-- Segmented Tabs for Dossier Sections -->
-                    <ul class="nav segmented-nav" id="dossierTabs" role="tablist">
+                    <ul class="nav nav-pills gap-1" id="dossierTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="tab-biodata-btn" data-bs-toggle="pill" data-bs-target="#tab-biodata" type="button" role="tab">
-                                <i class="ph-bold ph-user"></i> Biodata
+                            <button class="nav-link active py-1 px-3 fw-semibold" id="tab-biodata-btn" data-bs-toggle="pill" data-bs-target="#tab-biodata" type="button" role="tab" style="font-size: 12.5px;">
+                                Biodata
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-alamat-btn" data-bs-toggle="pill" data-bs-target="#tab-alamat" type="button" role="tab">
-                                <i class="ph-bold ph-map-pin"></i> Domisili & Kontak
+                            <button class="nav-link py-1 px-3 fw-semibold" id="tab-alamat-btn" data-bs-toggle="pill" data-bs-target="#tab-alamat" type="button" role="tab" style="font-size: 12.5px;">
+                                Domisili & Kontak
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-ortu-btn" data-bs-toggle="pill" data-bs-target="#tab-ortu" type="button" role="tab">
-                                <i class="ph-bold ph-users"></i> Orang Tua / Wali
+                            <button class="nav-link py-1 px-3 fw-semibold" id="tab-ortu-btn" data-bs-toggle="pill" data-bs-target="#tab-ortu" type="button" role="tab" style="font-size: 12.5px;">
+                                Orang Tua / Wali
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-all-btn" data-bs-toggle="pill" data-bs-target="#tab-all" type="button" role="tab">
-                                <i class="ph-bold ph-list-bullets"></i> Semua
+                            <button class="nav-link py-1 px-3 fw-semibold" id="tab-all-btn" data-bs-toggle="pill" data-bs-target="#tab-all" type="button" role="tab" style="font-size: 12.5px;">
+                                Semua Data
                             </button>
                         </li>
                     </ul>
                 @else
-                    <span class="badge-pastel badge-pastel-neutral">BELUM MENGISI FORMULIR</span>
+                    <span class="badge bg-light text-muted border">BELUM MENGISI FORMULIR</span>
                 @endif
             </div>
 
-            <div class="p-3 p-md-4">
+            <div class="card-body p-3 p-md-4">
                 @if(!$hasForm)
-                    <div class="text-center py-5 text-secondary">
-                        <i class="ph-bold ph-file-dashed fs-1 d-block mb-2 text-secondary"></i>
-                        <h5 class="fw-semibold text-dark">Pendaftar Belum Mengisi Formulir Pendaftaran</h5>
-                        <p class="small text-secondary mb-0" style="max-width: 480px; margin: 0 auto;">
+                    <div class="text-center py-5 text-muted">
+                        <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 40px;">feed</span>
+                        <h6 class="fw-bold text-dark">Pendaftar Belum Mengisi Formulir Pendaftaran</h6>
+                        <p class="small text-muted mb-0" style="max-width: 480px; margin: 0 auto;">
                             Calon siswa belum melengkapi isian biodata pokok, identitas tambahan, domisili tempat tinggal, kontak, dan data orang tua/wali.
                         </p>
                     </div>
                 @else
                     <div class="tab-content" id="dossierTabContent">
-
                         <!-- ========================================== -->
-                        <!-- TAB 1: BIODATA & IDENTITAS -->
+                        <!-- TAB 1: BIODATA & IDENTITAS                 -->
                         <!-- ========================================== -->
                         <div class="tab-pane fade show active" id="tab-biodata" role="tabpanel">
                             <!-- Section: Biodata Pokok -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge-pastel badge-pastel-neutral">01</span>
-                                        <h6 class="fw-semibold text-dark mb-0">Biodata Pokok Calon Siswa</h6>
-                                    </div>
-                                    <span class="badge-pastel badge-pastel-green">TERVERIFIKASI</span>
-                                </div>
-
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">1. Biodata Pokok Calon Siswa</h6>
                                 <div class="row g-2">
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nomor Induk Kependudukan (NIK)</span>
-                                            <span class="data-value font-mono-meta fs-6">{{ $formData['nik'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nomor Induk Kependudukan (NIK)</div>
+                                            <div class="fw-bold text-dark fs-6">{{ $formData['nik'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nomor Induk Siswa Nasional (NISN)</span>
-                                            <span class="data-value font-mono-meta fs-6">{{ $formData['nisn'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nomor Induk Siswa Nasional (NISN)</div>
+                                            <div class="fw-bold text-dark fs-6">{{ $formData['nisn'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama Lengkap Siswa</span>
-                                            <span class="data-value fw-semibold fs-6">{{ $formData['full_name'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Siswa</div>
+                                            <div class="fw-bold text-dark fs-6">{{ $formData['full_name'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama Depan</span>
-                                            <span class="data-value">{{ $formData['first_name'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama Depan</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['first_name'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama Belakang</span>
-                                            <span class="data-value">{{ $formData['last_name'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama Belakang</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['last_name'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -407,37 +388,24 @@
 
                             <!-- Section: Peminatan Jurusan & Sekolah Asal -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge-pastel badge-pastel-neutral">02</span>
-                                        <h6 class="fw-semibold text-dark mb-0">Peminatan Jurusan &amp; Asal Sekolah</h6>
-                                    </div>
-                                    <span class="badge-pastel badge-pastel-blue">PPDB PILIHAN</span>
-                                </div>
-
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">2. Peminatan Jurusan &amp; Asal Sekolah</h6>
                                 <div class="row g-2">
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Pilihan Jurusan</span>
-                                            <span class="data-value fw-bold text-dark">
-                                                {{ strtoupper($formData['major'] ?? ($registration['student']['major'] ?? '-')) }}
-                                            </span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Pilihan Jurusan</div>
+                                            <div class="fw-bold text-primary">{{ strtoupper($formData['major'] ?? ($registration['student']['major'] ?? '-')) }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-8">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama Asal Sekolah (SMP/MTs)</span>
-                                            <span class="data-value fw-medium">
-                                                {{ $formData['school_origin'] ?? ($registration['student']['school_origin'] ?? '-') }}
-                                            </span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama Asal Sekolah</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['school_origin'] ?? ($registration['student']['school_origin'] ?? '-') }}</div>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="data-cell">
-                                            <span class="data-label">Alamat Sekolah Asal</span>
-                                            <span class="data-value">
-                                                {{ $formData['school_origin_address'] ?? ($registration['student']['school_origin_address'] ?? '-') }}
-                                            </span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Alamat Sekolah Asal</div>
+                                            <div class="text-dark">{{ $formData['school_origin_address'] ?? ($registration['student']['school_origin_address'] ?? '-') }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -445,50 +413,44 @@
 
                             <!-- Section: Identitas Tambahan -->
                             <div>
-                                <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge-pastel badge-pastel-neutral">03</span>
-                                        <h6 class="fw-semibold text-dark mb-0">Identitas Tambahan &amp; Keluarga</h6>
-                                    </div>
-                                </div>
-
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">3. Identitas Tambahan &amp; Keluarga</h6>
                                 <div class="row g-2">
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nomor Kartu Keluarga (KK)</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['identity']['family_card_number'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nomor Kartu Keluarga (KK)</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['family_card_number'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Jenis Kelamin</span>
-                                            <span class="data-value">{{ $formData['identity']['gender'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Jenis Kelamin</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['gender'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Agama</span>
-                                            <span class="data-value">{{ $formData['identity']['religion'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Agama</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['religion'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Tempat Lahir</span>
-                                            <span class="data-value">{{ $formData['identity']['place_of_birth'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Tempat Lahir</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['place_of_birth'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Tanggal Lahir</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['identity']['date_of_birth'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Tanggal Lahir</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['date_of_birth'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="data-cell">
-                                            <span class="data-label">Susunan Saudara Kandung</span>
-                                            <span class="data-value">
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Susunan Saudara Kandung</div>
+                                            <div class="text-dark">
                                                 Anak ke-<strong>{{ $formData['identity']['birth_order'] ?? ($formData['birth_order'] ?? '-') }}</strong> dari total <strong>{{ $formData['identity']['siblings_count'] ?? ($formData['siblings_count'] ?? '-') }}</strong> bersaudara
-                                            </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -496,103 +458,91 @@
                         </div>
 
                         <!-- ========================================== -->
-                        <!-- TAB 2: DOMISILI & KONTAK -->
+                        <!-- TAB 2: DOMISILI & KONTAK                   -->
                         <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-alamat" role="tabpanel">
                             <!-- Section: Tempat Tinggal -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge-pastel badge-pastel-neutral">03</span>
-                                        <h6 class="fw-semibold text-dark mb-0">Alamat Tempat Tinggal & Domisili</h6>
-                                    </div>
-                                </div>
-
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">1. Alamat Tempat Tinggal &amp; Domisili</h6>
                                 <div class="row g-2">
                                     <div class="col-12">
-                                        <div class="data-cell">
-                                            <span class="data-label">Alamat Lengkap / Jalan</span>
-                                            <span class="data-value fw-medium">{{ $formData['address']['street_address'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Alamat Lengkap / Jalan</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['street_address'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">RT / RW</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['address']['rt'] ?? '-' }} / {{ $formData['address']['rw'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">RT / RW</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['rt'] ?? '-' }} / {{ $formData['address']['rw'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Kelurahan / Desa</span>
-                                            <span class="data-value">{{ $formData['address']['village'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Kelurahan / Desa</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['village'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Kecamatan</span>
-                                            <span class="data-value">{{ $formData['address']['district'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Kecamatan</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['district'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Kode Pos</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['address']['postal_code'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Kode Pos</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['postal_code'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Jenis Tempat Tinggal</span>
-                                            <span class="data-value">{{ $formData['address']['residence_type'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Jenis Tempat Tinggal</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['residence_type'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Moda Transportasi</span>
-                                            <span class="data-value">{{ $formData['address']['transportation_mode'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Moda Transportasi</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['transportation_mode'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Section: Kontak -->
+                            <!-- Section: Kontak Siswa -->
                             <div>
-                                <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge-pastel badge-pastel-neutral">04</span>
-                                        <h6 class="fw-semibold text-dark mb-0">Kontak & Komunikasi Siswa</h6>
-                                    </div>
-                                </div>
-
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">2. Kontak &amp; Komunikasi Siswa</h6>
                                 <div class="row g-2">
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nomor WhatsApp Siswa</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nomor WhatsApp Siswa</div>
                                             <div class="d-flex align-items-center justify-content-between">
-                                                <span class="data-value font-mono-meta">{{ $formData['contact']['whatsapp_number'] ?? '-' }}</span>
+                                                <span class="fw-semibold text-dark">{{ $formData['contact']['whatsapp_number'] ?? '-' }}</span>
                                                 @if(!empty($formData['contact']['whatsapp_number']))
-                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $formData['contact']['whatsapp_number']) }}" target="_blank" class="btn-minimal-secondary py-0 px-2" style="font-size: 0.72rem; min-height: 24px;">
-                                                        <i class="ph-bold ph-chat-circle-dots"></i> Chat
+                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $formData['contact']['whatsapp_number']) }}" target="_blank" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 12px;">
+                                                        Chat WA
                                                     </a>
                                                 @endif
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nomor Handphone (HP)</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['contact']['mobile_number'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nomor Handphone (HP)</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['contact']['mobile_number'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nomor Telepon Rumah</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['contact']['phone_number'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nomor Telepon Rumah</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['contact']['phone_number'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Email Calon Siswa</span>
-                                            <span class="data-value">{{ $formData['contact']['email'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Email Calon Siswa</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['contact']['email'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -600,34 +550,27 @@
                         </div>
 
                         <!-- ========================================== -->
-                        <!-- TAB 3: DATA ORANG TUA / WALI -->
+                        <!-- TAB 3: ORANG TUA / WALI                    -->
                         <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-ortu" role="tabpanel">
-                            <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge-pastel badge-pastel-neutral">05</span>
-                                    <h6 class="fw-semibold text-dark mb-0">Data Orang Tua / Wali Siswa</h6>
-                                </div>
-
-                                <!-- Sub tabs for father, mother, guardian -->
-                                <ul class="nav segmented-nav" id="parentSubTabs" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="subtab-ayah-btn" data-bs-toggle="pill" data-bs-target="#subtab-ayah" type="button" role="tab">
-                                            Ayah Kandung
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="subtab-ibu-btn" data-bs-toggle="pill" data-bs-target="#subtab-ibu" type="button" role="tab">
-                                            Ibu Kandung
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="subtab-wali-btn" data-bs-toggle="pill" data-bs-target="#subtab-wali" type="button" role="tab">
-                                            Wali (Opsional)
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
+                            <!-- Sub Nav Pills Ayah / Ibu / Wali -->
+                            <ul class="nav nav-pills gap-1 mb-3 pb-2 border-bottom" id="parentSubTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active py-1 px-3 fw-semibold" id="subtab-ayah-btn" data-bs-toggle="pill" data-bs-target="#subtab-ayah" type="button" role="tab" style="font-size: 12.5px;">
+                                        Ayah Kandung
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link py-1 px-3 fw-semibold" id="subtab-ibu-btn" data-bs-toggle="pill" data-bs-target="#subtab-ibu" type="button" role="tab" style="font-size: 12.5px;">
+                                        Ibu Kandung
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link py-1 px-3 fw-semibold" id="subtab-wali-btn" data-bs-toggle="pill" data-bs-target="#subtab-wali" type="button" role="tab" style="font-size: 12.5px;">
+                                        Wali (Opsional)
+                                    </button>
+                                </li>
+                            </ul>
 
                             <div class="tab-content" id="parentSubContent">
                                 <!-- Sub Pane Ayah -->
@@ -635,56 +578,56 @@
                                     @if(!empty($father))
                                         <div class="row g-2">
                                             <div class="col-md-6">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Nama Lengkap Ayah</span>
-                                                    <span class="data-value fw-semibold">{{ $father['full_name'] ?? ($father['name'] ?? '-') }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Ayah</div>
+                                                    <div class="fw-bold text-dark">{{ $father['full_name'] ?? ($father['name'] ?? '-') }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <div class="data-cell">
-                                                    <span class="data-label">NIK Ayah</span>
-                                                    <span class="data-value font-mono-meta">{{ $father['nik'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">NIK Ayah</div>
+                                                    <div class="fw-semibold text-dark">{{ $father['nik'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Tahun Lahir</span>
-                                                    <span class="data-value font-mono-meta">{{ $father['birth_year'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
+                                                    <div class="fw-semibold text-dark">{{ $father['birth_year'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Pendidikan Terakhir</span>
-                                                    <span class="data-value">{{ $educationList[$father['education_code'] ?? ''] ?? ($father['education'] ?? ($father['education_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
+                                                    <div class="fw-semibold text-dark">{{ $educationList[$father['education_code'] ?? ''] ?? ($father['education'] ?? ($father['education_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Pekerjaan Utama</span>
-                                                    <span class="data-value">{{ $occupationList[$father['occupation_code'] ?? ''] ?? ($father['occupation'] ?? ($father['occupation_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan Utama</div>
+                                                    <div class="fw-semibold text-dark">{{ $occupationList[$father['occupation_code'] ?? ''] ?? ($father['occupation'] ?? ($father['occupation_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Penghasilan Bulanan</span>
-                                                    <span class="data-value">{{ $incomeList[$father['income_code'] ?? ''] ?? ($father['monthly_income'] ?? ($father['income_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
+                                                    <div class="fw-semibold text-dark">{{ $incomeList[$father['income_code'] ?? ''] ?? ($father['monthly_income'] ?? ($father['income_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Nomor HP / WhatsApp</span>
-                                                    <span class="data-value font-mono-meta">{{ $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
+                                                    <div class="fw-semibold text-dark">{{ $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Email Ayah</span>
-                                                    <span class="data-value">{{ $father['email'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Email Ayah</div>
+                                                    <div class="fw-semibold text-dark">{{ $father['email'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                         </div>
                                     @else
-                                        <div class="p-4 text-center border rounded-2 text-secondary small" style="background-color: var(--surface-muted); border-color: var(--border-light) !important;">
+                                        <div class="p-4 text-center border rounded-3 bg-light text-muted small">
                                             Data ayah kandung belum tercatat.
                                         </div>
                                     @endif
@@ -695,56 +638,56 @@
                                     @if(!empty($mother))
                                         <div class="row g-2">
                                             <div class="col-md-6">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Nama Lengkap Ibu</span>
-                                                    <span class="data-value fw-semibold">{{ $mother['full_name'] ?? ($mother['name'] ?? '-') }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Ibu</div>
+                                                    <div class="fw-bold text-dark">{{ $mother['full_name'] ?? ($mother['name'] ?? '-') }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <div class="data-cell">
-                                                    <span class="data-label">NIK Ibu</span>
-                                                    <span class="data-value font-mono-meta">{{ $mother['nik'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">NIK Ibu</div>
+                                                    <div class="fw-semibold text-dark">{{ $mother['nik'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Tahun Lahir</span>
-                                                    <span class="data-value font-mono-meta">{{ $mother['birth_year'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
+                                                    <div class="fw-semibold text-dark">{{ $mother['birth_year'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Pendidikan Terakhir</span>
-                                                    <span class="data-value">{{ $educationList[$mother['education_code'] ?? ''] ?? ($mother['education'] ?? ($mother['education_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
+                                                    <div class="fw-semibold text-dark">{{ $educationList[$mother['education_code'] ?? ''] ?? ($mother['education'] ?? ($mother['education_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Pekerjaan Utama</span>
-                                                    <span class="data-value">{{ $occupationList[$mother['occupation_code'] ?? ''] ?? ($mother['occupation'] ?? ($mother['occupation_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan Utama</div>
+                                                    <div class="fw-semibold text-dark">{{ $occupationList[$mother['occupation_code'] ?? ''] ?? ($mother['occupation'] ?? ($mother['occupation_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Penghasilan Bulanan</span>
-                                                    <span class="data-value">{{ $incomeList[$mother['income_code'] ?? ''] ?? ($mother['monthly_income'] ?? ($mother['income_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
+                                                    <div class="fw-semibold text-dark">{{ $incomeList[$mother['income_code'] ?? ''] ?? ($mother['monthly_income'] ?? ($mother['income_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Nomor HP / WhatsApp</span>
-                                                    <span class="data-value font-mono-meta">{{ $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
+                                                    <div class="fw-semibold text-dark">{{ $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Email Ibu</span>
-                                                    <span class="data-value">{{ $mother['email'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Email Ibu</div>
+                                                    <div class="fw-semibold text-dark">{{ $mother['email'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                         </div>
                                     @else
-                                        <div class="p-4 text-center border rounded-2 text-secondary small" style="background-color: var(--surface-muted); border-color: var(--border-light) !important;">
+                                        <div class="p-4 text-center border rounded-3 bg-light text-muted small">
                                             Data ibu kandung belum tercatat.
                                         </div>
                                     @endif
@@ -755,56 +698,56 @@
                                     @if(!empty($guardian))
                                         <div class="row g-2">
                                             <div class="col-md-6">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Nama Lengkap Wali</span>
-                                                    <span class="data-value fw-semibold">{{ $guardian['full_name'] ?? ($guardian['name'] ?? '-') }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Wali</div>
+                                                    <div class="fw-bold text-dark">{{ $guardian['full_name'] ?? ($guardian['name'] ?? '-') }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <div class="data-cell">
-                                                    <span class="data-label">NIK Wali</span>
-                                                    <span class="data-value font-mono-meta">{{ $guardian['nik'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">NIK Wali</div>
+                                                    <div class="fw-semibold text-dark">{{ $guardian['nik'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Tahun Lahir</span>
-                                                    <span class="data-value font-mono-meta">{{ $guardian['birth_year'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
+                                                    <div class="fw-semibold text-dark">{{ $guardian['birth_year'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Pendidikan Terakhir</span>
-                                                    <span class="data-value">{{ $educationList[$guardian['education_code'] ?? ''] ?? ($guardian['education'] ?? ($guardian['education_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
+                                                    <div class="fw-semibold text-dark">{{ $educationList[$guardian['education_code'] ?? ''] ?? ($guardian['education'] ?? ($guardian['education_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Pekerjaan</span>
-                                                    <span class="data-value">{{ $occupationList[$guardian['occupation_code'] ?? ''] ?? ($guardian['occupation'] ?? ($guardian['occupation_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan</div>
+                                                    <div class="fw-semibold text-dark">{{ $occupationList[$guardian['occupation_code'] ?? ''] ?? ($guardian['occupation'] ?? ($guardian['occupation_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Penghasilan Bulanan</span>
-                                                    <span class="data-value">{{ $incomeList[$guardian['income_code'] ?? ''] ?? ($guardian['monthly_income'] ?? ($guardian['income_code'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
+                                                    <div class="fw-semibold text-dark">{{ $incomeList[$guardian['income_code'] ?? ''] ?? ($guardian['monthly_income'] ?? ($guardian['income_code'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Nomor HP / WhatsApp</span>
-                                                    <span class="data-value font-mono-meta">{{ $guardian['phone_number'] ?? ($guardian['whatsapp_number'] ?? ($guardian['phone'] ?? '-')) }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
+                                                    <div class="fw-semibold text-dark">{{ $guardian['phone_number'] ?? ($guardian['whatsapp_number'] ?? ($guardian['phone'] ?? '-')) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="data-cell">
-                                                    <span class="data-label">Email Wali</span>
-                                                    <span class="data-value">{{ $guardian['email'] ?? '-' }}</span>
+                                                <div class="p-3 bg-light rounded-3 border h-100">
+                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Email Wali</div>
+                                                    <div class="fw-semibold text-dark">{{ $guardian['email'] ?? '-' }}</div>
                                                 </div>
                                             </div>
                                         </div>
                                     @else
-                                        <div class="p-4 text-center border rounded-2 text-secondary small" style="background-color: var(--surface-muted); border-color: var(--border-light) !important;">
+                                        <div class="p-4 text-center border rounded-3 bg-light text-muted small">
                                             Data wali tidak diisi (opsional).
                                         </div>
                                     @endif
@@ -813,44 +756,41 @@
                         </div>
 
                         <!-- ========================================== -->
-                        <!-- TAB 4: SEMUA BERKAS LENGKAP -->
+                        <!-- TAB 4: SEMUA DATA LENGKAP                  -->
                         <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-all" role="tabpanel">
                             <!-- All Section 1 -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <span class="badge-pastel badge-pastel-neutral">01</span>
-                                    <h6 class="fw-semibold text-dark mb-0">Biodata Pokok Siswa</h6>
-                                </div>
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">1. Biodata Pokok Siswa</h6>
                                 <div class="row g-2">
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">NIK Siswa</span>
-                                            <span class="data-value font-mono-meta fs-6">{{ $formData['nik'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">NIK Siswa</div>
+                                            <div class="fw-bold text-dark fs-6">{{ $formData['nik'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">NISN Siswa</span>
-                                            <span class="data-value font-mono-meta fs-6">{{ $formData['nisn'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">NISN Siswa</div>
+                                            <div class="fw-bold text-dark fs-6">{{ $formData['nisn'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama Lengkap</span>
-                                            <span class="data-value fw-semibold">{{ $formData['full_name'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap</div>
+                                            <div class="fw-bold text-dark">{{ $formData['full_name'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama Depan</span>
-                                            <span class="data-value">{{ $formData['first_name'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama Depan</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['first_name'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama Belakang</span>
-                                            <span class="data-value">{{ $formData['last_name'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama Belakang</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['last_name'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -858,45 +798,42 @@
 
                             <!-- All Section 2 -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <span class="badge-pastel badge-pastel-neutral">02</span>
-                                    <h6 class="fw-semibold text-dark mb-0">Identitas Tambahan</h6>
-                                </div>
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">2. Identitas Tambahan</h6>
                                 <div class="row g-2">
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nomor Kartu Keluarga (KK)</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['identity']['family_card_number'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nomor Kartu Keluarga (KK)</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['family_card_number'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Jenis Kelamin</span>
-                                            <span class="data-value">{{ $formData['identity']['gender'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Jenis Kelamin</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['gender'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <div class="data-cell">
-                                            <span class="data-label">Agama</span>
-                                            <span class="data-value">{{ $formData['identity']['religion'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Agama</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['religion'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <div class="data-cell">
-                                            <span class="data-label">Tempat Lahir</span>
-                                            <span class="data-value">{{ $formData['identity']['place_of_birth'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Tempat Lahir</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['place_of_birth'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <div class="data-cell">
-                                            <span class="data-label">Tanggal Lahir</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['identity']['date_of_birth'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Tanggal Lahir</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['identity']['date_of_birth'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <div class="data-cell">
-                                            <span class="data-label">Susunan Saudara</span>
-                                            <span class="data-value">Ke-{{ $formData['identity']['birth_order'] ?? ($formData['birth_order'] ?? '-') }} dari {{ $formData['identity']['siblings_count'] ?? ($formData['siblings_count'] ?? '-') }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Susunan Saudara</div>
+                                            <div class="fw-semibold text-dark">Ke-{{ $formData['identity']['birth_order'] ?? ($formData['birth_order'] ?? '-') }} dari {{ $formData['identity']['siblings_count'] ?? ($formData['siblings_count'] ?? '-') }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -904,33 +841,30 @@
 
                             <!-- All Section 3 -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <span class="badge-pastel badge-pastel-neutral">03</span>
-                                    <h6 class="fw-semibold text-dark mb-0">Alamat Tempat Tinggal</h6>
-                                </div>
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">3. Alamat Tempat Tinggal</h6>
                                 <div class="row g-2">
                                     <div class="col-12">
-                                        <div class="data-cell">
-                                            <span class="data-label">Alamat / Jalan</span>
-                                            <span class="data-value">{{ $formData['address']['street_address'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Alamat / Jalan</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['street_address'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">RT / RW</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['address']['rt'] ?? '-' }} / {{ $formData['address']['rw'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">RT / RW</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['rt'] ?? '-' }} / {{ $formData['address']['rw'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Kelurahan / Kecamatan</span>
-                                            <span class="data-value">{{ $formData['address']['village'] ?? '-' }}, {{ $formData['address']['district'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Kelurahan / Kecamatan</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['village'] ?? '-' }}, {{ $formData['address']['district'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="data-cell">
-                                            <span class="data-label">Kode Pos & Tinggal</span>
-                                            <span class="data-value">{{ $formData['address']['postal_code'] ?? '-' }} ({{ $formData['address']['residence_type'] ?? '-' }})</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Kode Pos &amp; Tinggal</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['address']['postal_code'] ?? '-' }} ({{ $formData['address']['residence_type'] ?? '-' }})</div>
                                         </div>
                                     </div>
                                 </div>
@@ -938,76 +872,71 @@
 
                             <!-- All Section 4 -->
                             <div>
-                                <div class="d-flex align-items-center gap-2 pb-2 mb-3 border-bottom" style="border-color: var(--border-light) !important;">
-                                    <span class="badge-pastel badge-pastel-neutral">04</span>
-                                    <h6 class="fw-semibold text-dark mb-0">Kontak & Ringkasan Orang Tua</h6>
-                                </div>
+                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">4. Kontak &amp; Ringkasan Orang Tua</h6>
                                 <div class="row g-2">
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Kontak WhatsApp Siswa</span>
-                                            <span class="data-value font-mono-meta">{{ $formData['contact']['whatsapp_number'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Kontak WhatsApp Siswa</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['contact']['whatsapp_number'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Email Calon Siswa</span>
-                                            <span class="data-value">{{ $formData['contact']['email'] ?? '-' }}</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Email Calon Siswa</div>
+                                            <div class="fw-semibold text-dark">{{ $formData['contact']['email'] ?? '-' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama & Kontak Ayah</span>
-                                            <span class="data-value">{{ $father['full_name'] ?? ($father['name'] ?? '-') }} ({{ $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? '-')) }})</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama &amp; Kontak Ayah</div>
+                                            <div class="fw-semibold text-dark">{{ $father['full_name'] ?? ($father['name'] ?? '-') }} ({{ $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? '-')) }})</div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="data-cell">
-                                            <span class="data-label">Nama & Kontak Ibu</span>
-                                            <span class="data-value">{{ $mother['full_name'] ?? ($mother['name'] ?? '-') }} ({{ $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? '-')) }})</span>
+                                        <div class="p-3 bg-light rounded-3 border h-100">
+                                            <div class="text-muted small fw-bold text-uppercase mb-1">Nama &amp; Kontak Ibu</div>
+                                            <div class="fw-semibold text-dark">{{ $mother['full_name'] ?? ($mother['name'] ?? '-') }} ({{ $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? '-')) }})</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 @endif
             </div>
         </div>
+    </div>
 </div>
 
 <!-- Modal Konfirmasi Hapus -->
 <div class="modal fade" id="deleteShowModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered text-start">
-        <div class="modal-content bento-card p-0 shadow-sm border" style="border-color: var(--border-light) !important;">
-            <div class="d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: var(--border-light) !important;">
-                <div class="d-flex align-items-center gap-2 text-danger">
-                    <i class="ph-bold ph-warning-octagon fs-5"></i>
-                    <h6 class="fw-bold mb-0">Hapus Data Calon Siswa</h6>
-                </div>
+        <div class="modal-content border-0 shadow rounded-3">
+            <div class="modal-header border-bottom py-3">
+                <h6 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined">warning</span>
+                    Hapus Data Calon Siswa
+                </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
-            <div class="p-3">
+            <div class="modal-body p-3 p-md-4">
                 <p class="text-dark small mb-2">
                     Apakah Anda yakin ingin menghapus data calon siswa ini secara permanen?
                 </p>
-                <div class="p-2 mb-2 rounded bg-light border">
-                    <strong class="text-dark d-block" style="font-size: 0.88rem;">{{ $name }}</strong>
-                    <span class="font-mono-meta text-secondary" style="font-size: 0.78rem;">NIK: {{ $account['nik'] ?? ($formData['nik'] ?? '-') }}</span>
+                <div class="p-3 mb-2 rounded-3 bg-light border">
+                    <div class="fw-bold text-dark">{{ $name }}</div>
+                    <div class="text-muted small">NIK: {{ $account['nik'] ?? ($formData['nik'] ?? '-') }}</div>
                 </div>
-                <span class="text-danger small" style="font-size: 0.78rem;">
-                    <i class="ph-bold ph-info me-1"></i> Seluruh data pendaftaran, akun akses calon siswa, dan berkas terkait akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+                <span class="text-danger small">
+                    Seluruh data pendaftaran, akun akses calon siswa, dan berkas terkait akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
                 </span>
             </div>
-            <div class="p-3 border-top d-flex justify-content-end gap-2" style="border-color: var(--border-light) !important; background-color: var(--surface-muted);">
-                <button type="button" class="btn-minimal-secondary py-1 px-3" data-bs-dismiss="modal">Batal</button>
+            <div class="modal-footer border-top bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
                 <form action="{{ route('admin.ppdb.destroy', $registration['id']) }}" method="POST">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm py-1 px-3 d-inline-flex align-items-center gap-1">
-                        <i class="ph-bold ph-trash"></i> Hapus Permanen
-                    </button>
+                    <button type="submit" class="btn btn-danger btn-sm fw-semibold">Hapus Permanen</button>
                 </form>
             </div>
         </div>

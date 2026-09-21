@@ -43,7 +43,6 @@ class PpdbController extends Controller
 
                     $studentData = [
                         'full_name' => session('full_name', 'Calon Siswa'),
-                        'nik' => session('nik', '-'),
                         'email' => session('email', '-'),
                     ];
 
@@ -98,9 +97,6 @@ class PpdbController extends Controller
             $formData = $registration['form_data'] ?? [];
 
             // Pre-fill basic details from account/session if not yet populated
-            if (empty($formData['nik'])) {
-                $formData['nik'] = session('nik');
-            }
             if (empty($formData['full_name'])) {
                 $formData['full_name'] = session('full_name');
             }
@@ -312,12 +308,104 @@ class PpdbController extends Controller
                 return redirect()->route('dashboard')->with('success', 'Formulir pendaftaran berhasil disimpan dan diperbarui!');
             }
 
+            // Handle duplicate NIK constraint violation (backend returns 500 or 409)
+            if (in_array($response->status(), [500, 409])) {
+                $body = $response->body();
+                if (str_contains($body, 'ix_ppdb_accounts_nik') || str_contains($body, 'UniqueViolation') || str_contains($body, 'duplicate key') || str_contains($body, 'NIK sudah')) {
+                    return back()->withInput()->with('error', 'NIK "' . $request->nik . '" sudah terdaftar oleh akun lain. Silakan periksa kembali NIK Anda.');
+                }
+            }
+
             $errorMessage = $this->extractErrorMessage($response, 'Gagal menyimpan formulir pendaftaran.');
             return back()->withInput()->with('error', $errorMessage);
 
         } catch (\Exception $e) {
             Log::error('PPDB Form Submit Error: ' . $e->getMessage());
             return back()->withInput()->with('error', 'Terjadi kesalahan saat mengirim formulir ke backend: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show test card for printing / downloading.
+     */
+    public function showTestCard(Request $request)
+    {
+        try {
+            $regResponse = $this->httpWithToken()->get($this->backendUrl() . '/api/ppdb/my-registration');
+
+            if ($regResponse->status() === 401) {
+                $request->session()->flush();
+                return redirect()->route('login')->with('warning', 'Sesi login telah berakhir.');
+            }
+
+            if (!$regResponse->successful()) {
+                return redirect()->route('dashboard')->with('error', 'Gagal memverifikasi status pendaftaran.');
+            }
+
+            $registration = $regResponse->json();
+            $paymentStatus = $registration['payment_status'] ?? 'unpaid';
+            $formData = $registration['form_data'] ?? [];
+
+            // Must have paid and filled form
+            if ($paymentStatus !== 'paid') {
+                return redirect()->route('dashboard')->with('warning', 'Kartu tes belum tersedia. Pembayaran harus diverifikasi terlebih dahulu.');
+            }
+
+            if (empty($formData)) {
+                return redirect()->route('dashboard')->with('warning', 'Kartu tes belum tersedia. Silakan lengkapi formulir pendaftaran terlebih dahulu.');
+            }
+
+            $autoPrint = $request->query('print') === '1';
+
+            return view('ppdb.test-card', [
+                'registration' => $registration,
+                'formData' => $formData,
+                'user' => [
+                    'full_name' => session('full_name'),
+                    'email' => session('email'),
+                ],
+                'autoPrint' => $autoPrint,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PPDB Test Card Error: ' . $e->getMessage());
+            return redirect()->route('dashboard')->with('error', 'Koneksi ke backend bermasalah: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show upload berkas (documents) page.
+     * This is currently a UI mockup — actual upload to backend will be added later.
+     */
+    public function showUpload(Request $request)
+    {
+        try {
+            $regResponse = $this->httpWithToken()->get($this->backendUrl() . '/api/ppdb/my-registration');
+
+            if ($regResponse->status() === 401) {
+                $request->session()->flush();
+                return redirect()->route('login')->with('warning', 'Sesi login telah berakhir.');
+            }
+
+            if (!$regResponse->successful()) {
+                return redirect()->route('dashboard')->with('error', 'Gagal memverifikasi status pendaftaran.');
+            }
+
+            $registration = $regResponse->json();
+            $paymentStatus = $registration['payment_status'] ?? 'unpaid';
+
+            // Must have paid to access upload
+            if ($paymentStatus !== 'paid') {
+                return redirect()->route('dashboard')->with('warning', 'Menu upload berkas masih terkunci. Pembayaran harus diverifikasi terlebih dahulu.');
+            }
+
+            return view('ppdb.upload', [
+                'registration' => $registration,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PPDB Upload Berkas Error: ' . $e->getMessage());
+            return redirect()->route('dashboard')->with('error', 'Koneksi ke backend bermasalah: ' . $e->getMessage());
         }
     }
 }
