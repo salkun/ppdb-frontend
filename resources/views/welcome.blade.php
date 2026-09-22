@@ -60,7 +60,7 @@
                         <div class="lp-hero-img-overlay"></div>
                         <div class="lp-hero-img-badge">
                             <span class="material-symbols-outlined" style="font-size:16px;color:var(--lp-green);">check_circle</span>
-                            Pendaftaran Online {{ date('Y') }}/{{ date('Y') + 1 }}
+                            Pendaftaran Online 2027/2028
                         </div>
                         <div class="lp-hero-img-bottom">
                             <div>
@@ -379,7 +379,7 @@
         <div class="lp-section">
             <div style="text-align:center;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;">
                 <span class="lp-section-tag">Transparansi Finansial</span>
-                <h2 class="lp-section-title">Rincian Biaya PPDB TP {{ date('Y') }}–{{ date('Y') + 1 }}</h2>
+                <h2 class="lp-section-title">Rincian Biaya PPDB TP 2027–2028</h2>
                 <p class="lp-section-desc">Pilih tab peminatan untuk melihat tabel rincian biaya pendidikan secara lengkap antara santri Putra dan Putri.</p>
             </div>
 
@@ -401,13 +401,16 @@
                             <span class="material-symbols-outlined" style="font-size:22px;">account_balance_wallet</span>
                         </div>
                         <div>
-                            <span style="font-size:16px;font-weight:700;color:var(--lp-on-surface);" id="lpActiveProgramName">Program: Kelas Reguler</span>
-                            <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:0;">Rincian resmi biaya masuk tahun ajaran pertama {{ date('Y') }}–{{ date('Y') + 1 }}</p>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:16px;font-weight:700;color:var(--lp-on-surface);" id="lpActiveProgramName">Program: Kelas Reguler</span>
+                                <span id="lpProgramBadge" style="padding:2px 8px;background:rgba(0,90,180,0.1);color:var(--lp-primary);font-weight:700;font-size:11px;border-radius:6px;">Kelas Reguler</span>
+                            </div>
+                            <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:0;" id="lpProgramDesc">Rincian resmi biaya masuk tahun ajaran baru TP 2027–2028</p>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <span style="padding:4px 12px;background:var(--lp-surface-pure);color:var(--lp-primary);font-weight:700;font-size:12px;border-radius:9999px;border:1px solid rgba(0,90,180,0.2);">Putra &amp; Putri</span>
-                        <span style="padding:4px 12px;background:var(--lp-yellow-light);color:var(--lp-yellow-dark);font-weight:700;font-size:12px;border-radius:9999px;border:1px solid rgba(234,179,8,0.3);">Gelombang 1</span>
+                        <span style="padding:4px 12px;background:var(--lp-yellow-light);color:var(--lp-yellow-dark);font-weight:700;font-size:12px;border-radius:9999px;border:1px solid rgba(234,179,8,0.3);">TP 2027/2028</span>
                     </div>
                 </div>
 
@@ -430,8 +433,8 @@
                                         <span style="font-size:14px;">TOTAL BIAYA PENDAFTARAN AWAL</span>
                                     </div>
                                 </td>
-                                <td style="text-align:right;font-size:16px;" id="lpTotalPutra">Rp12.850.000</td>
-                                <td style="text-align:right;font-size:16px;" id="lpTotalPutri">Rp13.150.000</td>
+                                <td style="text-align:right;font-size:16px;" id="lpTotalPutra">Rp10.945.000</td>
+                                <td style="text-align:right;font-size:16px;" id="lpTotalPutri">Rp11.145.000</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -442,7 +445,7 @@
                     <div class="lp-pricing-summary-card" style="background:var(--lp-primary-subtle);border-color:rgba(0,90,180,0.2);">
                         <div>
                             <span style="font-size:12px;font-weight:700;color:var(--lp-on-surface-variant);">Total Estimasi Santri Putra:</span>
-                            <p class="lp-pricing-summary-val" style="color:var(--lp-primary);margin:0;" id="lpBadgePutra">Rp12.850.000</p>
+                            <p class="lp-pricing-summary-val" style="color:var(--lp-primary);margin:0;" id="lpBadgePutra">Rp10.945.000</p>
                         </div>
                         <div class="lp-pricing-summary-icon" style="background:rgba(0,90,180,0.1);color:var(--lp-primary);">
                             <span class="material-symbols-outlined" style="font-size:26px;">male</span>
@@ -451,7 +454,7 @@
                     <div class="lp-pricing-summary-card" style="background:rgba(220,252,231,0.6);border-color:rgba(22,163,74,0.2);">
                         <div>
                             <span style="font-size:12px;font-weight:700;color:var(--lp-on-surface-variant);">Total Estimasi Santri Putri:</span>
-                            <p class="lp-pricing-summary-val" style="color:var(--lp-green);margin:0;" id="lpBadgePutri">Rp13.150.000</p>
+                            <p class="lp-pricing-summary-val" style="color:var(--lp-green);margin:0;" id="lpBadgePutri">Rp11.145.000</p>
                         </div>
                         <div class="lp-pricing-summary-icon" style="background:rgba(22,163,74,0.1);color:var(--lp-green);">
                             <span class="material-symbols-outlined" style="font-size:26px;">female</span>
@@ -471,34 +474,30 @@
                         <div class="lp-pricing-note-item" style="background:var(--lp-red-subtle);border-color:rgba(220,38,38,0.2);">
                             <span class="material-symbols-outlined" style="font-size:20px;color:var(--lp-red);flex-shrink:0;margin-top:2px;">stars</span>
                             <div style="font-size:12px;color:var(--lp-on-surface-variant);">
-                                <strong style="color:var(--lp-red);">Diskon Alumni SD Plus Al-Muhajirin:</strong>
+                                <strong style="color:var(--lp-red);">1. Diskon Registrasi Alumni SD Plus Al-Muhajirin:</strong>
                                 <p style="margin:2px 0 0;color:var(--lp-on-surface);">Potongan biaya registrasi alumni SD Plus Al-Muhajirin sebesar <strong style="color:var(--lp-red);">Rp1.200.000</strong>.</p>
                             </div>
                         </div>
                         <div class="lp-pricing-note-item" style="background:rgba(254,249,195,0.7);border-color:rgba(234,179,8,0.4);">
                             <span class="material-symbols-outlined" style="font-size:20px;color:var(--lp-yellow-dark);flex-shrink:0;margin-top:2px;">group</span>
                             <div style="font-size:12px;color:var(--lp-on-surface-variant);">
-                                <strong style="color:var(--lp-yellow-dark);">Diskon Kakak / Adik Santri:</strong>
-                                <p style="margin:2px 0 0;color:var(--lp-on-surface);">Potongan registrasi kakak non alumni SD Plus Al-Muhajirin sebesar <strong style="color:var(--lp-yellow-dark);">Rp400.000</strong>.</p>
+                                <strong style="color:var(--lp-yellow-dark);">2. Diskon Registrasi Kakak Beradik:</strong>
+                                <p style="margin:2px 0 0;color:var(--lp-on-surface);">Potongan registrasi kakak beradik non alumni SD Plus Al-Muhajirin sebesar <strong style="color:var(--lp-yellow-dark);">Rp400.000</strong>.</p>
                             </div>
                         </div>
                     </div>
                     <div>
                         <div class="lp-pricing-note-text">
-                            <span class="material-symbols-outlined" style="font-size:18px;color:var(--lp-primary);flex-shrink:0;margin-top:2px;">sports_soccer</span>
-                            <span><strong>Biaya Ekstrakurikuler:</strong> Iuran ekskul rutin per bulan sebesar <span style="font-weight:600;color:var(--lp-on-surface);">Rp100.000</span>.</span>
-                        </div>
-                        <div class="lp-pricing-note-text">
-                            <span class="material-symbols-outlined" style="font-size:18px;color:var(--lp-on-surface-variant);flex-shrink:0;margin-top:2px;">menu_book</span>
-                            <span><strong>Buku Pelajaran:</strong> Biaya belum termasuk Buku Paket dengan estimasi <span style="font-weight:600;color:var(--lp-on-surface);">Rp1.600.000</span>.</span>
+                            <span class="material-symbols-outlined" style="font-size:18px;color:var(--lp-primary);flex-shrink:0;margin-top:2px;">info</span>
+                            <span><strong>3. Biaya Tambahan:</strong> Belum termasuk biaya Ekstrakulikuler dan Buku Paket.</span>
                         </div>
                         <div class="lp-pricing-note-text">
                             <span class="material-symbols-outlined" style="font-size:18px;color:var(--lp-red);flex-shrink:0;margin-top:2px;">timer</span>
-                            <span><strong>Batas Registrasi Ulang:</strong> Maksimal <strong style="color:var(--lp-red);">3 bulan</strong> setelah tanggal pengumuman kelulusan seleksi PPDB.</span>
+                            <span><strong>4. Batas Waktu Registrasi:</strong> Batas waktu registrasi <strong style="color:var(--lp-red);">3 bulan setelah pengumuman kelulusan</strong> (syarat dan ketentuan berlaku).</span>
                         </div>
                         <div class="lp-pricing-note-text">
                             <span class="material-symbols-outlined" style="font-size:18px;color:var(--lp-green);flex-shrink:0;margin-top:2px;">payments</span>
-                            <span><strong>Sistem Pembayaran Fleksibel:</strong> Dapat diangsur sesuai ketentuan tata usaha keuangan sekolah yayasan.</span>
+                            <span><strong>Sistem Pembayaran:</strong> Pembayaran dilakukan via rekening resmi Bank Mandiri atau Loket Tata Usaha Gedung SMPS 2 Al-Muhajirin.</span>
                         </div>
                     </div>
                 </div>
@@ -592,71 +591,63 @@
 
 @push('scripts')
 <script>
-    // ===== Interactive Pricing Tab Logic =====
+    // ===== Interactive Pricing Tab Logic (Sumber: Rincian Biaya 2728.xlsx) =====
+    const regulerFeeItems = [
+        { label: "Infak Pendidikan Per Bulan (SPP)", putra: "Rp700.000", putri: "Rp700.000" },
+        { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp2.500.000", putri: "Rp2.500.000" },
+        { label: "Infak Bangunan", putra: "Rp4.000.000", putri: "Rp4.000.000" },
+        { label: "Kalender, Majalah, Buku Karya Siswa, Buku Hijroti, Raport, Buku Panduan Ibadah, Foto, Kartu Pelajar", putra: "Rp550.000", putri: "Rp550.000" },
+        { label: "Milad Yayasan", putra: "Rp100.000", putri: "Rp100.000" },
+        { label: "Ujian Selama Setahun", putra: "Rp800.000", putri: "Rp800.000" },
+        { label: "Kegiatan Kesiswaan dan Asesmen", putra: "Rp550.000", putri: "Rp550.000" },
+        { label: "Seragam Sekolah dan Atribut: Pramuka, Putih Biru, Rompi, Seragam Khas, Seragam Batik, Seragam Muslim, Kaos Olahraga, dan Kerudung (Khusus Putri)", putra: "Rp1.595.000", putri: "Rp1.795.000" },
+        { label: "Infaq Masjid", putra: "Rp150.000", putri: "Rp150.000" }
+    ];
+
+    const takhosusFeeItems = [
+        { label: "Infak Pendidikan Per Bulan (SPP)", putra: "Rp800.000", putri: "Rp800.000" },
+        { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp2.500.000", putri: "Rp2.500.000" },
+        { label: "Infak Bangunan", putra: "Rp4.000.000", putri: "Rp4.000.000" },
+        { label: "Kalender, Majalah, Buku Karya Siswa, Buku Hijroti, Raport, Buku Panduan Ibadah, Foto, Kartu Pelajar", putra: "Rp550.000", putri: "Rp550.000" },
+        { label: "Milad Yayasan", putra: "Rp100.000", putri: "Rp100.000" },
+        { label: "Ujian Selama Setahun", putra: "Rp800.000", putri: "Rp800.000" },
+        { label: "Kegiatan Kesiswaan dan Asesmen", putra: "Rp550.000", putri: "Rp550.000" },
+        { label: "Seragam Sekolah dan Atribut: Pramuka, Putih Biru, Rompi, Seragam Khas, Seragam Batik, Seragam Muslim, Kaos Olahraga, dan Kerudung (Khusus Putri)", putra: "Rp1.595.000", putri: "Rp1.795.000" },
+        { label: "Infaq Masjid", putra: "Rp150.000", putri: "Rp150.000" }
+    ];
+
     const lpFeeData = {
         reguler: {
             name: "Program: Kelas Reguler",
-            items: [
-                { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
-                { label: "TeachCast (Program Pengayaan)", putra: "Rp0", putri: "Rp0" },
-                { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp3.500.000", putri: "Rp3.500.000" },
-                { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
-                { label: "Kalender, Majalah, Buku Karya, Buku Hijrot, Rapor, Buku Doa, Foto, Kartu Pelajar", putra: "Rp850.000", putri: "Rp850.000" },
-                { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
-                { label: "Ujian Selama Setahun (PTS, PAS, Asesmen)", putra: "Rp950.000", putri: "Rp950.000" },
-                { label: "Kegiatan Kesiswaan & Asesmen Karakter", putra: "Rp1.100.000", putri: "Rp1.100.000" },
-                { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
-                { label: "Infaq Masjid & Pengembangan Ibadah", putra: "Rp500.000", putri: "Rp500.000" }
-            ],
-            totalPutra: "Rp12.850.000", totalPutri: "Rp13.150.000"
+            badge: "Kelas Reguler",
+            desc: "Rincian resmi biaya masuk tahun ajaran baru TP 2027–2028",
+            items: regulerFeeItems,
+            totalPutra: "Rp10.945.000",
+            totalPutri: "Rp11.145.000"
         },
         bahasa: {
-            name: "Program: Kelas Bahasa (TeachCast Oxford)",
-            items: [
-                { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
-                { label: "TeachCast (Oxford Curriculum & Native Speaker)", putra: "Rp1.800.000", putri: "Rp1.800.000" },
-                { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp3.500.000", putri: "Rp3.500.000" },
-                { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
-                { label: "Kalender, Majalah, Buku Karya, Buku Hijrot, Rapor, Buku Doa, Foto, Kartu Pelajar", putra: "Rp850.000", putri: "Rp850.000" },
-                { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
-                { label: "Ujian Selama Setahun (PTS, PAS, Language Assessment)", putra: "Rp950.000", putri: "Rp950.000" },
-                { label: "Kegiatan Kesiswaan & Language Immersion Camp", putra: "Rp1.300.000", putri: "Rp1.300.000" },
-                { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
-                { label: "Infaq Masjid & Pengembangan Ibadah", putra: "Rp500.000", putri: "Rp500.000" }
-            ],
-            totalPutra: "Rp14.850.000", totalPutri: "Rp15.150.000"
+            name: "Program: Kelas Bahasa",
+            badge: "Kelas Takhosus",
+            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027–2028",
+            items: takhosusFeeItems,
+            totalPutra: "Rp11.045.000",
+            totalPutri: "Rp11.245.000"
         },
         tahfizh: {
-            name: "Program: Kelas Tahfizh Al-Qur'an",
-            items: [
-                { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
-                { label: "TeachCast (Program Bahasa)", putra: "Rp0", putri: "Rp0" },
-                { label: "Pengembangan Sarana Prasarana Pendidikan", putra: "Rp3.500.000", putri: "Rp3.500.000" },
-                { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
-                { label: "Kalender, Majalah, Buku Karya, Mutaba'ah Tahfizh, Rapor, Mushaf Al-Qur'an", putra: "Rp950.000", putri: "Rp950.000" },
-                { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
-                { label: "Ujian & Tasmi' Qur'an Selama Setahun", putra: "Rp1.100.000", putri: "Rp1.100.000" },
-                { label: "Karantina Tahfizh & Dauroh Qur'ani", putra: "Rp1.450.000", putri: "Rp1.450.000" },
-                { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
-                { label: "Infaq Masjid & Sarana Halaqah", putra: "Rp500.000", putri: "Rp500.000" }
-            ],
-            totalPutra: "Rp13.450.000", totalPutri: "Rp13.750.000"
+            name: "Program: Kelas Tahfizh",
+            badge: "Kelas Takhosus",
+            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027–2028",
+            items: takhosusFeeItems,
+            totalPutra: "Rp11.045.000",
+            totalPutri: "Rp11.245.000"
         },
         ict: {
-            name: "Program: Kelas ICT & Digital Literasi",
-            items: [
-                { label: "Infaq Pendidikan per Bulan (SPP)", putra: "Rp850.000", putri: "Rp850.000" },
-                { label: "TeachCast (Program Bahasa)", putra: "Rp0", putri: "Rp0" },
-                { label: "Pengembangan Sarana Prasarana & Lab Komputer", putra: "Rp4.100.000", putri: "Rp4.100.000" },
-                { label: "Infaq Bangunan", putra: "Rp3.000.000", putri: "Rp3.000.000" },
-                { label: "Kalender, Majalah, Modul Coding, Buku Hijrot, Rapor, Foto, Kartu Siswa RFID", putra: "Rp950.000", putri: "Rp950.000" },
-                { label: "Milad Yayasan", putra: "Rp200.000", putri: "Rp200.000" },
-                { label: "Ujian Berbasis Komputer & Asesmen Coding", putra: "Rp1.050.000", putri: "Rp1.050.000" },
-                { label: "Workshop Coding & Kompetisi Kesiswaan", putra: "Rp1.300.000", putri: "Rp1.300.000" },
-                { label: "Seragam dan Atribut Lengkap (5 Stel + Atribut)", putra: "Rp1.900.000", putri: "Rp2.200.000" },
-                { label: "Infaq Masjid & Pengembangan Sarana Ibadah", putra: "Rp500.000", putri: "Rp500.000" }
-            ],
-            totalPutra: "Rp13.850.000", totalPutri: "Rp14.150.000"
+            name: "Program: Kelas ICT",
+            badge: "Kelas Takhosus",
+            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027–2028",
+            items: takhosusFeeItems,
+            totalPutra: "Rp11.045.000",
+            totalPutri: "Rp11.245.000"
         }
     };
 
@@ -666,12 +657,25 @@
 
         const tbody = document.getElementById('lpFeeTableBody');
         const progName = document.getElementById('lpActiveProgramName');
+        const progBadge = document.getElementById('lpProgramBadge');
+        const progDesc = document.getElementById('lpProgramDesc');
         const totalPutra = document.getElementById('lpTotalPutra');
         const totalPutri = document.getElementById('lpTotalPutri');
         const badgePutra = document.getElementById('lpBadgePutra');
         const badgePutri = document.getElementById('lpBadgePutri');
 
         if (progName) progName.innerText = data.name;
+        if (progBadge) {
+            progBadge.innerText = data.badge;
+            if (data.badge === 'Kelas Reguler') {
+                progBadge.style.background = 'rgba(0,90,180,0.1)';
+                progBadge.style.color = 'var(--lp-primary)';
+            } else {
+                progBadge.style.background = 'rgba(13,148,136,0.12)';
+                progBadge.style.color = '#0f766e';
+            }
+        }
+        if (progDesc) progDesc.innerText = data.desc;
         if (totalPutra) totalPutra.innerText = data.totalPutra;
         if (totalPutri) totalPutri.innerText = data.totalPutri;
         if (badgePutra) badgePutra.innerText = data.totalPutra;

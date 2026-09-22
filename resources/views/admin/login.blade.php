@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal PMB — SMPS2 Al-Muhajirin</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('logo/favicon-64x64.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo/favicon-128x128.png') }}">
+
     <!-- Google Fonts: Plus Jakarta Sans & Chivo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -99,16 +104,23 @@
         }
 
         .adm-brand-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #0066cc, #004080);
-            color: #ffffff;
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 24px rgba(0, 102, 204, 0.35);
+            padding: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
             margin-bottom: 1.25rem;
+        }
+
+        .adm-brand-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .adm-title {
@@ -278,7 +290,7 @@
 
         <div class="text-center mb-4">
             <div class="adm-brand-icon">
-                <span class="material-symbols-outlined" style="font-size: 28px;">shield_person</span>
+                <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin">
             </div>
             <div>
                 <span class="adm-status-badge">

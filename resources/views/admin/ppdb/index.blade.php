@@ -11,14 +11,25 @@
             <div>
                 <div class="badge bg-white text-primary mb-2 px-3 py-2 fw-semibold rounded-pill" style="font-size: 11.5px;">
                     <span class="material-symbols-outlined align-middle" style="font-size:16px;">school</span>
-                    Tahun Ajaran {{ date('Y') }}/{{ date('Y') + 1 }}
+                    Tahun Ajaran 2027/2028
                 </div>
                 <h4 class="fw-bold mb-1">Selamat Datang, {{ session('admin_user.username', 'Administrator') }}!</h4>
                 <p class="text-white-50 mb-0 small" style="max-width: 620px;">
                     Pantau alur pendaftaran calon peserta didik baru SMP Al-Muhajirin Purwakarta, kelengkapan berkas, serta verifikasi bukti pembayaran secara real-time.
                 </p>
             </div>
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <!-- One-Click Master Sync Button -->
+                <form action="{{ route('admin.ppdb.sync') }}" method="POST" class="d-inline mb-0">
+                    @csrf
+                    <button type="submit" class="btn btn-success text-white fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3" onclick="return confirm('Kirim seluruh data lokal yang belum tersinkron ke Master Data API?')">
+                        <span class="material-symbols-outlined" style="font-size:18px;">sync</span>
+                        <span>Sinkron ke Master API</span>
+                        @if(($syncStats['pending'] ?? 0) > 0)
+                            <span class="badge bg-white text-success rounded-pill ms-1" style="font-size: 11px;">{{ $syncStats['pending'] }}</span>
+                        @endif
+                    </button>
+                </form>
                 <a href="{{ route('admin.ppdb.users') }}" class="btn btn-outline-light text-white fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3">
                     <span class="material-symbols-outlined" style="font-size:18px;">group_add</span>
                     <span>Kelola & Import User</span>
@@ -32,6 +43,48 @@
                     <span>Export Excel</span>
                 </a>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sync Status Widget (Local-First + Master API Status) -->
+<div class="card border-0 shadow-sm rounded-3 bg-white mb-4 p-3 border-start border-4 {{ ($syncStats['failed'] ?? 0) > 0 ? 'border-danger' : (($syncStats['pending'] ?? 0) > 0 ? 'border-warning' : 'border-success') }}">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px; background-color: {{ ($syncStats['failed'] ?? 0) > 0 ? '#fee2e2' : (($syncStats['pending'] ?? 0) > 0 ? '#fef3c7' : '#dcfce7') }};">
+                <span class="material-symbols-outlined {{ ($syncStats['failed'] ?? 0) > 0 ? 'text-danger' : (($syncStats['pending'] ?? 0) > 0 ? 'text-warning' : 'text-success') }}" style="font-size: 24px;">
+                    {{ ($syncStats['failed'] ?? 0) > 0 ? 'sync_problem' : (($syncStats['pending'] ?? 0) > 0 ? 'sync' : 'cloud_done') }}
+                </span>
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <h6 class="fw-bold mb-0 text-dark">Status Sinkronisasi Master API</h6>
+                    @if(($syncStats['pending'] ?? 0) > 0)
+                        <span class="badge bg-warning text-dark fw-semibold" style="font-size: 11px;">{{ $syncStats['pending'] }} data menunggu kirim</span>
+                    @elseif(($syncStats['failed'] ?? 0) > 0)
+                        <span class="badge bg-danger text-white fw-semibold" style="font-size: 11px;">{{ $syncStats['failed'] }} data perlu dicek</span>
+                    @else
+                        <span class="badge bg-success text-white fw-semibold" style="font-size: 11px;">Semua data tersinkron</span>
+                    @endif
+                </div>
+                <div class="text-muted small mt-1">
+                    <span>Target Server: <code class="text-primary">{{ config('ppdb.api_url', 'http://127.0.0.1:8001') }}</code></span>
+                    <span class="mx-2">•</span>
+                    <span>Database Lokal: <strong class="text-success">MySQL (Source of Truth)</strong></span>
+                    <span class="mx-2">•</span>
+                    <span>Terakhir Sinkron: <strong>{{ !empty($syncStats['last_synced_at']) ? \Carbon\Carbon::parse($syncStats['last_synced_at'])->diffForHumans() : 'Belum pernah' }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <form action="{{ route('admin.ppdb.sync') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-outline-success fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3" onclick="return confirm('Kirim seluruh data lokal yang belum tersinkron ke Master Data API?')">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">send</span>
+                    <span>Kirim ke Master Sekarang</span>
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -150,7 +203,7 @@
                                         </td>
                                         <td>
                                             @if($proofPath)
-                                                <a href="{{ $backendUrl . $proofPath }}" target="_blank" class="badge bg-light text-primary border text-decoration-none py-1 px-2">
+                                                <a href="{{ ppdb_proof_url($proofPath, $backendUrl) }}" target="_blank" class="badge bg-light text-primary border text-decoration-none py-1 px-2">
                                                     <span class="material-symbols-outlined align-middle" style="font-size:14px;">image</span>
                                                     Lihat Foto
                                                 </a>
@@ -184,11 +237,11 @@
 
                                                                 @if($proofPath)
                                                                     <div class="mb-3 text-center">
-                                                                        <a href="{{ $backendUrl . $proofPath }}" target="_blank" class="d-inline-block border rounded-3 p-1 bg-light">
-                                                                            <img src="{{ $backendUrl . $proofPath }}" alt="Bukti Transfer" style="max-height: 180px; max-width: 100%; object-fit: contain;" class="rounded">
+                                                                        <a href="{{ ppdb_proof_url($proofPath, $backendUrl) }}" target="_blank" class="d-inline-block border rounded-3 p-1 bg-light">
+                                                                            <img src="{{ ppdb_proof_url($proofPath, $backendUrl) }}" alt="Bukti Transfer" style="max-height: 180px; max-width: 100%; object-fit: contain;" class="rounded">
                                                                         </a>
                                                                         <div class="mt-1">
-                                                                            <a href="{{ $backendUrl . $proofPath }}" target="_blank" class="small fw-semibold text-primary text-decoration-none">
+                                                                            <a href="{{ ppdb_proof_url($proofPath, $backendUrl) }}" target="_blank" class="small fw-semibold text-primary text-decoration-none">
                                                                                 Perbesar Bukti Transfer &rarr;
                                                                             </a>
                                                                         </div>
@@ -400,7 +453,10 @@
                         <td class="text-muted small">
                             {{ date('d/m/Y H:i', strtotime($reg['created_at'] ?? 'now')) }}
                         </td>
-                        <td class="pe-3 pe-md-4 text-end">
+                        <td class="pe-3 pe-md-4 text-end text-nowrap">
+                            <a href="{{ route('admin.ppdb.show', $reg['id']) }}?tab=dokumen" class="btn btn-sm btn-light border text-primary py-1 px-2" title="Lihat Berkas Dokumen Siswa">
+                                <span class="material-symbols-outlined align-middle" style="font-size: 15px;">folder_open</span>
+                            </a>
                             <a href="{{ route('admin.ppdb.show', $reg['id']) }}" class="btn btn-sm btn-outline-primary py-1 px-2 fw-semibold" style="font-size: 12px;">
                                 Detail
                             </a>

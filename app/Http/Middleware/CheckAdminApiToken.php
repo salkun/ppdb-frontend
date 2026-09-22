@@ -15,10 +15,13 @@ class CheckAdminApiToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->session()->has('admin_api_token') || empty($request->session()->get('admin_api_token'))) {
+        $hasToken = $request->session()->has('admin_api_token') && !empty($request->session()->get('admin_api_token'));
+        $isAdmin = $request->session()->get('is_admin') === true;
+
+        if (!$hasToken || !$isAdmin) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Unauthenticated. Token admin tidak ditemukan di sesi.'
+                    'message' => 'Unauthenticated. Sesi administrator tidak sah atau telah berakhir.'
                 ], 401);
             }
 

@@ -106,8 +106,9 @@
                     <th style="width: 48px;" class="ps-3 ps-md-4 text-center">No</th>
                     <th>Calon Siswa</th>
                     <th>Email & NIK</th>
-                    <th>Nominal Biaya</th>
-                    <th>Bukti Transfer</th>
+                    <th>Nominal</th>
+                    <th>Metode</th>
+                    <th>Bukti Bayar</th>
                     <th>Status</th>
                     <th>Tanggal Masuk</th>
                     <th style="text-align: right; width: 140px;" class="pe-3 pe-md-4">Tindakan</th>
@@ -117,6 +118,7 @@
                 @forelse($payments as $index => $pay)
                     @php
                         $pStatus = $pay['payment_status'] ?? 'unpaid';
+                        $pMethod = $pay['payment_method'] ?? 'transfer';
                         $acc = $pay['account'] ?? [];
                         $proofPath = $pay['payment_proof_path'] ?? null;
                     @endphp
@@ -135,10 +137,23 @@
                             <span class="fw-bold text-dark">Rp {{ number_format($pay['payment_amount'] ?? 400000, 0, ',', '.') }}</span>
                         </td>
                         <td>
+                            @if($pMethod === 'cash')
+                                <span class="badge py-1 px-2" style="background:#ccfbf1;color:#0f766e;border:1px solid #99f6e4;">
+                                    <span class="material-symbols-outlined align-middle me-1" style="font-size:13px;">payments</span>
+                                    Tunai (Cash)
+                                </span>
+                            @else
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 px-2">
+                                    <span class="material-symbols-outlined align-middle me-1" style="font-size:13px;">account_balance</span>
+                                    Transfer (TF)
+                                </span>
+                            @endif
+                        </td>
+                        <td>
                             @if($proofPath)
-                                <a href="{{ $backendUrl . $proofPath }}" target="_blank" class="badge bg-light text-primary border text-decoration-none py-1 px-2" title="Klik untuk lihat gambar bukti">
+                                <a href="{{ ppdb_proof_url($proofPath, $backendUrl) }}" target="_blank" class="badge bg-light text-primary border text-decoration-none py-1 px-2" title="Klik untuk lihat gambar bukti">
                                     <span class="material-symbols-outlined align-middle" style="font-size:14px;">image</span>
-                                    Lihat Bukti
+                                    {{ $pMethod === 'cash' ? 'Kuitansi Tunai' : 'Struk Transfer' }}
                                 </a>
                             @else
                                 <span class="text-muted small">Tidak Ada Bukti</span>
@@ -184,24 +199,35 @@
 
                                                 @if($proofPath)
                                                     <div class="mb-3 text-center">
-                                                        <a href="{{ $backendUrl . $proofPath }}" target="_blank" class="d-inline-block border rounded-3 p-1 bg-light">
-                                                            <img src="{{ $backendUrl . $proofPath }}" alt="Bukti Transfer" style="max-height: 240px; max-width: 100%; object-fit: contain;" class="rounded">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">
+                                                            Berkas {{ $pMethod === 'cash' ? 'Kuitansi Tunai (Cash)' : 'Bukti Transfer (TF)' }}
+                                                        </div>
+                                                        <a href="{{ ppdb_proof_url($proofPath, $backendUrl) }}" target="_blank" class="d-inline-block border rounded-3 p-1 bg-light">
+                                                            <img src="{{ ppdb_proof_url($proofPath, $backendUrl) }}" alt="Bukti Pembayaran" style="max-height: 240px; max-width: 100%; object-fit: contain;" class="rounded">
                                                         </a>
                                                         <div class="mt-1">
-                                                            <a href="{{ $backendUrl . $proofPath }}" target="_blank" class="small fw-semibold text-primary text-decoration-none">
+                                                            <a href="{{ ppdb_proof_url($proofPath, $backendUrl) }}" target="_blank" class="small fw-semibold text-primary text-decoration-none">
                                                                 Buka Ukuran Penuh &rarr;
                                                             </a>
                                                         </div>
                                                     </div>
                                                 @else
                                                     <div class="alert alert-warning py-2 small mb-3">
-                                                        Pendaftar belum mengunggah bukti transfer fisik/struk.
+                                                        Pendaftar belum mengunggah berkas bukti pembayaran.
                                                     </div>
                                                 @endif
 
                                                 <div class="mb-3">
+                                                    <label class="form-label fw-bold text-dark small mb-1">Metode Pembayaran:</label>
+                                                    <select class="form-select form-select-sm" name="payment_method">
+                                                        <option value="transfer" {{ $pMethod === 'transfer' ? 'selected' : '' }}>Transfer Bank (TF)</option>
+                                                        <option value="cash" {{ $pMethod === 'cash' ? 'selected' : '' }}>Tunai / Cash di Loket</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-3">
                                                     <label class="form-label fw-bold text-dark small mb-1">Keputusan Status Pembayaran:</label>
-                                                    <select class="form-select" name="payment_status" required>
+                                                    <select class="form-select form-select-sm" name="payment_status" required>
                                                         <option value="paid" {{ $pStatus === 'paid' ? 'selected' : '' }}>Setujui: Lunas (PAID)</option>
                                                         <option value="rejected" {{ $pStatus === 'rejected' ? 'selected' : '' }}>Tolak: Tidak Valid (REJECTED)</option>
                                                     </select>
@@ -209,7 +235,7 @@
 
                                                 <div class="mb-3">
                                                     <label class="form-label fw-bold text-dark small mb-1">Nominal Terverifikasi (Rp):</label>
-                                                    <input type="number" class="form-control" name="payment_amount" value="{{ (int)($pay['payment_amount'] ?? 400000) }}" step="1000" required>
+                                                    <input type="number" class="form-control form-control-sm" name="payment_amount" value="{{ (int)($pay['payment_amount'] ?? 400000) }}" step="1000" required>
                                                 </div>
                                             </div>
                                             <div class="modal-footer border-top bg-light py-2">

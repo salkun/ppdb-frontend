@@ -175,17 +175,39 @@
                 <span class="badge bg-primary-subtle text-primary fw-semibold">Rp 400.000</span>
             </div>
             <div class="card-body p-3 px-md-4">
-                <!-- Struk Transfer Preview -->
+                @php
+                    $payMethod = $registration['payment_method'] ?? 'transfer';
+                @endphp
+
+                <!-- Info Metode Pembayaran -->
+                <div class="mb-3 d-flex align-items-center justify-content-between p-2 rounded-3 bg-light border">
+                    <span class="text-muted small fw-bold text-uppercase">Metode:</span>
+                    @if($payMethod === 'cash')
+                        <span class="badge py-1 px-2" style="background:#ccfbf1;color:#0f766e;border:1px solid #99f6e4;">
+                            <span class="material-symbols-outlined align-middle me-1" style="font-size:13px;">payments</span>
+                            Tunai (Cash di Loket)
+                        </span>
+                    @else
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 px-2">
+                            <span class="material-symbols-outlined align-middle me-1" style="font-size:13px;">account_balance</span>
+                            Transfer Bank (TF)
+                        </span>
+                    @endif
+                </div>
+
+                <!-- Struk Transfer / Kuitansi Tunai Preview -->
                 <div class="mb-3">
-                    <label class="text-muted small fw-bold text-uppercase d-block mb-2">Berkas Bukti Transfer</label>
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-2">
+                        Berkas {{ $payMethod === 'cash' ? 'Kuitansi Tunai (Cash)' : 'Bukti Transfer (TF)' }}
+                    </label>
                     @if($hasProof)
                         <div class="p-2 border rounded-3 bg-light text-center">
                             @php
                                 $ext = pathinfo($paymentProof, PATHINFO_EXTENSION);
                             @endphp
                             @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp']))
-                                <img src="{{ $backendUrl . $paymentProof }}" 
-                                     alt="Struk Transfer" 
+                                <img src="{{ ppdb_proof_url($paymentProof, $backendUrl) }}" 
+                                     alt="Bukti Pembayaran" 
                                      class="img-fluid rounded mb-2 border cursor-pointer"
                                      style="max-height: 180px; object-fit: contain; cursor: pointer;"
                                      data-bs-toggle="modal"
@@ -197,7 +219,7 @@
                                 </div>
                             @endif
                             <div>
-                                <a href="{{ $backendUrl . $paymentProof }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 py-1" style="font-size: 12px;">
+                                <a href="{{ ppdb_proof_url($paymentProof, $backendUrl) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 py-1" style="font-size: 12px;">
                                     Buka Ukuran Penuh &rarr;
                                 </a>
                             </div>
@@ -208,11 +230,13 @@
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content border-0 shadow rounded-3">
                                     <div class="modal-header border-bottom py-3">
-                                        <h6 class="modal-title fw-bold text-dark">Pratinjau Berkas Bukti Transfer</h6>
+                                        <h6 class="modal-title fw-bold text-dark">
+                                            Pratinjau Berkas {{ $payMethod === 'cash' ? 'Kuitansi Tunai (Cash)' : 'Bukti Transfer (TF)' }}
+                                        </h6>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                                     </div>
                                     <div class="modal-body p-3 text-center bg-light">
-                                        <img src="{{ $backendUrl . $paymentProof }}" alt="Bukti Transfer" class="img-fluid rounded shadow-sm" style="max-height: 75vh;">
+                                        <img src="{{ ppdb_proof_url($paymentProof, $backendUrl) }}" alt="Bukti Pembayaran" class="img-fluid rounded shadow-sm" style="max-height: 75vh;">
                                     </div>
                                 </div>
                             </div>
@@ -220,7 +244,7 @@
                     @else
                         <div class="p-3 border rounded-3 text-center text-muted bg-light small">
                             <span class="material-symbols-outlined d-block mb-1 text-secondary" style="font-size: 28px;">receipt_long</span>
-                            Pendaftar belum mengunggah berkas transfer.
+                            Pendaftar belum mengunggah berkas bukti pembayaran.
                         </div>
                     @endif
                 </div>
@@ -228,6 +252,13 @@
                 <!-- Form Verifikasi Pembayaran -->
                 <form action="{{ route('admin.ppdb.verify-payment', $registration['id']) }}" method="POST" class="pt-3 border-top">
                     @csrf
+                    <div class="mb-2">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1">Metode Pembayaran</label>
+                        <select class="form-select form-select-sm" name="payment_method">
+                            <option value="transfer" {{ $payMethod === 'transfer' ? 'selected' : '' }}>Transfer Bank (TF)</option>
+                            <option value="cash" {{ $payMethod === 'cash' ? 'selected' : '' }}>Tunai / Cash di Loket</option>
+                        </select>
+                    </div>
                     <div class="mb-2">
                         <label class="form-label text-muted small fw-bold text-uppercase mb-1">Status Verifikasi</label>
                         <select class="form-select form-select-sm" name="payment_status" required>
@@ -246,7 +277,72 @@
             </div>
         </div>
 
-        <!-- Panel 2: Status Penerimaan -->
+        <!-- Panel: Kelengkapan Berkas Persyaratan Siswa -->
+        @php
+            $docInfo = ppdb_get_student_documents($registration, $backendUrl);
+            $docItems = $docInfo['items'];
+            $uploadedDocsCount = $docInfo['uploaded_count'];
+        @endphp
+        <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+            <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-primary" style="font-size:20px;">folder_open</span>
+                    Berkas Persyaratan
+                </h6>
+                <span class="badge {{ $uploadedDocsCount >= 4 ? 'bg-success-subtle text-success' : ($uploadedDocsCount > 0 ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary') }} fw-semibold">
+                    {{ $uploadedDocsCount }}/4 Berkas
+                </span>
+            </div>
+            <div class="card-body p-3 px-md-4">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center small mb-1">
+                        <span class="text-muted fw-semibold">Kelengkapan Berkas</span>
+                        <span class="fw-bold {{ $uploadedDocsCount >= 4 ? 'text-success' : 'text-warning' }}">{{ round(($uploadedDocsCount / 4) * 100) }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar {{ $uploadedDocsCount >= 4 ? 'bg-success' : 'bg-warning' }}" role="progressbar" style="width: {{ ($uploadedDocsCount / 4) * 100 }}%"></div>
+                    </div>
+                </div>
+
+                <div class="list-group list-group-flush mb-3">
+                    @foreach(['kk', 'akta', 'nisn', 'foto'] as $dKey)
+                        @php $dItem = $docItems[$dKey]; @endphp
+                        <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                <span class="material-symbols-outlined {{ $dItem['has_file'] ? 'text-success' : 'text-muted' }}" style="font-size: 18px;">
+                                    {{ $dItem['has_file'] ? 'task_alt' : 'radio_button_unchecked' }}
+                                </span>
+                                <div>
+                                    <div class="fw-semibold text-dark text-truncate" style="font-size: 12.5px;">{{ $dItem['label'] }}</div>
+                                    <div class="text-muted" style="font-size: 11px;">
+                                        @if($dItem['has_file'])
+                                            <span class="text-success fw-medium">{{ strtoupper($dItem['ext']) }} Terunggah</span>
+                                        @else
+                                            <span class="text-muted">Belum ada file</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @if($dItem['has_file'])
+                                <a href="{{ $dItem['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill d-inline-flex align-items-center gap-1" style="font-size: 11px;">
+                                    <span class="material-symbols-outlined" style="font-size: 13px;">open_in_new</span>
+                                    <span>Buka</span>
+                                </a>
+                            @else
+                                <span class="badge bg-light text-muted border" style="font-size: 10px;">Kosong</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-primary w-100 fw-semibold d-inline-flex align-items-center justify-content-center gap-1" onclick="const b = document.getElementById('tab-dokumen-btn'); if(b){ new bootstrap.Tab(b).show(); b.scrollIntoView({behavior:'smooth', block:'center'}); }">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">visibility</span>
+                    <span>Lihat di Tab Berkas Lampiran &rarr;</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel 3: Status Penerimaan -->
         <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
             <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
                 <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
@@ -306,49 +402,54 @@
                     Lembar Berkas Calon Siswa
                 </div>
 
-                @if($hasForm)
-                    <ul class="nav nav-pills gap-1" id="dossierTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active py-1 px-3 fw-semibold" id="tab-biodata-btn" data-bs-toggle="pill" data-bs-target="#tab-biodata" type="button" role="tab" style="font-size: 12.5px;">
-                                Biodata
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link py-1 px-3 fw-semibold" id="tab-alamat-btn" data-bs-toggle="pill" data-bs-target="#tab-alamat" type="button" role="tab" style="font-size: 12.5px;">
-                                Domisili & Kontak
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link py-1 px-3 fw-semibold" id="tab-ortu-btn" data-bs-toggle="pill" data-bs-target="#tab-ortu" type="button" role="tab" style="font-size: 12.5px;">
-                                Orang Tua / Wali
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link py-1 px-3 fw-semibold" id="tab-all-btn" data-bs-toggle="pill" data-bs-target="#tab-all" type="button" role="tab" style="font-size: 12.5px;">
-                                Semua Data
-                            </button>
-                        </li>
-                    </ul>
-                @else
-                    <span class="badge bg-light text-muted border">BELUM MENGISI FORMULIR</span>
-                @endif
+                <ul class="nav nav-pills gap-1" id="dossierTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ $hasForm ? 'active' : '' }} py-1 px-3 fw-semibold" id="tab-biodata-btn" data-bs-toggle="pill" data-bs-target="#tab-biodata" type="button" role="tab" style="font-size: 12.5px;">
+                            Biodata
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link py-1 px-3 fw-semibold" id="tab-alamat-btn" data-bs-toggle="pill" data-bs-target="#tab-alamat" type="button" role="tab" style="font-size: 12.5px;">
+                            Domisili & Kontak
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link py-1 px-3 fw-semibold" id="tab-ortu-btn" data-bs-toggle="pill" data-bs-target="#tab-ortu" type="button" role="tab" style="font-size: 12.5px;">
+                            Orang Tua / Wali
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ !$hasForm ? 'active' : '' }} py-1 px-3 fw-semibold d-inline-flex align-items-center gap-1" id="tab-dokumen-btn" data-bs-toggle="pill" data-bs-target="#tab-dokumen" type="button" role="tab" style="font-size: 12.5px;">
+                            <span>Berkas Lampiran</span>
+                            <span class="badge {{ $uploadedDocsCount >= 4 ? 'bg-success' : 'bg-primary' }} rounded-pill" style="font-size: 10px;">{{ $uploadedDocsCount }}/4</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link py-1 px-3 fw-semibold" id="tab-all-btn" data-bs-toggle="pill" data-bs-target="#tab-all" type="button" role="tab" style="font-size: 12.5px;">
+                            Semua Data
+                        </button>
+                    </li>
+                </ul>
             </div>
 
             <div class="card-body p-3 p-md-4">
-                @if(!$hasForm)
-                    <div class="text-center py-5 text-muted">
-                        <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 40px;">feed</span>
-                        <h6 class="fw-bold text-dark">Pendaftar Belum Mengisi Formulir Pendaftaran</h6>
-                        <p class="small text-muted mb-0" style="max-width: 480px; margin: 0 auto;">
-                            Calon siswa belum melengkapi isian biodata pokok, identitas tambahan, domisili tempat tinggal, kontak, dan data orang tua/wali.
-                        </p>
-                    </div>
-                @else
-                    <div class="tab-content" id="dossierTabContent">
-                        <!-- ========================================== -->
-                        <!-- TAB 1: BIODATA & IDENTITAS                 -->
-                        <!-- ========================================== -->
-                        <div class="tab-pane fade show active" id="tab-biodata" role="tabpanel">
+                <div class="tab-content" id="dossierTabContent">
+                    <!-- ========================================== -->
+                    <!-- TAB 1: BIODATA & IDENTITAS                 -->
+                    <!-- ========================================== -->
+                    <div class="tab-pane fade {{ $hasForm ? 'show active' : '' }}" id="tab-biodata" role="tabpanel">
+                        @if(!$hasForm)
+                            <div class="text-center py-5 text-muted">
+                                <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 40px;">feed</span>
+                                <h6 class="fw-bold text-dark">Pendaftar Belum Mengisi Formulir Biodata</h6>
+                                <p class="small text-muted mb-3" style="max-width: 480px; margin: 0 auto;">
+                                    Calon siswa belum melengkapi isian biodata pokok, domisili tempat tinggal, dan data orang tua/wali. Namun Anda tetap dapat melihat berkas persyaratan pada tab <strong>Berkas Lampiran</strong>.
+                                </p>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="new bootstrap.Tab(document.getElementById('tab-dokumen-btn')).show();">
+                                    Buka Tab Berkas Lampiran Siswa &rarr;
+                                </button>
+                            </div>
+                        @else
                             <!-- Section: Biodata Pokok -->
                             <div class="mb-4">
                                 <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">1. Biodata Pokok Calon Siswa</h6>
@@ -455,12 +556,20 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
+                    </div>
 
-                        <!-- ========================================== -->
-                        <!-- TAB 2: DOMISILI & KONTAK                   -->
-                        <!-- ========================================== -->
-                        <div class="tab-pane fade" id="tab-alamat" role="tabpanel">
+                    <!-- ========================================== -->
+                    <!-- TAB 2: DOMISILI & KONTAK                   -->
+                    <!-- ========================================== -->
+                    <div class="tab-pane fade" id="tab-alamat" role="tabpanel">
+                        @if(!$hasForm)
+                            <div class="text-center py-5 text-muted">
+                                <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 40px;">location_on</span>
+                                <h6 class="fw-bold text-dark">Data Domisili &amp; Kontak Belum Diisi</h6>
+                                <p class="small text-muted mb-0">Calon siswa belum melengkapi isian alamat domisili dan kontak keluarga.</p>
+                            </div>
+                        @else
                             <!-- Section: Tempat Tinggal -->
                             <div class="mb-4">
                                 <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">1. Alamat Tempat Tinggal &amp; Domisili</h6>
@@ -547,210 +656,315 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
+                    </div>
 
                         <!-- ========================================== -->
                         <!-- TAB 3: ORANG TUA / WALI                    -->
                         <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-ortu" role="tabpanel">
-                            <!-- Sub Nav Pills Ayah / Ibu / Wali -->
-                            <ul class="nav nav-pills gap-1 mb-3 pb-2 border-bottom" id="parentSubTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active py-1 px-3 fw-semibold" id="subtab-ayah-btn" data-bs-toggle="pill" data-bs-target="#subtab-ayah" type="button" role="tab" style="font-size: 12.5px;">
-                                        Ayah Kandung
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link py-1 px-3 fw-semibold" id="subtab-ibu-btn" data-bs-toggle="pill" data-bs-target="#subtab-ibu" type="button" role="tab" style="font-size: 12.5px;">
-                                        Ibu Kandung
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link py-1 px-3 fw-semibold" id="subtab-wali-btn" data-bs-toggle="pill" data-bs-target="#subtab-wali" type="button" role="tab" style="font-size: 12.5px;">
-                                        Wali (Opsional)
-                                    </button>
-                                </li>
-                            </ul>
+                            @if(!$hasForm)
+                                <div class="text-center py-5 text-muted">
+                                    <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 40px;">family_restroom</span>
+                                    <h6 class="fw-bold text-dark">Data Orang Tua / Wali Belum Diisi</h6>
+                                    <p class="small text-muted mb-0">Calon siswa belum melengkapi isian data orang tua atau wali.</p>
+                                </div>
+                            @else
+                                <!-- Sub Nav Pills Ayah / Ibu / Wali -->
+                                <ul class="nav nav-pills gap-1 mb-3 pb-2 border-bottom" id="parentSubTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active py-1 px-3 fw-semibold" id="subtab-ayah-btn" data-bs-toggle="pill" data-bs-target="#subtab-ayah" type="button" role="tab" style="font-size: 12.5px;">
+                                            Ayah Kandung
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link py-1 px-3 fw-semibold" id="subtab-ibu-btn" data-bs-toggle="pill" data-bs-target="#subtab-ibu" type="button" role="tab" style="font-size: 12.5px;">
+                                            Ibu Kandung
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link py-1 px-3 fw-semibold" id="subtab-wali-btn" data-bs-toggle="pill" data-bs-target="#subtab-wali" type="button" role="tab" style="font-size: 12.5px;">
+                                            Wali (Opsional)
+                                        </button>
+                                    </li>
+                                </ul>
 
-                            <div class="tab-content" id="parentSubContent">
-                                <!-- Sub Pane Ayah -->
-                                <div class="tab-pane fade show active" id="subtab-ayah" role="tabpanel">
-                                    @if(!empty($father))
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Ayah</div>
-                                                    <div class="fw-bold text-dark">{{ $father['full_name'] ?? ($father['name'] ?? '-') }}</div>
+                                <div class="tab-content" id="parentSubContent">
+                                    <!-- Sub Pane Ayah -->
+                                    <div class="tab-pane fade show active" id="subtab-ayah" role="tabpanel">
+                                        @if(!empty($father))
+                                            <div class="row g-2">
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Ayah</div>
+                                                        <div class="fw-bold text-dark">{{ $father['full_name'] ?? ($father['name'] ?? '-') }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">NIK Ayah</div>
+                                                        <div class="fw-semibold text-dark">{{ $father['nik'] ?? '-' }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
+                                                        <div class="fw-semibold text-dark">{{ $father['birth_year'] ?? '-' }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
+                                                        <div class="fw-semibold text-dark">{{ $educationList[$father['education_code'] ?? ''] ?? ($father['education'] ?? ($father['education_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan Utama</div>
+                                                        <div class="fw-semibold text-dark">{{ $occupationList[$father['occupation_code'] ?? ''] ?? ($father['occupation'] ?? ($father['occupation_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
+                                                        <div class="fw-semibold text-dark">{{ $incomeList[$father['income_code'] ?? ''] ?? ($father['monthly_income'] ?? ($father['income_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
+                                                        <div class="fw-semibold text-dark">{{ $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Email Ayah</div>
+                                                        <div class="fw-semibold text-dark">{{ $father['email'] ?? '-' }}</div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">NIK Ayah</div>
-                                                    <div class="fw-semibold text-dark">{{ $father['nik'] ?? '-' }}</div>
+                                        @else
+                                            <div class="p-4 text-center border rounded-3 bg-light text-muted small">
+                                                Data ayah kandung belum tercatat.
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Sub Pane Ibu -->
+                                    <div class="tab-pane fade" id="subtab-ibu" role="tabpanel">
+                                        @if(!empty($mother))
+                                            <div class="row g-2">
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Ibu</div>
+                                                        <div class="fw-bold text-dark">{{ $mother['full_name'] ?? ($mother['name'] ?? '-') }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">NIK Ibu</div>
+                                                        <div class="fw-semibold text-dark">{{ $mother['nik'] ?? '-' }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
+                                                        <div class="fw-semibold text-dark">{{ $mother['birth_year'] ?? '-' }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
+                                                        <div class="fw-semibold text-dark">{{ $educationList[$mother['education_code'] ?? ''] ?? ($mother['education'] ?? ($mother['education_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan Utama</div>
+                                                        <div class="fw-semibold text-dark">{{ $occupationList[$mother['occupation_code'] ?? ''] ?? ($mother['occupation'] ?? ($mother['occupation_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
+                                                        <div class="fw-semibold text-dark">{{ $incomeList[$mother['income_code'] ?? ''] ?? ($mother['monthly_income'] ?? ($mother['income_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
+                                                        <div class="fw-semibold text-dark">{{ $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Email Ibu</div>
+                                                        <div class="fw-semibold text-dark">{{ $mother['email'] ?? '-' }}</div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
-                                                    <div class="fw-semibold text-dark">{{ $father['birth_year'] ?? '-' }}</div>
+                                        @else
+                                            <div class="p-4 text-center border rounded-3 bg-light text-muted small">
+                                                Data ibu kandung belum tercatat.
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Sub Pane Wali -->
+                                    <div class="tab-pane fade" id="subtab-wali" role="tabpanel">
+                                        @if(!empty($guardian))
+                                            <div class="row g-2">
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Wali</div>
+                                                        <div class="fw-bold text-dark">{{ $guardian['full_name'] ?? ($guardian['name'] ?? '-') }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">NIK Wali</div>
+                                                        <div class="fw-semibold text-dark">{{ $guardian['nik'] ?? '-' }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
+                                                        <div class="fw-semibold text-dark">{{ $guardian['birth_year'] ?? '-' }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
+                                                        <div class="fw-semibold text-dark">{{ $educationList[$guardian['education_code'] ?? ''] ?? ($guardian['education'] ?? ($guardian['education_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan</div>
+                                                        <div class="fw-semibold text-dark">{{ $occupationList[$guardian['occupation_code'] ?? ''] ?? ($guardian['occupation'] ?? ($guardian['occupation_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
+                                                        <div class="fw-semibold text-dark">{{ $incomeList[$guardian['income_code'] ?? ''] ?? ($guardian['monthly_income'] ?? ($guardian['income_code'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
+                                                        <div class="fw-semibold text-dark">{{ $guardian['phone_number'] ?? ($guardian['whatsapp_number'] ?? ($guardian['phone'] ?? '-')) }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="p-3 bg-light rounded-3 border h-100">
+                                                        <div class="text-muted small fw-bold text-uppercase mb-1">Email Wali</div>
+                                                        <div class="fw-semibold text-dark">{{ $guardian['email'] ?? '-' }}</div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
-                                                    <div class="fw-semibold text-dark">{{ $educationList[$father['education_code'] ?? ''] ?? ($father['education'] ?? ($father['education_code'] ?? '-')) }}</div>
-                                                </div>
+                                        @else
+                                            <div class="p-4 text-center border rounded-3 bg-light text-muted small">
+                                                Data wali tidak diisi (opsional).
                                             </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan Utama</div>
-                                                    <div class="fw-semibold text-dark">{{ $occupationList[$father['occupation_code'] ?? ''] ?? ($father['occupation'] ?? ($father['occupation_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
-                                                    <div class="fw-semibold text-dark">{{ $incomeList[$father['income_code'] ?? ''] ?? ($father['monthly_income'] ?? ($father['income_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
-                                                    <div class="fw-semibold text-dark">{{ $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Email Ayah</div>
-                                                    <div class="fw-semibold text-dark">{{ $father['email'] ?? '-' }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="p-4 text-center border rounded-3 bg-light text-muted small">
-                                            Data ayah kandung belum tercatat.
-                                        </div>
-                                    @endif
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- TAB: BERKAS LAMPIRAN SISWA                 -->
+                        <!-- ========================================== -->
+                        <div class="tab-pane fade {{ !$hasForm ? 'show active' : '' }}" id="tab-dokumen" role="tabpanel">
+                            <div class="mb-4">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom pb-2 mb-3">
+                                    <h6 class="fw-bold text-dark mb-0" style="font-size: 14px;">
+                                        Berkas Dokumen Persyaratan Calon Siswa
+                                    </h6>
+                                    <span class="badge {{ $uploadedDocsCount >= 4 ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' }} fw-semibold px-2 py-1">
+                                        {{ $uploadedDocsCount }} dari 4 Berkas Persyaratan Terunggah
+                                    </span>
                                 </div>
 
-                                <!-- Sub Pane Ibu -->
-                                <div class="tab-pane fade" id="subtab-ibu" role="tabpanel">
-                                    @if(!empty($mother))
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Ibu</div>
-                                                    <div class="fw-bold text-dark">{{ $mother['full_name'] ?? ($mother['name'] ?? '-') }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">NIK Ibu</div>
-                                                    <div class="fw-semibold text-dark">{{ $mother['nik'] ?? '-' }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
-                                                    <div class="fw-semibold text-dark">{{ $mother['birth_year'] ?? '-' }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
-                                                    <div class="fw-semibold text-dark">{{ $educationList[$mother['education_code'] ?? ''] ?? ($mother['education'] ?? ($mother['education_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan Utama</div>
-                                                    <div class="fw-semibold text-dark">{{ $occupationList[$mother['occupation_code'] ?? ''] ?? ($mother['occupation'] ?? ($mother['occupation_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
-                                                    <div class="fw-semibold text-dark">{{ $incomeList[$mother['income_code'] ?? ''] ?? ($mother['monthly_income'] ?? ($mother['income_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
-                                                    <div class="fw-semibold text-dark">{{ $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Email Ibu</div>
-                                                    <div class="fw-semibold text-dark">{{ $mother['email'] ?? '-' }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="p-4 text-center border rounded-3 bg-light text-muted small">
-                                            Data ibu kandung belum tercatat.
-                                        </div>
-                                    @endif
-                                </div>
+                                <div class="row g-3">
+                                    @foreach(['kk', 'akta', 'nisn', 'foto', 'bukti_bayar'] as $dKey)
+                                        @php $d = $docItems[$dKey]; @endphp
+                                        <div class="col-md-6 {{ $dKey === 'bukti_bayar' ? 'col-12' : '' }}">
+                                            <div class="p-3 bg-light rounded-3 border h-100 d-flex flex-column justify-content-between">
+                                                <div>
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                                                            <span class="material-symbols-outlined text-primary" style="font-size: 18px;">
+                                                                {{ $dKey === 'foto' ? 'account_box' : ($dKey === 'bukti_bayar' ? 'receipt_long' : 'description') }}
+                                                            </span>
+                                                            <span>{{ $d['label'] }}</span>
+                                                        </div>
+                                                        <span class="badge {{ $d['has_file'] ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }}">
+                                                            {{ $d['has_file'] ? '✓ Tersedia' : 'Belum Ada' }}
+                                                        </span>
+                                                    </div>
 
-                                <!-- Sub Pane Wali -->
-                                <div class="tab-pane fade" id="subtab-wali" role="tabpanel">
-                                    @if(!empty($guardian))
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nama Lengkap Wali</div>
-                                                    <div class="fw-bold text-dark">{{ $guardian['full_name'] ?? ($guardian['name'] ?? '-') }}</div>
+                                                    @if($d['has_file'])
+                                                        @if($d['is_image'])
+                                                            <div class="text-center my-2 p-2 bg-white rounded border">
+                                                                <a href="{{ $d['url'] }}" target="_blank" class="d-inline-block" data-bs-toggle="modal" data-bs-target="#previewModal_{{ $dKey }}">
+                                                                    <img src="{{ $d['url'] }}" alt="{{ $d['label'] }}" style="max-height: 150px; max-width: 100%; object-fit: contain;" class="rounded">
+                                                                </a>
+                                                                <div class="mt-1">
+                                                                    <button type="button" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#previewModal_{{ $dKey }}">
+                                                                        Perbesar Pratinjau &rarr;
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Modal Zoom Berkas -->
+                                                            <div class="modal fade" id="previewModal_{{ $dKey }}" tabindex="-1" aria-hidden="true">
+                                                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                                                    <div class="modal-content border-0 shadow rounded-3">
+                                                                        <div class="modal-header border-bottom py-3">
+                                                                            <h6 class="modal-title fw-bold text-dark">{{ $d['label'] }} — {{ $name }}</h6>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                                                        </div>
+                                                                        <div class="modal-body text-center bg-light p-3">
+                                                                            <img src="{{ $d['url'] }}" alt="{{ $d['label'] }}" class="img-fluid rounded shadow-sm" style="max-height: 75vh;">
+                                                                        </div>
+                                                                        <div class="modal-footer border-top py-2">
+                                                                            <a href="{{ $d['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary">Buka di Tab Baru</a>
+                                                                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @else
+                                                            <div class="py-4 text-center text-primary bg-white rounded border my-2">
+                                                                <span class="material-symbols-outlined d-block text-danger" style="font-size: 38px;">picture_as_pdf</span>
+                                                                <div class="small fw-semibold mt-1">Dokumen PDF Terlampir</div>
+                                                                <div class="text-muted" style="font-size: 11px;">Format dokumen resmi (.pdf)</div>
+                                                            </div>
+                                                        @endif
+                                                    @else
+                                                        <div class="text-muted small py-4 text-center bg-white rounded border my-2">
+                                                            <span class="material-symbols-outlined text-secondary d-block mb-1" style="font-size: 28px;">upload_file</span>
+                                                            Pendaftar belum mengunggah dokumen {{ strtolower($d['label']) }}.
+                                                        </div>
+                                                    @endif
                                                 </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">NIK Wali</div>
-                                                    <div class="fw-semibold text-dark">{{ $guardian['nik'] ?? '-' }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Tahun Lahir</div>
-                                                    <div class="fw-semibold text-dark">{{ $guardian['birth_year'] ?? '-' }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pendidikan Terakhir</div>
-                                                    <div class="fw-semibold text-dark">{{ $educationList[$guardian['education_code'] ?? ''] ?? ($guardian['education'] ?? ($guardian['education_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Pekerjaan</div>
-                                                    <div class="fw-semibold text-dark">{{ $occupationList[$guardian['occupation_code'] ?? ''] ?? ($guardian['occupation'] ?? ($guardian['occupation_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Penghasilan Bulanan</div>
-                                                    <div class="fw-semibold text-dark">{{ $incomeList[$guardian['income_code'] ?? ''] ?? ($guardian['monthly_income'] ?? ($guardian['income_code'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Nomor HP / WhatsApp</div>
-                                                    <div class="fw-semibold text-dark">{{ $guardian['phone_number'] ?? ($guardian['whatsapp_number'] ?? ($guardian['phone'] ?? '-')) }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-light rounded-3 border h-100">
-                                                    <div class="text-muted small fw-bold text-uppercase mb-1">Email Wali</div>
-                                                    <div class="fw-semibold text-dark">{{ $guardian['email'] ?? '-' }}</div>
-                                                </div>
+
+                                                @if($d['has_file'])
+                                                    <div class="d-flex gap-2 mt-2">
+                                                        <a href="{{ $d['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 d-inline-flex align-items-center justify-content-center gap-1" style="font-size: 12px;">
+                                                            <span class="material-symbols-outlined" style="font-size: 15px;">open_in_new</span>
+                                                            <span>Buka Ukuran Penuh</span>
+                                                        </a>
+                                                        <a href="{{ $d['url'] }}" download class="btn btn-sm btn-light border text-secondary px-2" title="Unduh Berkas">
+                                                            <span class="material-symbols-outlined" style="font-size: 15px;">download</span>
+                                                        </a>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
-                                    @else
-                                        <div class="p-4 text-center border rounded-3 bg-light text-muted small">
-                                            Data wali tidak diisi (opsional).
-                                        </div>
-                                    @endif
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
@@ -759,12 +973,19 @@
                         <!-- TAB 4: SEMUA DATA LENGKAP                  -->
                         <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-all" role="tabpanel">
-                            <!-- All Section 1 -->
-                            <div class="mb-4">
-                                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">1. Biodata Pokok Siswa</h6>
-                                <div class="row g-2">
-                                    <div class="col-md-6">
-                                        <div class="p-3 bg-light rounded-3 border h-100">
+                            @if(!$hasForm)
+                                <div class="text-center py-5 text-muted">
+                                    <span class="material-symbols-outlined text-secondary mb-2" style="font-size: 40px;">feed</span>
+                                    <h6 class="fw-bold text-dark">Data Formulir Belum Diisi</h6>
+                                    <p class="small text-muted mb-0">Calon siswa belum melengkapi isian formulir pendaftaran.</p>
+                                </div>
+                            @else
+                                <!-- All Section 1 -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3" style="font-size: 14px;">1. Biodata Pokok Siswa</h6>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded-3 border h-100">
                                             <div class="text-muted small fw-bold text-uppercase mb-1">NIK Siswa</div>
                                             <div class="fw-bold text-dark fs-6">{{ $formData['nik'] ?? '-' }}</div>
                                         </div>
@@ -944,3 +1165,19 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tab') === 'dokumen' || window.location.hash === '#tab-dokumen') {
+            const tabBtn = document.getElementById('tab-dokumen-btn');
+            if (tabBtn) {
+                const tabInstance = new bootstrap.Tab(tabBtn);
+                tabInstance.show();
+                tabBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+</script>
+@endpush

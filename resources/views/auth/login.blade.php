@@ -12,15 +12,15 @@
             <div class="lp-auth-card-top-accent"></div>
 
             <div class="lp-auth-header">
-                <a href="{{ route('home') }}" class="lp-auth-icon-badge" title="Kembali ke Beranda">
-                    <span class="material-symbols-outlined" style="font-size: 28px;">school</span>
+                <a href="{{ route('home') }}" class="lp-auth-icon-badge" style="background: transparent; box-shadow: none; border: none; padding: 0;" title="Kembali ke Beranda">
+                    <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 56px; height: 56px; object-fit: contain;">
                 </a>
                 <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 8px;">
                     <span class="lp-badge lp-badge-blue" style="font-size: 11.5px;">
                         Portal Calon Siswa
                     </span>
                     <span class="lp-badge lp-badge-yellow" style="font-size: 11.5px;">
-                        PMB TP {{ date('Y') }}–{{ date('Y') + 1 }}
+                        PMB TP 2027–2028
                     </span>
                 </div>
                 <h1 class="lp-auth-title">Masuk ke Portal Murid</h1>

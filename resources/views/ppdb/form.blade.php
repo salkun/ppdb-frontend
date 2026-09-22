@@ -740,14 +740,21 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="father_occupation" class="db-label">Pekerjaan <span class="text-danger">*</span></label>
-                                <select class="db-select" id="father_occupation" name="father_occupation" required {{ $isLocked ? 'disabled' : '' }}>
-                                    <option value="">Pilih Pekerjaan</option>
-                                    @php $fOcc = old('father_occupation', $father['occupation_code'] ?? ''); @endphp
-                                    @foreach($occupationList as $code => $label)
-                                        <option value="{{ $code }}" {{ $fOcc == $code ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endforeach
-                                </select>
+                                <label for="father_occupation" class="db-label">Pekerjaan Ayah <span class="text-danger">*</span></label>
+                                @php
+                                    $fOccVal = old('father_occupation', $father['occupation_code'] ?? ($father['occupation'] ?? ''));
+                                    if (isset($occupationList[$fOccVal])) {
+                                        $fOccVal = $occupationList[$fOccVal];
+                                    }
+                                @endphp
+                                <input type="text"
+                                       class="db-input"
+                                       id="father_occupation"
+                                       name="father_occupation"
+                                       value="{{ $fOccVal }}"
+                                       placeholder="Contoh: Wiraswasta, PNS, Petani, dll"
+                                       required
+                                       {{ $isLocked ? 'disabled' : '' }}>
                             </div>
 
                             <div class="col-md-4">
@@ -856,14 +863,21 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="mother_occupation" class="db-label">Pekerjaan <span class="text-danger">*</span></label>
-                                <select class="db-select" id="mother_occupation" name="mother_occupation" required {{ $isLocked ? 'disabled' : '' }}>
-                                    <option value="">Pilih Pekerjaan</option>
-                                    @php $mOcc = old('mother_occupation', $mother['occupation_code'] ?? ''); @endphp
-                                    @foreach($occupationList as $code => $label)
-                                        <option value="{{ $code }}" {{ $mOcc == $code ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endforeach
-                                </select>
+                                <label for="mother_occupation" class="db-label">Pekerjaan Ibu <span class="text-danger">*</span></label>
+                                @php
+                                    $mOccVal = old('mother_occupation', $mother['occupation_code'] ?? ($mother['occupation'] ?? ''));
+                                    if (isset($occupationList[$mOccVal])) {
+                                        $mOccVal = $occupationList[$mOccVal];
+                                    }
+                                @endphp
+                                <input type="text"
+                                       class="db-input"
+                                       id="mother_occupation"
+                                       name="mother_occupation"
+                                       value="{{ $mOccVal }}"
+                                       placeholder="Contoh: Ibu Rumah Tangga, Guru, Pedagang, dll"
+                                       required
+                                       {{ $isLocked ? 'disabled' : '' }}>
                             </div>
 
                             <div class="col-md-4">
@@ -979,14 +993,20 @@
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label for="guardian_occupation" class="db-label">Pekerjaan</label>
-                                    <select class="db-select" id="guardian_occupation" name="guardian_occupation" {{ $isLocked ? 'disabled' : '' }}>
-                                        <option value="">Pilih Pekerjaan</option>
-                                        @php $gOcc = old('guardian_occupation', $guardian['occupation_code'] ?? ''); @endphp
-                                        @foreach($occupationList as $code => $label)
-                                            <option value="{{ $code }}" {{ $gOcc == $code ? 'selected' : '' }}>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label for="guardian_occupation" class="db-label">Pekerjaan Wali</label>
+                                    @php
+                                        $gOccVal = old('guardian_occupation', $guardian['occupation_code'] ?? ($guardian['occupation'] ?? ''));
+                                        if (isset($occupationList[$gOccVal])) {
+                                            $gOccVal = $occupationList[$gOccVal];
+                                        }
+                                    @endphp
+                                    <input type="text"
+                                           class="db-input"
+                                           id="guardian_occupation"
+                                           name="guardian_occupation"
+                                           value="{{ $gOccVal }}"
+                                           placeholder="Contoh: Pensiunan, Wiraswasta, dll"
+                                           {{ $isLocked ? 'disabled' : '' }}>
                                 </div>
 
                                 <div class="col-md-4">

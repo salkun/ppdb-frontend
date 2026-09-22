@@ -6,6 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'Admin Panel PPDB') — SMP Al-Muhajirin</title>
 
+    <!-- Official Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('logo/favicon-64x64.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo/favicon-128x128.png') }}">
+
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,8 +40,8 @@
             <div>
                 <!-- Brand Header -->
                 <a href="{{ route('admin.ppdb.index') }}" class="admin-brand">
-                    <div class="admin-brand-icon">
-                        <span class="material-symbols-outlined" style="font-size:24px;">admin_panel_settings</span>
+                    <div class="admin-brand-icon" style="background: transparent; box-shadow: none;">
+                        <img src="{{ asset('logo/logo.png') }}" alt="Logo SMP Al-Muhajirin" style="width: 36px; height: 36px; object-fit: contain;">
                     </div>
                     <div>
                         <div class="admin-brand-title">PPDB Admin</div>
@@ -131,8 +136,8 @@
         <div class="offcanvas offcanvas-start" tabindex="-1" id="adminMobileDrawer" aria-labelledby="adminMobileDrawerLabel" style="width: 280px;">
             <div class="offcanvas-header border-bottom p-3">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="admin-brand-icon" style="width: 36px; height: 36px;">
-                        <span class="material-symbols-outlined" style="font-size:20px;">admin_panel_settings</span>
+                    <div class="admin-brand-icon" style="width: 36px; height: 36px; background: transparent; box-shadow: none;">
+                        <img src="{{ asset('logo/logo.png') }}" alt="Logo SMP Al-Muhajirin" style="width: 34px; height: 34px; object-fit: contain;">
                     </div>
                     <div>
                         <div class="fw-bold text-dark" style="font-size: 15px;">PPDB Admin</div>
@@ -234,6 +239,15 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
+                    <!-- One-Click Bulk Sync to Master API -->
+                    <form action="{{ route('admin.ppdb.sync') }}" method="POST" class="d-inline mb-0">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-success d-inline-flex align-items-center gap-1 py-1 px-3 fw-semibold shadow-sm" style="font-size: 12px;" onclick="return confirm('Kirim seluruh data pendaftar & verifikasi lokal ke Master Data API?')">
+                            <span class="material-symbols-outlined" style="font-size:16px;">sync</span>
+                            <span>Sinkron ke Master API</span>
+                        </button>
+                    </form>
+
                     <span class="badge bg-white text-secondary border d-none d-md-inline-flex align-items-center gap-1 py-2 px-3 fw-medium" style="font-size: 12px;">
                         <span class="material-symbols-outlined" style="font-size:16px;">calendar_today</span>
                         {{ date('d M Y') }}

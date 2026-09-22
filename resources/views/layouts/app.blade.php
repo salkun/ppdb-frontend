@@ -6,6 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'Portal SPMB Online') — Sistem Penerimaan Murid Baru</title>
 
+    <!-- Official Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('logo/favicon-64x64.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo/favicon-128x128.png') }}">
+
     <!-- Google Fonts: Geist Sans, Geist Mono, Newsreader (Editorial Serif) + Landing Page Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,14 +42,14 @@
                 <div>
                     <!-- Brand -->
                     <a class="db-sidebar-brand" href="{{ route('dashboard') }}">
-                        <div class="db-sidebar-brand-icon">
-                            <span class="material-symbols-outlined" style="font-size:24px;">school</span>
+                        <div class="db-sidebar-brand-icon" style="background: transparent; box-shadow: none;">
+                            <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 38px; height: 38px; object-fit: contain;">
                         </div>
                         <div>
                             <span class="db-sidebar-brand-text">PPDB Online</span>
                             <div class="db-sidebar-brand-sub">
                                 <span class="db-sidebar-brand-dot"></span>
-                                <span>PORTAL SISWA {{ date('Y') }}/{{ date('Y') + 1 }}</span>
+                                <span>SMPS2 AL-MUHAJIRIN</span>
                             </div>
                         </div>
                     </a>
@@ -107,12 +112,12 @@
             <div class="offcanvas offcanvas-start p-3" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="width:300px;background:#fff;border-right:1px solid var(--lp-surface-container);font-family:var(--font-landing);">
                 <div class="offcanvas-header pb-3 border-bottom px-1" style="border-color:var(--lp-surface-container)!important;">
                     <div style="display:flex;align-items:center;gap:10px;">
-                        <div class="db-sidebar-brand-icon" style="width:38px;height:38px;">
-                            <span class="material-symbols-outlined" style="font-size:20px;">school</span>
+                        <div class="db-sidebar-brand-icon" style="width:38px;height:38px;background:transparent;box-shadow:none;">
+                            <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 36px; height: 36px; object-fit: contain;">
                         </div>
                         <div>
                             <span style="font-weight:700;font-size:15px;color:var(--lp-on-surface);display:block;">PPDB Online</span>
-                            <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">Portal Siswa {{ date('Y') }}/{{ date('Y') + 1 }}</span>
+                            <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">SMPS2 AL-MUHAJIRIN</span>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup"></button>
@@ -241,14 +246,14 @@
         <header class="lp-navbar" style="font-family: var(--font-landing);">
             <div class="lp-navbar-inner">
                 <a class="lp-brand" href="{{ route('home') }}">
-                    <div class="lp-brand-icon">
-                        <span class="material-symbols-outlined" style="font-size:26px;">school</span>
+                    <div class="lp-brand-icon" style="background: transparent; box-shadow: none;">
+                        <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 38px; height: 38px; object-fit: contain;">
                     </div>
                     <div>
                         <span class="lp-brand-text">SMPS2 Al-Muhajirin</span>
                         <div class="lp-brand-sub">
                             <span class="lp-brand-dot"></span>
-                            <span class="lp-brand-badge">PMB TP {{ date('Y') }}–{{ date('Y') + 1 }}</span>
+                            <span class="lp-brand-badge">PMB TP 2027–2028</span>
                         </div>
                     </div>
                 </a>
@@ -293,12 +298,12 @@
             <div class="lp-mobile-panel">
                 <div class="lp-mobile-panel-header">
                     <div style="display:flex;align-items:center;gap:8px;">
-                        <div class="lp-brand-icon" style="width:36px;height:36px;">
-                            <span class="material-symbols-outlined" style="font-size:20px;">school</span>
+                        <div class="lp-brand-icon" style="width:36px;height:36px;background:transparent;box-shadow:none;">
+                            <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 34px; height: 34px; object-fit: contain;">
                         </div>
                         <div>
                             <span style="font-weight:700;font-size:15px;color:var(--lp-on-surface);display:block;">SMPS2 Al-Muhajirin</span>
-                            <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">PMB TP {{ date('Y') }}–{{ date('Y') + 1 }}</span>
+                            <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">PMB TP 2027–2028</span>
                         </div>
                     </div>
                     <button onclick="document.getElementById('lpMobileDrawer').classList.remove('open')" style="background:none;border:none;cursor:pointer;padding:4px;" aria-label="Tutup">
@@ -388,8 +393,8 @@
                 <div class="lp-footer-grid">
                     <div>
                         <div class="lp-footer-brand">
-                            <div class="lp-footer-brand-icon">
-                                <span class="material-symbols-outlined" style="font-size:24px;">school</span>
+                            <div class="lp-footer-brand-icon" style="background: rgba(255,255,255,0.08); box-shadow: none;">
+                                <img src="{{ asset('logo/logo-white.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 34px; height: 34px; object-fit: contain;">
                             </div>
                             <div>
                                 <span style="font-size:18px;font-weight:700;color:#fff;line-height:1;">SMPS2 Al-Muhajirin</span>
@@ -436,7 +441,7 @@
                         <span class="lp-footer-dot"></span>
                         <span style="color:var(--lp-primary-light);font-weight:700;">100% Berkas Digital</span>
                         <span class="lp-footer-dot"></span>
-                        <span style="color:#fff;font-weight:600;">PPDB TP {{ date('Y') }}–{{ date('Y') + 1 }}</span>
+                        <span style="color:#fff;font-weight:600;">PPDB TP 2027–2028</span>
                     </div>
                 </div>
             </div>

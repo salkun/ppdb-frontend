@@ -58,6 +58,34 @@ class AdminPpdbTest extends TestCase
     }
 
     /**
+     * Test admin can login using local seeded MySQL account when API backend is offline.
+     */
+    public function test_admin_can_login_with_local_seeded_account(): void
+    {
+        \App\Models\User::updateOrCreate(
+            ['email' => 'admin@almuhajirin.sch.id'],
+            [
+                'name' => 'admin',
+                'password' => \Illuminate\Support\Facades\Hash::make('admin123'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        Http::fake([
+            '*/api/auth/login' => Http::response(['detail' => 'Service Unavailable'], 503),
+        ]);
+
+        $response = $this->post('/admin/login', [
+            'username' => 'admin',
+            'password' => 'admin123',
+        ]);
+
+        $response->assertRedirect('/admin/ppdb');
+        $this->assertTrue(session('is_admin'));
+        $this->assertStringStartsWith('local_admin_', session('admin_api_token'));
+    }
+
+    /**
      * Test admin dashboard renders with mock registrations.
      */
     public function test_admin_dashboard_renders_registrations_table(): void
@@ -371,6 +399,74 @@ class AdminPpdbTest extends TestCase
     }
 
     /**
+     * Test admin can view student uploaded documents in dossier and modal.
+     */
+    public function test_admin_can_view_student_uploaded_documents_in_dossier_and_modal(): void
+    {
+        $accId = (string) \Illuminate\Support\Str::uuid();
+        $regId = (string) \Illuminate\Support\Str::uuid();
+
+        $account = \App\Models\PpdbAccount::create([
+            'id' => $accId,
+            'nik' => '3201019988776655',
+            'full_name' => 'Siti Berkas Nurhaliza',
+            'email' => 'siti.berkas.' . uniqid() . '@example.com',
+            'password' => bcrypt('secret123'),
+        ]);
+
+        $reg = \App\Models\PpdbRegistration::create([
+            'id' => $regId,
+            'account_id' => $account->id,
+            'payment_status' => 'paid',
+            'payment_proof_path' => 'uploads/ppdb_payments/proof-sample.jpg',
+            'registration_status' => 'pending',
+            'sync_status' => 'pending',
+            'form_data' => [
+                'full_name' => 'Siti Berkas Nurhaliza',
+                'nik' => '3201019988776655',
+                'documents' => [
+                    'kk' => 'uploads/ppdb_documents/kk_sample.pdf',
+                    'akta' => 'uploads/ppdb_documents/akta_sample.jpg',
+                    'nisn' => 'uploads/ppdb_documents/nisn_sample.jpg',
+                    'foto' => 'uploads/ppdb_documents/foto_sample.jpg',
+                ],
+            ],
+        ]);
+
+        try {
+            // 1. Cek pada halaman Data Berkas (/admin/ppdb/documents)
+            $docResponse = $this->withSession([
+                'admin_api_token' => 'admin-jwt-token-12345',
+                'is_admin' => true,
+            ])->get('/admin/ppdb/documents');
+
+            $docResponse->assertStatus(200);
+            $docResponse->assertSee('Siti Berkas Nurhaliza');
+            $docResponse->assertSee('docsModalDoc' . $regId);
+            $docResponse->assertSee('Kartu Keluarga (KK)');
+            $docResponse->assertSee('Akta Kelahiran');
+            $docResponse->assertSee('Pas Foto 3x4');
+
+            // 2. Cek pada halaman Detail Siswa / Dossier (/admin/ppdb/registrations/{id})
+            $showResponse = $this->withSession([
+                'admin_api_token' => 'admin-jwt-token-12345',
+                'is_admin' => true,
+            ])->get('/admin/ppdb/registrations/' . $reg->id);
+
+            $showResponse->assertStatus(200);
+            $showResponse->assertSee('Berkas Persyaratan');
+            $showResponse->assertSee('Berkas Lampiran');
+            $showResponse->assertSee('Kartu Keluarga (KK)');
+            $showResponse->assertSee('Dokumen PDF Terlampir');
+            $showResponse->assertSee('uploads/ppdb_documents/kk_sample.pdf');
+            $showResponse->assertSee('uploads/ppdb_documents/akta_sample.jpg');
+        } finally {
+            $reg->forceDelete();
+            $account->forceDelete();
+        }
+    }
+
+    /**
      * Test admin payments module renders.
      */
     public function test_admin_payments_module_renders(): void
@@ -614,7 +710,8 @@ class AdminPpdbTest extends TestCase
 
         $response->assertRedirect('/admin/ppdb/users');
         $response->assertSessionHas('success');
-        $this->assertStringContainsString('NewPassword123!', session('success'));
+        $this->assertStringContainsString('Password baru berhasil disetel', session('success'));
+        $this->assertStringNotContainsString('NewPassword123!', session('success'));
     }
 
     /**

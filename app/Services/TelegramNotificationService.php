@@ -13,8 +13,8 @@ class TelegramNotificationService
 
     public function __construct()
     {
-        $this->botToken = config('services.telegram.bot_token');
-        $this->chatId = config('services.telegram.panitia_chat_id');
+        $this->botToken = trim((string) config('services.telegram.bot_token', ''));
+        $this->chatId = trim((string) config('services.telegram.panitia_chat_id', ''));
     }
 
     /**
@@ -34,7 +34,7 @@ class TelegramNotificationService
      * @param string|null $registrationId
      * @return bool
      */
-    public function sendPaymentProofNotification(UploadedFile $file, array $studentData, ?string $registrationId = null): bool
+    public function sendPaymentProofNotification(UploadedFile $file, array $studentData, ?string $registrationId = null, string $paymentMethod = 'transfer'): bool
     {
         if (!$this->isConfigured()) {
             Log::info('Telegram Notification diabaikan: TELEGRAM_BOT_TOKEN atau TELEGRAM_PANITIA_CHAT_ID belum disetel di .env.');
@@ -47,6 +47,7 @@ class TelegramNotificationService
             $email = htmlspecialchars($studentData['email'] ?? '-', ENT_QUOTES, 'UTF-8');
             $uploadTime = now()->translatedFormat('d M Y, H:i') . ' WIB';
             $nominal = 'Rp 400.000';
+            $methodLabel = ($paymentMethod === 'cash') ? 'Tunai (Cash di Loket)' : 'Transfer Bank (TF)';
 
             // URL langsung ke detail pendaftar di admin panel
             $adminUrl = !empty($registrationId)
@@ -57,11 +58,12 @@ class TelegramNotificationService
                 ? "• <b>NIK:</b> <code>" . htmlspecialchars($studentData['nik'], ENT_QUOTES, 'UTF-8') . "</code>\n"
                 : "";
 
-            $caption = "📢 <b>NOTIFIKASI PEMBAYARAN PPDB BARU</b>\n\n"
-                . "Telah diterima unggahan bukti transfer pendaftaran:\n"
+            $caption = "📢 <b>NOTIFIKASI BUKTI PEMBAYARAN PPDB</b>\n\n"
+                . "Telah diterima unggahan bukti pembayaran pendaftaran:\n"
                 . "• <b>Nama Siswa:</b> {$fullName}\n"
                 . $nikLine
                 . "• <b>Email:</b> {$email}\n"
+                . "• <b>Metode:</b> <b>{$methodLabel}</b>\n"
                 . "• <b>Nominal:</b> <b>{$nominal}</b> (Biaya Registrasi)\n"
                 . "• <b>Waktu:</b> {$uploadTime}\n\n"
                 . "🔗 <b>Tindakan Panitia:</b>\n"

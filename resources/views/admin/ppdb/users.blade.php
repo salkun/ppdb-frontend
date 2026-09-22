@@ -184,6 +184,13 @@
 
         <!-- Tombol Tambah & Import User -->
         <div class="col-lg-5 d-flex justify-content-lg-end gap-2 flex-wrap">
+            <form action="{{ route('admin.ppdb.sync') }}" method="POST" class="d-inline mb-0">
+                @csrf
+                <button type="submit" class="btn btn-success fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3" onclick="return confirm('Kirim seluruh data lokal yang belum tersinkron ke Master Data API?')">
+                    <span class="material-symbols-outlined" style="font-size:18px;">sync</span>
+                    <span>Sinkron ke Master API</span>
+                </button>
+            </form>
             <button type="button" 
                     class="btn btn-outline-success fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3" 
                     data-bs-toggle="modal" 
@@ -224,6 +231,7 @@
                     <th style="min-width: 150px;">Kontak WhatsApp</th>
                     <th style="min-width: 130px;">Status Bayar</th>
                     <th style="min-width: 110px;">Formulir</th>
+                    <th style="min-width: 110px;">Sync Master</th>
                     <th style="min-width: 130px;">Terdaftar</th>
                     <th style="width: 140px; text-align: right;" class="pe-3 pe-md-4">Aksi</th>
                 </tr>
@@ -304,6 +312,24 @@
                                 <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1">Lengkap</span>
                             @else
                                 <span class="badge bg-light text-muted border px-2 py-1">Kosong</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if(($u['sync_status'] ?? 'pending') === 'synced')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 d-inline-flex align-items-center gap-1">
+                                    <span class="material-symbols-outlined" style="font-size:14px;">cloud_done</span>
+                                    <span>Tersinkron</span>
+                                </span>
+                            @elseif(($u['sync_status'] ?? 'pending') === 'failed')
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 d-inline-flex align-items-center gap-1" title="Gagal terhubung ke API">
+                                    <span class="material-symbols-outlined" style="font-size:14px;">error</span>
+                                    <span>Gagal</span>
+                                </span>
+                            @else
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 d-inline-flex align-items-center gap-1" title="Tersimpan di MySQL lokal, siap dikirim ke Master API">
+                                    <span class="material-symbols-outlined" style="font-size:14px;">schedule</span>
+                                    <span>Pending</span>
+                                </span>
                             @endif
                         </td>
                         <td>

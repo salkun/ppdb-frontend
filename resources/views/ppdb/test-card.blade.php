@@ -46,7 +46,15 @@
             'ict' => 'ICT (Teknologi)',
         ];
         $selectedMajor = $majorLabels[$formData['major'] ?? ''] ?? ($formData['major'] ?? '-');
-        $regId = $registration['id'] ?? 'PPDB-'.date('Y').'-001';
+        $regId = $registration['id'] ?? 'PPDB-2027-001';
+
+        // Ambil berkas Pas Foto 3x4 calon siswa
+        $photoPath = $formData['documents']['foto']
+            ?? $formData['photo_path']
+            ?? ($documents['foto'] ?? null)
+            ?? ($registration['documents']['foto'] ?? null)
+            ?? ($formData['foto'] ?? null);
+        $photoUrl = $photoPath ? ppdb_doc_url($photoPath, $backendUrl ?? null) : null;
     @endphp
 
     {{-- ======================================================== --}}
@@ -59,7 +67,7 @@
             <div class="tc-header">
                 <div class="tc-brand">
                     <div class="tc-logo">
-                        <span class="material-symbols-outlined">school</span>
+                        <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 100%; height: 100%; object-fit: contain;">
                     </div>
                     <div class="tc-school-info">
                         <div class="tc-school-name">SMPS2 AL-MUHAJIRIN</div>
@@ -82,10 +90,20 @@
             <div class="tc-body">
                 {{-- Foto 3x4 Frame --}}
                 <div class="tc-photo-col">
-                    <div class="tc-photo-box">
-                        <span class="material-symbols-outlined tc-photo-icon">person</span>
-                        <span class="tc-photo-label">PAS FOTO<br>3 × 4</span>
-                    </div>
+                    @if(!empty($photoUrl))
+                        <div class="tc-photo-box has-photo">
+                            <img src="{{ $photoUrl }}" alt="Pas Foto Siswa" class="tc-photo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; this.parentElement.classList.remove('has-photo');">
+                            <div class="tc-photo-fallback" style="display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;">
+                                <span class="material-symbols-outlined tc-photo-icon">person</span>
+                                <span class="tc-photo-label">PAS FOTO<br>3 × 4</span>
+                            </div>
+                        </div>
+                    @else
+                        <div class="tc-photo-box">
+                            <span class="material-symbols-outlined tc-photo-icon">person</span>
+                            <span class="tc-photo-label">PAS FOTO<br>3 × 4</span>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Data Siswa Table --}}
@@ -137,7 +155,7 @@
                 <div class="tc-schedule-grid">
                     <div class="tc-sch-item">
                         <span class="tc-sch-label">GELOMBANG / TP</span>
-                        <span class="tc-sch-val">TP {{ date('Y') }}/{{ date('Y') + 1 }}</span>
+                        <span class="tc-sch-val">TP 2027/2028</span>
                     </div>
                     <div class="tc-sch-item">
                         <span class="tc-sch-label">WAKTU TES</span>
@@ -213,15 +231,13 @@
     }
 
     .tc-logo {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, var(--lp-primary), var(--lp-primary-dark));
-        color: #ffffff;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: transparent;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 10px rgba(0, 90, 180, 0.25);
         flex-shrink: 0;
     }
 
@@ -319,6 +335,23 @@
         text-align: center;
         color: var(--lp-outline);
         padding: 4px;
+        position: relative;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .tc-photo-box.has-photo {
+        border: 1.5px solid rgba(0, 90, 180, 0.25);
+        background: #f8fafc;
+        padding: 0;
+    }
+
+    .tc-photo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 6px;
     }
 
     .tc-photo-icon {
@@ -586,10 +619,10 @@
         }
 
         .tc-logo {
-            width: 9mm !important;
-            height: 9mm !important;
-            background: #005ab4 !important;
-            color: #ffffff !important;
+            width: 12mm !important;
+            height: 12mm !important;
+            background: transparent !important;
+            box-shadow: none !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
@@ -625,6 +658,24 @@
             width: 25mm !important;
             height: 33mm !important; /* Pas foto 3x4 pada A6 */
             border: 1px dashed #777 !important;
+            box-sizing: border-box !important;
+        }
+
+        .tc-photo-box.has-photo {
+            border: 1px solid #333 !important;
+            background: #ffffff !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .tc-photo-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+            border-radius: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .tc-photo-icon {
