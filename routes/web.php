@@ -194,31 +194,86 @@ Route::get('/migrate-seed', function () {
     }
 });
 
-// 4. Storage Link (php artisan storage:link)
-Route::get('/storage-link', function () {
+// 4. Storage Link (php artisan storage:link + PHP native symlink fallback & aliases)
+$storageLinkHandler = function () {
+    $target = storage_path('app/public');
+    $link = public_path('storage');
+    $messages = [];
+    $isSuccess = true;
+
     try {
-        Artisan::call('storage:link');
-        $output = Artisan::output();
+        // Pastikan direktori target storage/app/public ada
+        if (!file_exists($target)) {
+            @mkdir($target, 0755, true);
+            $messages[] = "Direktori target storage/app/public berhasil dibuat.";
+        }
+
+        // Cek apakah public/storage sudah ada
+        if (file_exists($link) || is_link($link)) {
+            $messages[] = "Folder atau symlink [public/storage] sudah ada dan aktif.";
+        } else {
+            // Coba jalankan perintah artisan terlebih dahulu
+            try {
+                Artisan::call('storage:link');
+                $output = trim(Artisan::output());
+                if (!empty($output)) {
+                    $messages[] = "Artisan: " . $output;
+                }
+            } catch (\Throwable $ex) {
+                $messages[] = "Artisan storage:link error: " . $ex->getMessage();
+            }
+
+            // Jika masih belum terbentuk, coba native symlink (umum pada shared hosting/cPanel)
+            if (!file_exists($link) && !is_link($link)) {
+                if (function_exists('symlink')) {
+                    if (@symlink($target, $link)) {
+                        $messages[] = "Native PHP symlink berhasil dibuat: {$link} -> {$target}";
+                    } else {
+                        $isSuccess = false;
+                        $messages[] = "Gagal membuat native symlink. Periksa hak akses / permission folder hosting Anda.";
+                    }
+                } else {
+                    $isSuccess = false;
+                    $messages[] = "Fungsi symlink() dinonaktifkan di konfigurasi PHP hosting ini.";
+                }
+            }
+        }
+
+        $allOutput = implode("\n", $messages);
+        $badge = $isSuccess ? 'SUCCESS' : 'INFO';
+        $badgeBg = $isSuccess ? '#10b981' : '#f59e0b';
+        $title = $isSuccess ? '✓ Storage Symlink Berhasil Diproses' : 'ℹ Info Storage Symlink';
 
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
             <div style='display:flex;align-items:center;gap:10px;margin-bottom:15px;'>
-                <span style='background:#10b981;color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>SUCCESS</span>
-                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>✓ Storage Symlink Berhasil Dibuat</h2>
+                <span style='background:{$badgeBg};color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>{$badge}</span>
+                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>{$title}</h2>
             </div>
-            <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#34d399;font-size:13px;overflow-x:auto;border:1px solid #334155;'>" . htmlspecialchars($output ?: 'The [public/storage] directory has been linked.') . "</pre>
-            <div style='margin-top:20px;'>
+            <p style='color:#94a3b8;font-size:14px;margin-bottom:12px;'>Target: <code>{$target}</code> &rarr; Link: <code>{$link}</code></p>
+            <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#34d399;font-size:13px;overflow-x:auto;border:1px solid #334155;'>" . htmlspecialchars($allOutput ?: 'The [public/storage] directory has been linked.') . "</pre>
+            <div style='margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;'>
                 <a href='" . url('/') . "' style='padding:8px 16px;background:#334155;color:#f1f5f9;text-decoration:none;border-radius:8px;font-size:13px;'>&larr; Beranda</a>
+                <a href='" . url('/clear-cache') . "' style='padding:8px 16px;background:#0284c7;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:600;'>Clear Cache &rarr;</a>
+                <a href='" . url('/admin/login') . "' style='padding:8px 16px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;'>Login Admin</a>
             </div>
         </div>");
     } catch (\Throwable $e) {
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;'>
-            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>✗ Storage Link Gagal / Sudah Ada</h2>
+            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>✗ Storage Link Gagal</h2>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#fca5a5;font-size:13px;overflow-x:auto;'>" . htmlspecialchars($e->getMessage()) . "</pre>
-        </div>");
+            <div style='margin-top:20px;'>
+                <a href='" . url('/') . "' style='padding:8px 16px;background:#334155;color:#f1f5f9;text-decoration:none;border-radius:8px;font-size:13px;'>&larr; Beranda</a>
+            </div>
+        </div>", 500);
     }
-});
+};
+
+Route::get('/storage-link', $storageLinkHandler)->name('storage.link');
+Route::get('/link-storage', $storageLinkHandler);
+Route::get('/linkstorage', $storageLinkHandler);
+Route::get('/storage/link', $storageLinkHandler);
 
 // 5. Clear Cache & Optimize (php artisan optimize:clear)
 Route::get('/clear-cache', function () {
