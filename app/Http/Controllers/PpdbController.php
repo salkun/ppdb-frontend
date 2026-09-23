@@ -156,6 +156,10 @@ class PpdbController extends Controller
             $filename = 'proof_' . $paymentMethod . '_' . $regId . '_' . time() . '_' . $randomCode . '.' . $ext;
             $file->move($uploadDir, $filename);
             $webPath = '/uploads/ppdb_payments/' . $filename;
+            $uploadedFilePath = $uploadDir . DIRECTORY_SEPARATOR . $filename;
+
+            // Mirror berkas ke Document Root cPanel jika berbeda dari public_path
+            $this->mirrorUploadToDocumentRoot('ppdb_payments', $filename, $uploadedFilePath);
 
             // 2. Simpan status ke MySQL lokal
             if ($registration) {
@@ -654,6 +658,14 @@ class PpdbController extends Controller
                     @File::delete($realFilePath);
                 }
 
+                // Hapus juga dari Document Root cPanel jika ada
+                if (!empty($_SERVER['DOCUMENT_ROOT'])) {
+                    $docRootFile = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . ltrim($existingDocs[$docType], '/');
+                    if (file_exists($docRootFile)) {
+                        @File::delete($docRootFile);
+                    }
+                }
+
                 unset($existingDocs[$docType]);
                 $formData['documents'] = $existingDocs;
                 if ($docType === 'kk') unset($formData['kk_path']);
@@ -716,6 +728,9 @@ class PpdbController extends Controller
                     $file->move($uploadDir, $filename);
                     $existingDocs[$docType] = "/uploads/ppdb_documents/{$filename}";
                     $uploadedCount++;
+
+                    // Mirror berkas ke Document Root cPanel jika berbeda
+                    $this->mirrorUploadToDocumentRoot('ppdb_documents', $filename, $uploadDir . DIRECTORY_SEPARATOR . $filename);
                 }
             }
 
@@ -752,6 +767,73 @@ class PpdbController extends Controller
         } catch (\Exception $e) {
             Log::error('PPDB Submit Upload Error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->with('error', 'Gagal menyimpan berkas dokumen persyaratan. Silakan coba kembali atau hubungi panitia PPDB.');
+        }
+    }
+
+    /**
+     * Fallback file server: melayani request /uploads/{folder}/{filename} jika web server melempar request ke Laravel.
+     * Mencegah 404 pada shared hosting cPanel yang memisahkan folder public_html dari root project.
+     */
+    public function serveUpload(string $folder, string $filename)
+    {
+        $filename = basename($filename);
+        if (!in_array($folder, ['ppdb_payments', 'ppdb_documents'], true)) {
+            abort(404);
+        }
+
+        $candidates = array_unique(array_filter([
+            public_path("uploads/{$folder}/{$filename}"),
+            base_path("public/uploads/{$folder}/{$filename}"),
+            base_path("uploads/{$folder}/{$filename}"),
+            !empty($_SERVER['DOCUMENT_ROOT']) ? rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . "/uploads/{$folder}/{$filename}" : null,
+            dirname(base_path()) . "/public_html/uploads/{$folder}/{$filename}",
+            dirname(base_path()) . "/admisi.smp2almuhajirin.sch.id/uploads/{$folder}/{$filename}",
+            storage_path("app/public/uploads/{$folder}/{$filename}"),
+        ]));
+
+        foreach ($candidates as $filePath) {
+            if (file_exists($filePath) && is_file($filePath)) {
+                // Auto mirror ke Document Root jika belum ada
+                $this->mirrorUploadToDocumentRoot($folder, $filename, $filePath);
+
+                $mimeType = File::mimeType($filePath) ?: 'application/octet-stream';
+                return response()->file($filePath, [
+                    'Content-Type' => $mimeType,
+                    'Cache-Control' => 'public, max-age=86400',
+                ]);
+            }
+        }
+
+        abort(404, 'Berkas fisik tidak ditemukan di server.');
+    }
+
+    /**
+     * Mirror berkas ke Document Root web server jika Document Root berbeda dari public_path.
+     * Mengatasi kasus umum shared hosting/cPanel dimana folder public dipindah ke public_html.
+     */
+    public function mirrorUploadToDocumentRoot(string $folder, string $filename, string $sourceFilePath): void
+    {
+        try {
+            $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? null;
+            if (!$docRoot || !is_dir($docRoot)) {
+                return;
+            }
+
+            $normDocRoot = rtrim(str_replace('\\', '/', realpath($docRoot) ?: $docRoot), '/');
+            $normPublicPath = rtrim(str_replace('\\', '/', realpath(public_path()) ?: public_path()), '/');
+
+            if ($normDocRoot !== $normPublicPath) {
+                $targetDir = $normDocRoot . '/uploads/' . $folder;
+                if (!File::isDirectory($targetDir)) {
+                    @File::makeDirectory($targetDir, 0755, true);
+                }
+                $targetFile = $targetDir . '/' . $filename;
+                if (!file_exists($targetFile) && file_exists($sourceFilePath)) {
+                    @copy($sourceFilePath, $targetFile);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Mirror upload notice: ' . $e->getMessage());
         }
     }
 }

@@ -23,6 +23,11 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// File Server Fallback (Melayani berkas unggahan jika web server Apache/LiteSpeed melempar ke Laravel pada shared hosting)
+Route::get('/uploads/{folder}/{filename}', [PpdbController::class, 'serveUpload'])
+    ->where('folder', 'ppdb_payments|ppdb_documents')
+    ->name('uploads.serve');
+
 // Autentikasi Calon Siswa (Publik)
 Route::controller(AuthController::class)->group(function () {
     Route::get('/register', 'showRegister')->name('register');
@@ -299,5 +304,86 @@ Route::get('/clear-cache', function () {
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#fca5a5;font-size:13px;overflow-x:auto;'>" . htmlspecialchars($e->getMessage()) . "</pre>
         </div>", 500);
     }
+});
+
+// 6. Sinkronisasi Uploads (Salin file dari public_path ke Document Root cPanel jika folder terpisah)
+Route::get('/sync-uploads', function () {
+    $results = [];
+    $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? null;
+    $publicPath = public_path();
+    $folders = ['ppdb_payments', 'ppdb_documents'];
+    $totalSynced = 0;
+    $filesFound = [];
+
+    // Deteksi target folder cPanel
+    $targetRoots = [];
+    if ($docRoot && is_dir($docRoot)) {
+        $targetRoots[] = rtrim(str_replace('\\', '/', realpath($docRoot) ?: $docRoot), '/');
+    }
+    $cpanelPublicHtml = dirname(base_path()) . '/public_html';
+    if (is_dir($cpanelPublicHtml)) {
+        $targetRoots[] = rtrim(str_replace('\\', '/', realpath($cpanelPublicHtml) ?: $cpanelPublicHtml), '/');
+    }
+    $targetRoots = array_unique($targetRoots);
+
+    // Sumber file
+    $sourceDirs = array_unique([
+        public_path('uploads'),
+        base_path('public/uploads'),
+        base_path('uploads'),
+    ]);
+
+    foreach ($folders as $folder) {
+        foreach ($sourceDirs as $sourceRoot) {
+            $sourceDir = $sourceRoot . '/' . $folder;
+            if (is_dir($sourceDir)) {
+                $files = scandir($sourceDir);
+                foreach ($files as $file) {
+                    if ($file === '.' || $file === '..') continue;
+                    $srcFile = $sourceDir . '/' . $file;
+                    if (is_file($srcFile)) {
+                        $filesFound[] = "uploads/{$folder}/{$file}";
+                        foreach ($targetRoots as $targetRoot) {
+                            $targetDir = $targetRoot . '/uploads/' . $folder;
+                            if (!is_dir($targetDir)) {
+                                @mkdir($targetDir, 0755, true);
+                            }
+                            $destFile = $targetDir . '/' . $file;
+                            if (!file_exists($destFile) || filesize($destFile) !== filesize($srcFile)) {
+                                if (@copy($srcFile, $destFile)) {
+                                    $totalSynced++;
+                                    $results[] = "Disalin: {$folder}/{$file} &rarr; {$destFile}";
+                                }
+                            } else {
+                                $results[] = "Sudah sinkron: {$folder}/{$file}";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $resultsList = !empty($results) ? implode("\n", $results) : 'Belum ada berkas fisik yang ditemukan di folder uploads sumber.';
+    $foundCount = count($filesFound);
+
+    return response("
+    <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:760px;margin:40px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
+        <div style='display:flex;align-items:center;gap:10px;margin-bottom:15px;'>
+            <span style='background:#10b981;color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>SYNC OK</span>
+            <h2 style='margin:0;font-size:20px;color:#38bdf8;'>✓ Sinkronisasi Berkas Upload PPDB Berhasil</h2>
+        </div>
+        <p style='color:#94a3b8;font-size:14px;margin-bottom:6px;'>Lokasi <code>public_path()</code>: <span style='color:#f1f5f9;'>{$publicPath}</span></p>
+        <p style='color:#94a3b8;font-size:14px;margin-bottom:12px;'>Lokasi <code>DOCUMENT_ROOT</code>: <span style='color:#f1f5f9;'>" . ($docRoot ?: 'Tidak terdeteksi') . "</span></p>
+        <div style='margin-bottom:15px;padding:12px;background:#1e293b;border-radius:8px;border:1px solid #334155;font-size:13px;color:#38bdf8;'>
+            Total Berkas Terdeteksi: <strong>{$foundCount}</strong> | Berkas Baru Disinkronkan: <strong>{$totalSynced}</strong>
+        </div>
+        <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#34d399;font-size:12px;overflow-x:auto;max-height:250px;border:1px solid #334155;'>{$resultsList}</pre>
+        <div style='margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;'>
+            <a href='" . url('/admin/ppdb/payments') . "' style='padding:8px 16px;background:#0284c7;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:600;'>Cek Verifikasi Pembayaran &rarr;</a>
+            <a href='" . url('/admin/ppdb/documents') . "' style='padding:8px 16px;background:#10b981;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:600;'>Cek Berkas Siswa &rarr;</a>
+            <a href='" . url('/') . "' style='padding:8px 16px;background:#334155;color:#f1f5f9;text-decoration:none;border-radius:8px;font-size:13px;'>&larr; Beranda</a>
+        </div>
+    </div>");
 });
 

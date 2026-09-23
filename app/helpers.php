@@ -22,18 +22,23 @@ if (!function_exists('ppdb_proof_url')) {
 
         $cleanPath = ltrim($path, '/');
 
-        // 1. Cek apakah berkas ada di direktori public/ Laravel lokal (misal: public/uploads/ppdb_payments/...)
+        // 1. Cek apakah berkas ada di direktori public/ Laravel lokal atau Document Root cPanel
         if (file_exists(public_path($cleanPath))) {
+            return asset($cleanPath);
+        }
+        if (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . $cleanPath)) {
             return asset($cleanPath);
         }
 
         // 2. Cek apakah berkas ada di public/uploads/ppdb_payments/ atau public/uploads/ppdb_documents/ berdasarkan nama berkas
         $filename = basename($cleanPath);
         if (!empty($filename)) {
-            if (file_exists(public_path('uploads/ppdb_payments/' . $filename))) {
+            if (file_exists(public_path('uploads/ppdb_payments/' . $filename)) || 
+                (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/uploads/ppdb_payments/' . $filename))) {
                 return asset('uploads/ppdb_payments/' . $filename);
             }
-            if (file_exists(public_path('uploads/ppdb_documents/' . $filename))) {
+            if (file_exists(public_path('uploads/ppdb_documents/' . $filename)) ||
+                (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/uploads/ppdb_documents/' . $filename))) {
                 return asset('uploads/ppdb_documents/' . $filename);
             }
         }
@@ -43,9 +48,14 @@ if (!function_exists('ppdb_proof_url')) {
             return asset('storage/' . $cleanPath);
         }
 
-        // 4. Fallback ke remote backend URL jika ada
-        $baseBackend = $backendUrl ?: config('ppdb.api_url', 'http://127.0.0.1:8000');
-        if (!empty($baseBackend)) {
+        // 4. Jika ini adalah path uploads lokal, SELALU gunakan asset() karena Laravel memiliki fallback route /uploads/{folder}/{filename}
+        if (str_starts_with($cleanPath, 'uploads/')) {
+            return asset($cleanPath);
+        }
+
+        // 5. Fallback ke remote backend URL jika ada (khusus backend resmi non-localhost)
+        $baseBackend = $backendUrl ?: config('ppdb.api_url');
+        if (!empty($baseBackend) && !str_contains($baseBackend, '127.0.0.1') && !str_contains($baseBackend, 'localhost')) {
             return rtrim($baseBackend, '/') . '/' . $cleanPath;
         }
 
