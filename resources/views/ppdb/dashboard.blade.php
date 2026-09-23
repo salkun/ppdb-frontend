@@ -100,11 +100,14 @@
         $hasDocs = $docCount > 0;
         $isAllDocs = ($docCount >= 4);
 
+        // Formulir PPDB dinyatakan benar-benar sudah diisi jika calon siswa sudah submit data pokok (NIK & Jurusan)
+        $isFormFilled = !empty($formData['nik']) && !empty($formData['major']);
+
         // Progress calculation
         $progressItems = 0;
         $totalItems = 3; // Payment, Form, Upload
         if ($paymentStatus === 'paid') $progressItems++;
-        if (!empty($formData['identity']) || !empty($formData['full_name']) || !empty($formData['nisn'])) $progressItems++;
+        if ($isFormFilled) $progressItems++;
         if ($isAllDocs) {
             $progressItems++;
         } elseif ($hasDocs) {
@@ -144,12 +147,12 @@
 
             <div class="db-profile-status-pill">
                 @if($paymentStatus === 'paid')
-                    @if(!empty($formData) && $isAllDocs)
+                    @if($isFormFilled && $isAllDocs)
                         <div class="db-status-pill success">
                             <span class="material-symbols-outlined">verified</span>
                             <span>Lengkap 100%</span>
                         </div>
-                    @elseif(!empty($formData))
+                    @elseif($isFormFilled)
                         <div class="db-status-pill action-needed" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa;">
                             <span class="material-symbols-outlined">cloud_upload</span>
                             <span>Berkas ({{ $docCount }}/4)</span>
@@ -212,7 +215,7 @@
                     <span>Sedang Ditinjau</span>
                 </div>
             </div>
-        @elseif($paymentStatus === 'paid' && empty($formData))
+        @elseif($paymentStatus === 'paid' && !$isFormFilled)
             <div class="db-next-step step-primary">
                 <div class="db-next-step-left">
                     <div class="db-next-step-icon">
@@ -220,7 +223,7 @@
                     </div>
                     <div class="db-next-step-content">
                         <div class="db-next-step-title">Langkah Selanjutnya: Isi Formulir Pendaftaran (Wajib)</div>
-                        <div class="db-next-step-desc">Pembayaran Rp 400.000 telah lunas! Silakan lengkapi biodata calon siswa dan data orang tua/wali.</div>
+                        <div class="db-next-step-desc">Pembayaran Rp 400.000 telah lunas & terverifikasi! Silakan lengkapi biodata calon siswa, data orang tua/wali, dan pilihan jurusan.</div>
                     </div>
                 </div>
                 <a href="{{ route('ppdb.form') }}" class="db-next-step-btn primary">
@@ -228,7 +231,7 @@
                     <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
                 </a>
             </div>
-        @elseif($paymentStatus === 'paid' && !empty($formData) && !$isAllDocs)
+        @elseif($paymentStatus === 'paid' && $isFormFilled && !$isAllDocs)
             <div class="db-next-step step-accent">
                 <div class="db-next-step-left">
                     <div class="db-next-step-icon">
@@ -244,7 +247,7 @@
                     <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
                 </a>
             </div>
-        @elseif($paymentStatus === 'paid' && !empty($formData) && $isAllDocs)
+        @elseif($paymentStatus === 'paid' && $isFormFilled && $isAllDocs)
             <div class="db-next-step step-success">
                 <div class="db-next-step-left">
                     <div class="db-next-step-icon">
@@ -492,7 +495,7 @@
         {{-- 2 Feature Cards: Formulir & Upload Berkas --}}
         <div class="db-progress-grid">
             {{-- Card 1: Formulir Pendaftaran (WAJIB) --}}
-            <div class="db-feature-card {{ !empty($formData) ? 'completed' : '' }} {{ $paymentStatus !== 'paid' ? 'locked' : '' }}">
+            <div class="db-feature-card {{ $isFormFilled ? 'completed' : '' }} {{ $paymentStatus !== 'paid' ? 'locked' : '' }}">
                 <div class="db-feature-icon" style="background:var(--lp-primary);color:#fff;">
                     <span class="material-symbols-outlined">edit_note</span>
                 </div>
@@ -508,7 +511,7 @@
                         <span class="material-symbols-outlined" style="font-size:16px;">lock</span>
                         Terkunci — Selesaikan pembayaran di atas
                     </div>
-                @elseif(!empty($formData))
+                @elseif($isFormFilled)
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                         <div class="db-feature-status" style="background:var(--lp-green-light);color:var(--lp-green);">
                             <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
@@ -590,16 +593,16 @@
             <h5>Formulir</h5>
             @if($paymentStatus !== 'paid')
                 <span class="db-action-status" style="background:var(--lp-surface-subtle);color:var(--lp-outline);">Terkunci</span>
-            @elseif(!empty($formData))
+            @elseif($isFormFilled)
                 <span class="db-action-status" style="background:var(--lp-green-light);color:var(--lp-green);">Lengkap ✓</span>
             @else
                 <span class="db-action-status" style="background:rgba(214,227,255,0.6);color:var(--lp-primary);">Siap Diisi</span>
             @endif
         </a>
-        <a href="{{ route('ppdb.test-card') }}" class="db-action-card {{ ($paymentStatus !== 'paid' || empty($formData)) ? 'locked' : '' }}">
+        <a href="{{ route('ppdb.test-card') }}" class="db-action-card {{ ($paymentStatus !== 'paid' || !$isFormFilled) ? 'locked' : '' }}">
             <div class="db-action-icon" style="background:var(--lp-red);color:#fff;"><span class="material-symbols-outlined">badge</span></div>
             <h5>Kartu Tes</h5>
-            @if($paymentStatus === 'paid' && !empty($formData))
+            @if($paymentStatus === 'paid' && $isFormFilled)
                 <span class="db-action-status" style="background:var(--lp-green-light);color:var(--lp-green);">Siap Cetak</span>
             @else
                 <span class="db-action-status" style="background:var(--lp-surface-subtle);color:var(--lp-outline);">Terkunci</span>
@@ -665,7 +668,7 @@
             <span class="db-info-row-value">2027/2028</span>
         </div>
 
-        @if(!empty($formData))
+        @if($isFormFilled)
             <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--lp-surface-container);">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
                     <span style="font-size:12px;font-weight:700;color:var(--lp-outline);text-transform:uppercase;letter-spacing:0.04em;">Ringkasan Formulir</span>
@@ -677,16 +680,16 @@
                         <span class="db-info-row-value" style="font-family:var(--font-mono);font-size:13px;">{{ $formData['nisn'] ?? '-' }}</span>
                     </div>
                     <div class="db-info-row" style="border-bottom:none;padding:0.4rem 0;">
+                        <span class="db-info-row-label" style="font-size:12px;">Jurusan</span>
+                        <span class="db-info-row-value" style="font-size:13px;text-transform:uppercase;font-weight:700;color:var(--lp-primary);">{{ $formData['major'] ?? '-' }}</span>
+                    </div>
+                    <div class="db-info-row" style="border-bottom:none;padding:0.4rem 0;">
                         <span class="db-info-row-label" style="font-size:12px;">Jenis Kelamin</span>
                         <span class="db-info-row-value" style="font-size:13px;">{{ $formData['identity']['gender'] ?? '-' }}</span>
                     </div>
                     <div class="db-info-row" style="border-bottom:none;padding:0.4rem 0;">
-                        <span class="db-info-row-label" style="font-size:12px;">Tempat Lahir</span>
-                        <span class="db-info-row-value" style="font-size:13px;">{{ $formData['identity']['place_of_birth'] ?? '-' }}</span>
-                    </div>
-                    <div class="db-info-row" style="border-bottom:none;padding:0.4rem 0;">
-                        <span class="db-info-row-label" style="font-size:12px;">Tanggal Lahir</span>
-                        <span class="db-info-row-value" style="font-family:var(--font-mono);font-size:13px;">{{ $formData['identity']['date_of_birth'] ?? '-' }}</span>
+                        <span class="db-info-row-label" style="font-size:12px;">Asal Sekolah</span>
+                        <span class="db-info-row-value" style="font-size:13px;">{{ $formData['school_origin'] ?? '-' }}</span>
                     </div>
                 </div>
             </div>

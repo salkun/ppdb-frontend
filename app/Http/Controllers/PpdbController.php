@@ -521,7 +521,8 @@ class PpdbController extends Controller
                 return redirect()->route('dashboard')->with('warning', 'Kartu tes belum tersedia. Pembayaran harus diverifikasi terlebih dahulu.');
             }
 
-            if (empty($formData)) {
+            $isFormFilled = !empty($formData['nik']) && !empty($formData['major']);
+            if (!$isFormFilled) {
                 return redirect()->route('dashboard')->with('warning', 'Kartu tes belum tersedia. Silakan lengkapi formulir pendaftaran terlebih dahulu.');
             }
 

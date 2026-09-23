@@ -210,7 +210,7 @@ class AdminPpdbController extends Controller
                 'pending_payment' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'pending_verification')),
                 'paid' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'paid')),
                 'accepted' => count(array_filter($allRegistrations, fn($r) => ($r['registration_status'] ?? '') === 'accepted')),
-                'with_form' => count(array_filter($allRegistrations, fn($r) => !empty($r['form_data']))),
+                'with_form' => count(array_filter($allRegistrations, fn($r) => !empty($r['form_data']['nik']) && !empty($r['form_data']['major']))),
                 'total_amount' => array_reduce($allRegistrations, function ($acc, $r) {
                     return ($r['payment_status'] ?? '') === 'paid' ? $acc + (float)($r['payment_amount'] ?? 400000) : $acc;
                 }, 0),
@@ -375,7 +375,7 @@ class AdminPpdbController extends Controller
                     'phone' => $phone,
                     'payment_status' => $r['payment_status'] ?? 'unpaid',
                     'registration_status' => $r['registration_status'] ?? 'pending',
-                    'has_form' => !empty($form),
+                    'has_form' => !empty($form['nik']) && !empty($form['major']),
                     'sync_status' => $r['sync_status'] ?? 'pending',
                     'created_at' => $r['created_at'] ?? now()->toIso8601String(),
                 ];
@@ -409,7 +409,7 @@ class AdminPpdbController extends Controller
                 'total' => count($allRegistrations),
                 'paid' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'paid')),
                 'unpaid' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') !== 'paid')),
-                'has_form' => count(array_filter($allRegistrations, fn($r) => !empty($r['form_data']))),
+                'has_form' => count(array_filter($allRegistrations, fn($r) => !empty($r['form_data']['nik']) && !empty($r['form_data']['major']))),
             ];
 
             return view('admin.ppdb.users', [
