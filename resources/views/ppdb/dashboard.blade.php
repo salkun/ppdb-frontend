@@ -694,6 +694,16 @@
                 </div>
             </div>
         @endif
+
+        <div style="margin-top:1.25rem;padding-top:0.85rem;border-top:1px solid var(--lp-surface-container);display:flex;justify-content:flex-end;">
+            <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 py-1.5 px-3" style="font-size:12.5px;font-weight:600;border-radius:8px;">
+                    <span class="material-symbols-outlined" style="font-size:16px;">logout</span>
+                    <span>Keluar dari Akun Siswa</span>
+                </button>
+            </form>
+        </div>
     </div>
 
     {{-- ============================================ --}}

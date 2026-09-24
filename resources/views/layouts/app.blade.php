@@ -26,7 +26,7 @@
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <!-- Central PPDB Theme -->
-    <link rel="stylesheet" href="{{ asset('css/ppdb-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/ppdb-theme.css') }}?v={{ @filemtime(public_path('css/ppdb-theme.css')) ?: '2.1' }}">
 
     @stack('styles')
 </head>
@@ -109,7 +109,7 @@
             </aside>
 
             <!-- 2. Mobile Offcanvas Drawer -->
-            <div class="offcanvas offcanvas-start p-3" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="width:300px;background:#fff;border-right:1px solid var(--lp-surface-container);font-family:var(--font-landing);">
+            <div class="offcanvas offcanvas-start p-3" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel" style="width:300px;background:#fff;border-right:1px solid var(--lp-surface-container);font-family:var(--font-landing);z-index:1070;">
                 <div class="offcanvas-header pb-3 border-bottom px-1" style="border-color:var(--lp-surface-container)!important;">
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div class="db-sidebar-brand-icon" style="width:38px;height:38px;background:transparent;box-shadow:none;">
@@ -122,7 +122,7 @@
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup"></button>
                 </div>
-                <div class="offcanvas-body d-flex flex-column justify-content-between px-1 py-3">
+                <div class="offcanvas-body d-flex flex-column justify-content-between px-1 py-3" style="overflow-y:auto;padding-bottom:calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;">
                     <div>
                         <ul class="db-sidebar-nav">
                             <li><a class="db-sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a></li>
@@ -132,10 +132,10 @@
                             <li><a class="db-sidebar-link" href="{{ route('home') }}"><span class="material-symbols-outlined">info</span><span>Informasi & Alur</span></a></li>
                         </ul>
                     </div>
-                    <div class="db-sidebar-footer">
+                    <div class="db-sidebar-footer" style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--lp-surface-container);">
                         <a href="https://wa.me/6287821055283" target="_blank" rel="noopener" class="db-sidebar-link"><span class="material-symbols-outlined">chat</span><span>Bantuan WhatsApp</span></a>
                         <form action="{{ route('logout') }}" method="POST" style="margin:0;">@csrf
-                            <button type="submit" class="db-sidebar-link text-danger" style="width:100%;border:none;background:none;cursor:pointer;"><span class="material-symbols-outlined">logout</span><span>Keluar Sesi</span></button>
+                            <button type="submit" class="db-sidebar-link text-danger" style="width:100%;border:none;background:rgba(239,68,68,0.08);border-radius:10px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:600;margin-top:8px;"><span class="material-symbols-outlined">logout</span><span>Keluar Sesi</span></button>
                         </form>
                     </div>
                 </div>
@@ -146,20 +146,28 @@
                 <!-- Topbar -->
                 <header class="db-topbar">
                     <div style="display:flex;align-items:center;gap:10px;">
-                        <button class="d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" style="background:none;border:1px solid var(--lp-surface-container);border-radius:10px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;">
+                        <button class="d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" style="background:none;border:1px solid var(--lp-surface-container);border-radius:10px;padding:6px 8px;cursor:pointer;display:flex;align-items:center;" aria-label="Menu Navigasi">
                             <span class="material-symbols-outlined" style="font-size:22px;color:var(--lp-on-surface);">menu</span>
                         </button>
                         <span class="db-topbar-breadcrumb d-none d-sm-inline">Portal /</span>
                         <span class="db-topbar-title">@yield('title', 'Dashboard')</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
                         <span class="db-badge db-badge-green d-none d-sm-inline-flex" style="font-size:10px;">
                             <span class="material-symbols-outlined" style="font-size:14px;">check_circle</span> ONLINE
                         </span>
-                        <div class="db-topbar-avatar">
+                        <div class="db-topbar-avatar" title="{{ session('full_name', 'Siswa') }}">
                             {{ strtoupper(substr(session('full_name', 'S'), 0, 1)) }}
                         </div>
                         <span style="font-size:13px;font-weight:600;color:var(--lp-on-surface);" class="d-none d-md-inline">{{ session('full_name', 'Siswa') }}</span>
+                        <!-- Quick Logout Button (Bisa langsung diakses di Desktop & Mobile) -->
+                        <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 py-1 px-2" style="font-size:12px;font-weight:600;border-radius:8px;" title="Keluar dari sesi akun">
+                                <span class="material-symbols-outlined" style="font-size:16px;">logout</span>
+                                <span class="d-none d-sm-inline">Keluar</span>
+                            </button>
+                        </form>
                     </div>
                 </header>
 
