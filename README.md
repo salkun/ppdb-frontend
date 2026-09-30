@@ -175,9 +175,9 @@ Setelah perintah `migrate-seed` berhasil dijalankan, Anda dapat login ke portal 
 ## 💳 Informasi Rekening Pembayaran Resmi
 
 Pendaftar yang memilih metode **Transfer Bank** diinstruksikan melakukan transfer ke rekening resmi:
-- **Bank**: Bank Mandiri
-- **Nomor Rekening**: `1730004960275`
-- **Atas Nama**: `PUTRI MUNAWWAROH`
+- **Bank**: (bisa disesuaikan)
+- **Nomor Rekening**: `(bisa disesuaikan)`
+- **Atas Nama**: `(bisa disesuaikan)`
 
 ---
 
@@ -187,8 +187,8 @@ Sistem PPDB telah terintegrasi dengan Bot Telegram (`@paymen_ppdb_bot`) untuk me
 
 ### 1. Konfigurasi `.env`
 ```env
-TELEGRAM_BOT_TOKEN=8652897327:AAHLG5bufZk1He8sA-LzzE3pYy8HLhktFPU
-TELEGRAM_PANITIA_CHAT_ID=-1004416679598
+TELEGRAM_BOT_TOKEN=(bisa disesuaikan)
+TELEGRAM_PANITIA_CHAT_ID=(bisa disesuaikan)
 ```
 
 ### 2. Cara Kerja Verifikasi 1-Klik:
