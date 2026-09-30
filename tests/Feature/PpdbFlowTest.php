@@ -669,4 +669,91 @@ class PpdbFlowTest extends TestCase
         $this->assertEquals('Wiraswasta Pedagang Toko', $formData['student_parents'][0]['parent']['occupation_code']);
         $this->assertEquals('Ibu Rumah Tangga & Penjahit', $formData['student_parents'][1]['parent']['occupation_code']);
     }
+
+    /**
+     * Test form submission when father is deceased/divorced and details are omitted.
+     */
+    public function test_submit_form_with_deceased_or_divorced_parent_passes_validation(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registration-form' => Http::response(['success' => true], 200),
+        ]);
+
+        $account = \App\Models\PpdbAccount::create([
+            'full_name' => 'Budi Santoso',
+            'email' => 'budi.santoso.' . uniqid() . '@example.com',
+            'nik' => '3201019999990010',
+            'phone' => '081234567890',
+            'password' => bcrypt('password123'),
+        ]);
+
+        $reg = \App\Models\PpdbRegistration::create([
+            'account_id' => $account->id,
+            'payment_status' => 'paid',
+            'payment_amount' => 400000,
+            'registration_status' => 'pending',
+            'form_data' => null,
+        ]);
+
+        $postData = [
+            'nik' => '3201019999990010',
+            'nisn' => '0098765432',
+            'full_name' => 'Budi Santoso',
+            'first_name' => 'Budi',
+            'last_name' => 'Santoso',
+            'major' => 'ict',
+            'school_origin' => 'SD Negeri 1 Purwakarta',
+            'school_origin_address' => 'Jl. Veteran No. 10',
+            'family_card_number' => '3201011212120010',
+            'gender' => 'Laki-laki',
+            'religion' => 'Islam',
+            'place_of_birth' => 'Purwakarta',
+            'date_of_birth' => '2012-05-15',
+            'birth_order' => 1,
+            'siblings_count' => 2,
+            'street_address' => 'Jl. Sindangkasih No. 5',
+            'rt' => '02',
+            'rw' => '05',
+            'village' => 'Nagri Kaler',
+            'district' => 'Purwakarta',
+            'postal_code' => '41115',
+            'residence_type' => 'Rumah Sendiri',
+            'transportation_mode' => 'Jalan Kaki',
+            'mobile_number' => '081234567890',
+            'whatsapp_number' => '081234567890',
+            'email' => $account->email,
+            // Status Ayah: Meninggal Dunia, rincian dikosongkan
+            'father_status' => 'meninggal',
+            'father_nik' => '',
+            'father_name' => '',
+            'father_birth_year' => '',
+            'father_education' => '',
+            'father_occupation' => '',
+            'father_income' => '',
+            // Status Ibu: Ada di KK, rincian lengkap
+            'mother_status' => 'ada',
+            'mother_nik' => '3201019999990011',
+            'mother_name' => 'Siti Nurhaliza',
+            'mother_birth_year' => '1982',
+            'mother_education' => '04',
+            'mother_occupation' => 'Pedagang',
+            'mother_income' => '03',
+        ];
+
+        $response = $this->withSession([
+            'api_token' => 'local_auth_' . $account->id,
+            'account_id' => $account->id,
+            'full_name' => $account->full_name,
+            'email' => $account->email,
+        ])->post('/ppdb/form', $postData);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('success');
+
+        $reg->refresh();
+        $formData = $reg->form_data;
+        $this->assertEquals('meninggal', $formData['student_parents'][0]['parent']['status']);
+        $this->assertEquals('Meninggal Dunia', $formData['student_parents'][0]['parent']['status_label']);
+        $this->assertEquals('Siti Nurhaliza', $formData['student_parents'][1]['parent']['full_name']);
+    }
 }

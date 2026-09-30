@@ -14,6 +14,31 @@
     $pob = old('place_of_birth', $formData['identity']['place_of_birth'] ?? ($formData['place_of_birth'] ?? ''));
     $phone = old('whatsapp_number', $formData['contact']['whatsapp_number'] ?? ($formData['whatsapp_number'] ?? ($formData['contact']['mobile_number'] ?? '')));
     $street = old('street_address', $formData['address']['street_address'] ?? ($formData['street_address'] ?? ''));
+
+    // Extract parents
+    $father = null;
+    $mother = null;
+    $guardian = null;
+    $rawParents = $formData['student_parents'] ?? ($formData['parents'] ?? []);
+    if (!empty($rawParents) && is_array($rawParents)) {
+        foreach ($rawParents as $sp) {
+            $relType = (int) ($sp['relationship_type'] ?? 0);
+            $pObj = $sp['parent'] ?? $sp;
+            if (is_array($pObj)) {
+                if (empty($pObj['status']) && !empty($sp['status'])) {
+                    $pObj['status'] = $sp['status'];
+                }
+                if (empty($pObj['status_label']) && !empty($sp['status_label'])) {
+                    $pObj['status_label'] = $sp['status_label'];
+                }
+            }
+            if ($relType === 1) $father = $pObj;
+            elseif ($relType === 2) $mother = $pObj;
+            elseif ($relType === 3) $guardian = $pObj;
+        }
+    }
+    $fStatus = old('father_status', $father['status'] ?? 'ada');
+    $mStatus = old('mother_status', $mother['status'] ?? 'ada');
 @endphp
 
 <!-- Navigation Bar -->
@@ -176,6 +201,107 @@
                                   name="street_address" 
                                   rows="2" 
                                   placeholder="Nama jalan, nomor rumah, RT/RW, dsb.">{{ $street }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Data Orang Tua & Status KK -->
+            <div class="card border-0 shadow-sm rounded-3 bg-white p-3 p-md-4 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <span class="material-symbols-outlined text-primary" style="font-size:22px;">family_restroom</span>
+                    <h6 class="fw-bold text-dark mb-0">3. Data Orang Tua &amp; Status Kartu Keluarga (KK)</h6>
+                </div>
+
+                <!-- Bagian Ayah Kandung -->
+                <div class="p-3 rounded-3 bg-light border mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="fw-bold text-dark small d-flex align-items-center gap-1">
+                            <span class="material-symbols-outlined text-primary" style="font-size: 18px;">man</span>
+                            Ayah Kandung
+                        </span>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Status Ayah di Kartu Keluarga (KK)</label>
+                            <select class="form-select form-select-sm" name="father_status">
+                                <option value="ada" {{ $fStatus === 'ada' ? 'selected' : '' }}>Tercantum di KK (Masih Hidup)</option>
+                                <option value="meninggal" {{ $fStatus === 'meninggal' ? 'selected' : '' }}>Meninggal Dunia</option>
+                                <option value="cerai" {{ $fStatus === 'cerai' ? 'selected' : '' }}>Cerai / Pisah KK</option>
+                                <option value="tidak_diketahui" {{ $fStatus === 'tidak_diketahui' ? 'selected' : '' }}>Tidak Diketahui / Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Nama Lengkap Ayah</label>
+                            <input type="text" class="form-control form-control-sm" name="father_name" value="{{ old('father_name', $father['full_name'] ?? ($father['name'] ?? '')) }}" placeholder="Nama Ayah (boleh kosong jika meninggal/cerai)">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">NIK Ayah (16 Digit)</label>
+                            <input type="text" class="form-control form-control-sm" name="father_nik" value="{{ old('father_nik', $father['nik'] ?? '') }}" maxlength="16" placeholder="16 digit NIK Ayah">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">No. HP / WA Ayah</label>
+                            <input type="text" class="form-control form-control-sm" name="father_phone" value="{{ old('father_phone', $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? ''))) }}" placeholder="08xxxxxxxxxx">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bagian Ibu Kandung -->
+                <div class="p-3 rounded-3 bg-light border mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="fw-bold text-dark small d-flex align-items-center gap-1">
+                            <span class="material-symbols-outlined text-primary" style="font-size: 18px;">woman</span>
+                            Ibu Kandung
+                        </span>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Status Ibu di Kartu Keluarga (KK)</label>
+                            <select class="form-select form-select-sm" name="mother_status">
+                                <option value="ada" {{ $mStatus === 'ada' ? 'selected' : '' }}>Tercantum di KK (Masih Hidup)</option>
+                                <option value="meninggal" {{ $mStatus === 'meninggal' ? 'selected' : '' }}>Meninggal Dunia</option>
+                                <option value="cerai" {{ $mStatus === 'cerai' ? 'selected' : '' }}>Cerai / Pisah KK</option>
+                                <option value="tidak_diketahui" {{ $mStatus === 'tidak_diketahui' ? 'selected' : '' }}>Tidak Diketahui / Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Nama Lengkap Ibu</label>
+                            <input type="text" class="form-control form-control-sm" name="mother_name" value="{{ old('mother_name', $mother['full_name'] ?? ($mother['name'] ?? '')) }}" placeholder="Nama Ibu (boleh kosong jika meninggal/cerai)">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">NIK Ibu (16 Digit)</label>
+                            <input type="text" class="form-control form-control-sm" name="mother_nik" value="{{ old('mother_nik', $mother['nik'] ?? '') }}" maxlength="16" placeholder="16 digit NIK Ibu">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">No. HP / WA Ibu</label>
+                            <input type="text" class="form-control form-control-sm" name="mother_phone" value="{{ old('mother_phone', $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? ''))) }}" placeholder="08xxxxxxxxxx">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bagian Data Wali -->
+                <div class="p-3 rounded-3 bg-light border">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="fw-bold text-dark small d-flex align-items-center gap-1">
+                            <span class="material-symbols-outlined text-primary" style="font-size: 18px;">shield_person</span>
+                            Data Wali (Opsional / Penanggung Jawab)
+                        </span>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark">Nama Lengkap Wali</label>
+                            <input type="text" class="form-control form-control-sm" name="guardian_name" value="{{ old('guardian_name', $guardian['full_name'] ?? ($guardian['name'] ?? '')) }}" placeholder="Nama Wali">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark">NIK Wali (16 Digit)</label>
+                            <input type="text" class="form-control form-control-sm" name="guardian_nik" value="{{ old('guardian_nik', $guardian['nik'] ?? '') }}" maxlength="16" placeholder="16 digit NIK Wali">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-dark">No. HP / WA Wali</label>
+                            <input type="text" class="form-control form-control-sm" name="guardian_phone" value="{{ old('guardian_phone', $guardian['phone_number'] ?? ($guardian['whatsapp_number'] ?? ($guardian['phone'] ?? ''))) }}" placeholder="08xxxxxxxxxx">
+                        </div>
                     </div>
                 </div>
             </div>

@@ -5,6 +5,10 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use App\Models\PpdbAccount;
+use App\Models\PpdbRegistration;
 
 class AdminPpdbTest extends TestCase
 {
@@ -732,5 +736,68 @@ class AdminPpdbTest extends TestCase
 
         $response->assertRedirect('/admin/ppdb/users');
         $response->assertSessionHas('success');
+    }
+
+    /**
+     * Test admin can update registration including parent KK status.
+     */
+    public function test_admin_can_update_registration_with_parent_status(): void
+    {
+        $regId = (string) Str::uuid();
+        $account = PpdbAccount::create([
+            'id' => (string) Str::uuid(),
+            'email' => 'siswa.ortu.' . time() . '@example.com',
+            'full_name' => 'Siswa Status Ortu',
+            'nik' => '3201019988770001',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        $reg = PpdbRegistration::create([
+            'id' => $regId,
+            'account_id' => $account->id,
+            'payment_status' => 'paid',
+            'registration_status' => 'pending',
+            'form_data' => [
+                'full_name' => 'Siswa Status Ortu',
+                'nik' => '3201019988770001',
+            ],
+        ]);
+
+        try {
+            Http::fake([
+                '*/api/ppdb/registrations/*' => Http::response(['message' => 'OK'], 200),
+            ]);
+
+            $response = $this->withSession([
+                'admin_api_token' => 'admin-jwt-token-12345',
+                'is_admin' => true,
+            ])->put('/admin/ppdb/registrations/' . $reg->id, [
+                'full_name' => 'Siswa Status Ortu Updated',
+                'nik' => '3201019988770001',
+                'email' => $account->email,
+                'payment_status' => 'paid',
+                'registration_status' => 'pending',
+                'father_status' => 'meninggal',
+                'father_name' => '',
+                'mother_status' => 'cerai',
+                'mother_name' => 'Ibu Kandung Pisah',
+                'guardian_name' => 'Wali Sah Santri',
+            ]);
+
+            $response->assertRedirect('/admin/ppdb/registrations/' . $reg->id);
+            $response->assertSessionHas('success');
+
+            $reg->refresh();
+            $this->assertEquals('Siswa Status Ortu Updated', $reg->account->full_name);
+            $parents = $reg->form_data['student_parents'] ?? [];
+            $this->assertCount(3, $parents);
+            $this->assertEquals('meninggal', $parents[0]['parent']['status']);
+            $this->assertEquals('Meninggal Dunia', $parents[0]['parent']['status_label']);
+            $this->assertEquals('cerai', $parents[1]['parent']['status']);
+            $this->assertEquals('Wali Sah Santri', $parents[2]['parent']['full_name']);
+        } finally {
+            $reg->forceDelete();
+            $account->forceDelete();
+        }
     }
 }

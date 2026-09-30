@@ -53,6 +53,14 @@
         foreach ($rawParents as $sp) {
             $relType = (int) ($sp['relationship_type'] ?? 0);
             $pObj = $sp['parent'] ?? $sp;
+            if (is_array($pObj)) {
+                if (empty($pObj['status']) && !empty($sp['status'])) {
+                    $pObj['status'] = $sp['status'];
+                }
+                if (empty($pObj['status_label']) && !empty($sp['status_label'])) {
+                    $pObj['status_label'] = $sp['status_label'];
+                }
+            }
             if ($relType === 1) $father = $pObj;
             elseif ($relType === 2) $mother = $pObj;
             elseif ($relType === 3) $guardian = $pObj;
@@ -673,18 +681,43 @@
                                 <!-- Sub Nav Pills Ayah / Ibu / Wali -->
                                 <ul class="nav nav-pills gap-1 mb-3 pb-2 border-bottom" id="parentSubTabs" role="tablist">
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link active py-1 px-3 fw-semibold" id="subtab-ayah-btn" data-bs-toggle="pill" data-bs-target="#subtab-ayah" type="button" role="tab" style="font-size: 12.5px;">
-                                            Ayah Kandung
+                                        <button class="nav-link active py-1 px-3 fw-semibold d-inline-flex align-items-center gap-1" id="subtab-ayah-btn" data-bs-toggle="pill" data-bs-target="#subtab-ayah" type="button" role="tab" style="font-size: 12.5px;">
+                                            <span>Ayah Kandung</span>
+                                            @if(!empty($father['status']) && $father['status'] !== 'ada')
+                                                @php
+                                                    $fBadgeClass = match($father['status']) {
+                                                        'meninggal' => 'bg-secondary text-white',
+                                                        'cerai' => 'bg-warning text-dark',
+                                                        default => 'bg-info text-dark',
+                                                    };
+                                                @endphp
+                                                <span class="badge {{ $fBadgeClass }} ms-1" style="font-size: 10px;">{{ $father['status_label'] ?? ucfirst($father['status']) }}</span>
+                                            @endif
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link py-1 px-3 fw-semibold" id="subtab-ibu-btn" data-bs-toggle="pill" data-bs-target="#subtab-ibu" type="button" role="tab" style="font-size: 12.5px;">
-                                            Ibu Kandung
+                                        <button class="nav-link py-1 px-3 fw-semibold d-inline-flex align-items-center gap-1" id="subtab-ibu-btn" data-bs-toggle="pill" data-bs-target="#subtab-ibu" type="button" role="tab" style="font-size: 12.5px;">
+                                            <span>Ibu Kandung</span>
+                                            @if(!empty($mother['status']) && $mother['status'] !== 'ada')
+                                                @php
+                                                    $mBadgeClass = match($mother['status']) {
+                                                        'meninggal' => 'bg-secondary text-white',
+                                                        'cerai' => 'bg-warning text-dark',
+                                                        default => 'bg-info text-dark',
+                                                    };
+                                                @endphp
+                                                <span class="badge {{ $mBadgeClass }} ms-1" style="font-size: 10px;">{{ $mother['status_label'] ?? ucfirst($mother['status']) }}</span>
+                                            @endif
                                         </button>
                                     </li>
                                     <li class="nav-item" role="presentation">
-                                        <button class="nav-link py-1 px-3 fw-semibold" id="subtab-wali-btn" data-bs-toggle="pill" data-bs-target="#subtab-wali" type="button" role="tab" style="font-size: 12.5px;">
-                                            Wali (Opsional)
+                                        <button class="nav-link py-1 px-3 fw-semibold d-inline-flex align-items-center gap-1" id="subtab-wali-btn" data-bs-toggle="pill" data-bs-target="#subtab-wali" type="button" role="tab" style="font-size: 12.5px;">
+                                            <span>Wali</span>
+                                            @if(!empty($guardian['full_name']) || !empty($guardian['name']))
+                                                <span class="badge bg-success-subtle text-success border ms-1" style="font-size: 10px;">Tercatat</span>
+                                            @else
+                                                <span class="text-muted ms-1" style="font-size: 11px;">(Opsional)</span>
+                                            @endif
                                         </button>
                                     </li>
                                 </ul>
@@ -693,6 +726,27 @@
                                     <!-- Sub Pane Ayah -->
                                     <div class="tab-pane fade show active" id="subtab-ayah" role="tabpanel">
                                         @if(!empty($father))
+                                            @if(!empty($father['status']) && $father['status'] !== 'ada')
+                                                @php
+                                                    $fAlertClass = match($father['status']) {
+                                                        'meninggal' => 'alert-secondary',
+                                                        'cerai' => 'alert-warning',
+                                                        default => 'alert-info',
+                                                    };
+                                                    $fBadgeClass = match($father['status']) {
+                                                        'meninggal' => 'bg-secondary text-white',
+                                                        'cerai' => 'bg-warning text-dark',
+                                                        default => 'bg-info text-dark',
+                                                    };
+                                                @endphp
+                                                <div class="alert {{ $fAlertClass }} py-2 px-3 small d-flex align-items-center gap-2 mb-3 rounded-3">
+                                                    <span class="material-symbols-outlined" style="font-size: 20px;">info</span>
+                                                    <div>
+                                                        <strong>Status di Kartu Keluarga (KK):</strong> <span class="badge {{ $fBadgeClass }}">{{ $father['status_label'] ?? ucfirst($father['status']) }}</span>
+                                                        <span class="ms-1">(Calon siswa memilih status ini sehingga rincian data ayah tidak diwajibkan dalam pendaftaran)</span>
+                                                    </div>
+                                                </div>
+                                            @endif
                                             <div class="row g-2">
                                                 <div class="col-md-6">
                                                     <div class="p-3 bg-light rounded-3 border h-100">
@@ -753,6 +807,27 @@
                                     <!-- Sub Pane Ibu -->
                                     <div class="tab-pane fade" id="subtab-ibu" role="tabpanel">
                                         @if(!empty($mother))
+                                            @if(!empty($mother['status']) && $mother['status'] !== 'ada')
+                                                @php
+                                                    $mAlertClass = match($mother['status']) {
+                                                        'meninggal' => 'alert-secondary',
+                                                        'cerai' => 'alert-warning',
+                                                        default => 'alert-info',
+                                                    };
+                                                    $mBadgeClass = match($mother['status']) {
+                                                        'meninggal' => 'bg-secondary text-white',
+                                                        'cerai' => 'bg-warning text-dark',
+                                                        default => 'bg-info text-dark',
+                                                    };
+                                                @endphp
+                                                <div class="alert {{ $mAlertClass }} py-2 px-3 small d-flex align-items-center gap-2 mb-3 rounded-3">
+                                                    <span class="material-symbols-outlined" style="font-size: 20px;">info</span>
+                                                    <div>
+                                                        <strong>Status di Kartu Keluarga (KK):</strong> <span class="badge {{ $mBadgeClass }}">{{ $mother['status_label'] ?? ucfirst($mother['status']) }}</span>
+                                                        <span class="ms-1">(Calon siswa memilih status ini sehingga rincian data ibu tidak diwajibkan dalam pendaftaran)</span>
+                                                    </div>
+                                                </div>
+                                            @endif
                                             <div class="row g-2">
                                                 <div class="col-md-6">
                                                     <div class="p-3 bg-light rounded-3 border h-100">
@@ -812,6 +887,17 @@
 
                                     <!-- Sub Pane Wali -->
                                     <div class="tab-pane fade" id="subtab-wali" role="tabpanel">
+                                        @php
+                                            $bothParentsAbsent = (!empty($father['status']) && $father['status'] !== 'ada') && (!empty($mother['status']) && $mother['status'] !== 'ada');
+                                        @endphp
+                                        @if($bothParentsAbsent)
+                                            <div class="alert alert-info py-2 px-3 small d-flex align-items-center gap-2 mb-3 rounded-3">
+                                                <span class="material-symbols-outlined text-info" style="font-size: 20px;">info</span>
+                                                <div>
+                                                    <strong>Penanggung Jawab Utama:</strong> Karena status Ayah dan Ibu tidak tercantum di KK (Meninggal Dunia / Cerai), data Wali ini menjadi kontak dan penanggung jawab resmi calon siswa.
+                                                </div>
+                                            </div>
+                                        @endif
                                         @if(!empty($guardian))
                                             <div class="row g-2">
                                                 <div class="col-md-6">
@@ -1110,13 +1196,31 @@
                                     <div class="col-md-6">
                                         <div class="p-3 bg-light rounded-3 border h-100">
                                             <div class="text-muted small fw-bold text-uppercase mb-1">Nama &amp; Kontak Ayah</div>
-                                            <div class="fw-semibold text-dark">{{ $father['full_name'] ?? ($father['name'] ?? '-') }} ({{ $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? '-')) }})</div>
+                                            <div class="fw-semibold text-dark">
+                                                {{ $father['full_name'] ?? ($father['name'] ?? '-') }}
+                                                @if(!empty($father['status']) && $father['status'] !== 'ada')
+                                                    <span class="badge bg-warning text-dark ms-1 small" style="font-size: 10.5px;">{{ $father['status_label'] ?? ucfirst($father['status']) }}</span>
+                                                @endif
+                                                @php $fPhone = $father['phone_number'] ?? ($father['whatsapp_number'] ?? ($father['phone'] ?? null)); @endphp
+                                                @if(!empty($fPhone))
+                                                    <span class="text-muted small ms-1">({{ $fPhone }})</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="p-3 bg-light rounded-3 border h-100">
                                             <div class="text-muted small fw-bold text-uppercase mb-1">Nama &amp; Kontak Ibu</div>
-                                            <div class="fw-semibold text-dark">{{ $mother['full_name'] ?? ($mother['name'] ?? '-') }} ({{ $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? '-')) }})</div>
+                                            <div class="fw-semibold text-dark">
+                                                {{ $mother['full_name'] ?? ($mother['name'] ?? '-') }}
+                                                @if(!empty($mother['status']) && $mother['status'] !== 'ada')
+                                                    <span class="badge bg-warning text-dark ms-1 small" style="font-size: 10.5px;">{{ $mother['status_label'] ?? ucfirst($mother['status']) }}</span>
+                                                @endif
+                                                @php $mPhone = $mother['phone_number'] ?? ($mother['whatsapp_number'] ?? ($mother['phone'] ?? null)); @endphp
+                                                @if(!empty($mPhone))
+                                                    <span class="text-muted small ms-1">({{ $mPhone }})</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

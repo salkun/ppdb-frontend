@@ -157,6 +157,7 @@ class AdminPpdbController extends Controller
             'id' => $reg->id,
             'account_id' => $reg->account_id,
             'payment_status' => $reg->payment_status,
+            'payment_method' => $reg->payment_method ?? 'transfer',
             'payment_amount' => (float) $reg->payment_amount,
             'payment_proof_path' => $reg->payment_proof_path,
             'payment_verified_at' => $reg->payment_verified_at ? $reg->payment_verified_at->toIso8601String() : null,
@@ -913,12 +914,14 @@ class AdminPpdbController extends Controller
                     'email' => $acc['email'] ?? '-',
                     'nik' => $acc['nik'] ?? '-',
                     'phone' => $form['contact']['mobile_number'] ?? ($acc['phone'] ?? '-'),
+                    'payment_method' => $r['payment_method'] ?? 'transfer',
                     'payment_status' => $r['payment_status'] ?? 'unpaid',
                     'payment_amount' => (float)($r['payment_amount'] ?? 0),
                     'payment_proof_path' => $r['payment_proof_path'] ?? null,
                     'payment_verified_at' => $r['payment_verified_at'] ?? null,
                     'payment_verified_by' => $r['payment_verified_by'] ?? null,
                     'created_at' => $r['created_at'] ?? now()->toIso8601String(),
+                    'updated_at' => $r['updated_at'] ?? null,
                 ];
             }
 
@@ -1201,6 +1204,17 @@ class AdminPpdbController extends Controller
             'payment_status' => ['required', 'in:unpaid,pending_verification,paid,rejected'],
             'payment_amount' => ['nullable', 'numeric', 'min:0'],
             'registration_status' => ['required', 'in:pending,accepted,rejected'],
+            'father_status' => ['nullable', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
+            'father_name' => ['nullable', 'string', 'max:150'],
+            'father_nik' => ['nullable', 'string', 'max:20'],
+            'father_phone' => ['nullable', 'string', 'max:20'],
+            'mother_status' => ['nullable', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
+            'mother_name' => ['nullable', 'string', 'max:150'],
+            'mother_nik' => ['nullable', 'string', 'max:20'],
+            'mother_phone' => ['nullable', 'string', 'max:20'],
+            'guardian_name' => ['nullable', 'string', 'max:150'],
+            'guardian_nik' => ['nullable', 'string', 'max:20'],
+            'guardian_phone' => ['nullable', 'string', 'max:20'],
         ], [
             'full_name.required' => 'Nama lengkap calon siswa wajib diisi.',
             'nik.required' => 'NIK wajib diisi.',
@@ -1244,6 +1258,80 @@ class AdminPpdbController extends Controller
             $address = $currentForm['address'] ?? [];
             if ($request->filled('street_address')) $address['street_address'] = $request->street_address;
             $currentForm['address'] = $address;
+
+            // Parents / Wali
+            if ($request->has('father_status') || $request->has('mother_status') || $request->filled('father_name') || $request->filled('mother_name')) {
+                $rawParents = $currentForm['student_parents'] ?? ($currentForm['parents'] ?? []);
+                $existingFather = [];
+                $existingMother = [];
+                $existingGuardian = [];
+                if (is_array($rawParents)) {
+                    foreach ($rawParents as $sp) {
+                        $relType = (int) ($sp['relationship_type'] ?? 0);
+                        $pObj = $sp['parent'] ?? $sp;
+                        if ($relType === 1) $existingFather = is_array($pObj) ? $pObj : [];
+                        elseif ($relType === 2) $existingMother = is_array($pObj) ? $pObj : [];
+                        elseif ($relType === 3) $existingGuardian = is_array($pObj) ? $pObj : [];
+                    }
+                }
+
+                $fStatus = $request->input('father_status', $existingFather['status'] ?? 'ada');
+                $fLabel = match ($fStatus) {
+                    'meninggal' => 'Meninggal Dunia',
+                    'cerai' => 'Cerai / Pisah KK',
+                    'tidak_diketahui' => 'Tidak Diketahui',
+                    default => 'Ada / Tercantum di KK',
+                };
+                $fName = $request->filled('father_name') 
+                    ? $request->father_name 
+                    : ($fStatus !== 'ada' ? $fLabel : ($existingFather['full_name'] ?? ''));
+
+                $existingFather['status'] = $fStatus;
+                $existingFather['status_label'] = $fLabel;
+                $existingFather['full_name'] = $fName;
+                if ($request->filled('father_nik')) $existingFather['nik'] = $request->father_nik;
+                if ($request->filled('father_phone')) {
+                    $existingFather['phone_number'] = $request->father_phone;
+                    $existingFather['whatsapp_number'] = $request->father_phone;
+                }
+
+                $mStatus = $request->input('mother_status', $existingMother['status'] ?? 'ada');
+                $mLabel = match ($mStatus) {
+                    'meninggal' => 'Meninggal Dunia',
+                    'cerai' => 'Cerai / Pisah KK',
+                    'tidak_diketahui' => 'Tidak Diketahui',
+                    default => 'Ada / Tercantum di KK',
+                };
+                $mName = $request->filled('mother_name') 
+                    ? $request->mother_name 
+                    : ($mStatus !== 'ada' ? $mLabel : ($existingMother['full_name'] ?? ''));
+
+                $existingMother['status'] = $mStatus;
+                $existingMother['status_label'] = $mLabel;
+                $existingMother['full_name'] = $mName;
+                if ($request->filled('mother_nik')) $existingMother['nik'] = $request->mother_nik;
+                if ($request->filled('mother_phone')) {
+                    $existingMother['phone_number'] = $request->mother_phone;
+                    $existingMother['whatsapp_number'] = $request->mother_phone;
+                }
+
+                $newParentsList = [
+                    ['relationship_type' => 1, 'parent' => $existingFather],
+                    ['relationship_type' => 2, 'parent' => $existingMother],
+                ];
+
+                if ($request->filled('guardian_name') || !empty($existingGuardian['full_name'])) {
+                    if ($request->filled('guardian_name')) $existingGuardian['full_name'] = $request->guardian_name;
+                    if ($request->filled('guardian_nik')) $existingGuardian['nik'] = $request->guardian_nik;
+                    if ($request->filled('guardian_phone')) {
+                        $existingGuardian['phone_number'] = $request->guardian_phone;
+                        $existingGuardian['whatsapp_number'] = $request->guardian_phone;
+                    }
+                    $newParentsList[] = ['relationship_type' => 3, 'parent' => $existingGuardian];
+                }
+
+                $currentForm['student_parents'] = $newParentsList;
+            }
 
             if ($reg) {
                 // 1. Update Account

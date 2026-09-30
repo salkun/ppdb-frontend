@@ -181,12 +181,48 @@ Pendaftar yang memilih metode **Transfer Bank** diinstruksikan melakukan transfe
 
 ---
 
-## 🤖 Notifikasi Telegram Panitia (Opsional)
+## 🤖 Notifikasi & Verifikasi Pembayaran via Telegram Bot
 
-Untuk mengaktifkan pengiriman notifikasi instan ke grup WhatsApp/Telegram panitia saat ada berkas bukti pembayaran baru yang masuk, isi variabel berikut di file `.env`:
+Sistem PPDB telah terintegrasi dengan Bot Telegram (`@paymen_ppdb_bot`) untuk mengirimkan notifikasi bukti transfer secara real-time sekaligus memungkinkan **Verifikasi Pembayaran 1-Klik** langsung dari Telegram tanpa perlu membuka browser.
+
+### 1. Konfigurasi `.env`
 ```env
-TELEGRAM_BOT_TOKEN=123456789:AAFxxxxxxxxxxxxxxxxxxxxxx
-TELEGRAM_PANITIA_CHAT_ID=-100xxxxxxxxxx
+TELEGRAM_BOT_TOKEN=8652897327:AAHLG5bufZk1He8sA-LzzE3pYy8HLhktFPU
+TELEGRAM_PANITIA_CHAT_ID=-1004416679598
+```
+
+### 2. Cara Kerja Verifikasi 1-Klik:
+1. Saat calon siswa mengunggah bukti pembayaran, bot mengirim foto bukti ke grup Telegram panitia lengkap dengan tombol inline:
+   - `[ ✅ Verifikasi Lunas ]`
+   - `[ ❌ Tolak Bukti ]`
+   - `[ 🔍 Buka Dossier Siswa ]`
+2. Panitia cukup menekan tombol **`[ ✅ Verifikasi Lunas ]`**. Sistem langsung:
+   - Mengubah status pembayaran menjadi `paid` (Lunas) di database MySQL.
+   - Mencatat waktu dan nama akun Telegram panitia yang memverifikasi.
+   - Memperbarui caption foto di Telegram menjadi `✅ STATUS: DIVERIFIKASI LUNAS`.
+   - Mengubah tombol agar tidak dapat dipencet ganda.
+3. Bot juga mendukung perintah teks di grup/private chat:
+   - `/pending` — Menampilkan daftar siswa yang menunggu verifikasi.
+   - `/stats` — Ringkasan statistik pembayaran PPDB.
+   - `/verif <nik_atau_id>` — Verifikasi langsung via NIK / ID.
+   - `/tolak <nik_atau_id>` — Tolak bukti pembayaran.
+
+### 3. Perintah Artisan Pendukung:
+```bash
+# Uji coba koneksi bot ke grup Telegram panitia
+php artisan ppdb:test-telegram
+
+# Jalankan listener di lingkungan lokal/Laragon (Long Polling)
+php artisan ppdb:telegram-poll
+
+# Pasang Webhook untuk server production/cPanel (dengan domain HTTPS)
+php artisan ppdb:telegram-webhook --set=https://domain-anda.com/api/telegram/webhook
+
+# Cek informasi status Webhook saat ini
+php artisan ppdb:telegram-webhook --info
+
+# Hapus Webhook aktif
+php artisan ppdb:telegram-webhook --delete
 ```
 
 ---

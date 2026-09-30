@@ -186,14 +186,18 @@ class PpdbExportService
                 $mobile,
                 $email,
                 // Data Ayah
-                $father['full_name'] ?? '-',
+                (!empty($father['status']) && $father['status'] !== 'ada')
+                    ? (!empty($father['full_name']) && $father['full_name'] !== '-' ? $father['full_name'] . ' (' . ($father['status_label'] ?? ucfirst($father['status'])) . ')' : ($father['status_label'] ?? ucfirst($father['status'])))
+                    : ($father['full_name'] ?? '-'),
                 $father['nik'] ?? '-',
                 $this->educationMap[$father['education_code'] ?? ''] ?? ($father['education_code'] ?? '-'),
                 $this->occupationMap[$father['occupation_code'] ?? ''] ?? ($father['occupation_code'] ?? '-'),
                 $this->incomeMap[$father['income_code'] ?? ''] ?? ($father['income_code'] ?? '-'),
                 $father['phone_number'] ?? ($father['whatsapp_number'] ?? '-'),
                 // Data Ibu
-                $mother['full_name'] ?? '-',
+                (!empty($mother['status']) && $mother['status'] !== 'ada')
+                    ? (!empty($mother['full_name']) && $mother['full_name'] !== '-' ? $mother['full_name'] . ' (' . ($mother['status_label'] ?? ucfirst($mother['status'])) . ')' : ($mother['status_label'] ?? ucfirst($mother['status'])))
+                    : ($mother['full_name'] ?? '-'),
                 $mother['nik'] ?? '-',
                 $this->educationMap[$mother['education_code'] ?? ''] ?? ($mother['education_code'] ?? '-'),
                 $this->occupationMap[$mother['occupation_code'] ?? ''] ?? ($mother['occupation_code'] ?? '-'),

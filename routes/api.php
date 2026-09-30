@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Telegram Bot Webhook (Verifikasi Pembayaran PPDB)
+Route::post('/telegram/webhook', [\App\Http\Controllers\TelegramWebhookController::class, 'handleWebhook'])->name('api.telegram.webhook');
+

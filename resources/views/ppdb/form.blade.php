@@ -685,247 +685,361 @@
                 <div class="tab-content" id="parentTabContent">
                     {{-- Tab Ayah Kandung --}}
                     <div class="tab-pane fade show active" id="father-pane" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="father_nik" class="db-label">NIK Ayah <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="father_nik" 
-                                       name="father_nik" 
-                                       value="{{ old('father_nik', $father['nik'] ?? '') }}" 
-                                       placeholder="16 digit NIK ayah" 
-                                       maxlength="16" 
-                                       inputmode="numeric"
-                                       pattern="\d{16}"
-                                       required 
-                                       {{ $isLocked ? 'disabled' : '' }}>
+                        @php
+                            $fStatus = old('father_status', $father['status'] ?? 'ada');
+                            $isFatherActive = ($fStatus === 'ada');
+                        @endphp
+
+                        {{-- Pilihan Status Keberadaan Ayah di KK --}}
+                        <div class="db-parent-status-card mb-3 p-3 rounded-3" style="background:var(--lp-surface-subtle);border:1.5px solid var(--lp-surface-container);">
+                            <label class="db-label mb-2 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                <span class="d-flex align-items-center gap-1">
+                                    <span class="material-symbols-outlined text-primary" style="font-size:18px;">badge</span>
+                                    <strong>Keberadaan Ayah di Kartu Keluarga (KK) <span class="text-danger">*</span></strong>
+                                </span>
+                                <span class="badge bg-primary-subtle text-primary border" style="font-size:11px;font-weight:600;">Sesuai KK</span>
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="father_status" value="ada" class="form-check-input mt-0" {{ $fStatus === 'ada' ? 'checked' : '' }} onchange="handleParentStatusChange('father', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Ada di KK</span>
+                                    </label>
+                                </div>
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="father_status" value="meninggal" class="form-check-input mt-0" {{ $fStatus === 'meninggal' ? 'checked' : '' }} onchange="handleParentStatusChange('father', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Meninggal Dunia</span>
+                                    </label>
+                                </div>
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="father_status" value="cerai" class="form-check-input mt-0" {{ $fStatus === 'cerai' ? 'checked' : '' }} onchange="handleParentStatusChange('father', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Cerai / Pisah KK</span>
+                                    </label>
+                                </div>
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="father_status" value="tidak_diketahui" class="form-check-input mt-0" {{ $fStatus === 'tidak_diketahui' ? 'checked' : '' }} onchange="handleParentStatusChange('father', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Tidak Diketahui</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="father_name" class="db-label">Nama Lengkap Ayah <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="father_name" 
-                                       name="father_name" 
-                                       value="{{ old('father_name', $father['full_name'] ?? '') }}" 
-                                       placeholder="Nama lengkap ayah kandung" 
-                                       required 
-                                       {{ $isLocked ? 'disabled' : '' }}>
+                            <div id="father-status-notice" class="mt-2 alert alert-info py-2 px-3 small mb-0 rounded-2" style="display: {{ !$isFatherActive ? 'flex' : 'none' }}; align-items:center; gap:8px;">
+                                <span class="material-symbols-outlined text-info" style="font-size:20px;">info</span>
+                                <div>
+                                    Status Ayah adalah <strong id="father-status-text">{{ $fStatus === 'meninggal' ? 'Meninggal Dunia' : ($fStatus === 'cerai' ? 'Cerai / Pisah KK' : 'Tidak Diketahui') }}</strong> (tidak tercantum dalam KK). Rincian data ayah di bawah ini <strong>tidak perlu diisi</strong> (opsional). Anda dapat langsung lanjut mengisi data Ibu atau Wali.
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-4">
-                                <label for="father_birth_year" class="db-label">Tahun Lahir Ayah <span class="text-danger">*</span></label>
-                                <input type="number" 
-                                       class="db-input" 
-                                       id="father_birth_year" 
-                                       name="father_birth_year" 
-                                       value="{{ old('father_birth_year', $father['birth_year'] ?? '') }}" 
-                                       placeholder="Contoh: 1978" 
-                                       min="1930" 
-                                       max="2015" 
-                                       inputmode="numeric"
-                                       required 
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                        <div id="father-fields-wrapper" style="{{ !$isFatherActive ? 'display:none;' : '' }}">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="father_nik" class="db-label">NIK Ayah <span class="text-danger father-req-star" style="{{ $isFatherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="father_nik" 
+                                           name="father_nik" 
+                                           value="{{ old('father_nik', $father['nik'] ?? '') }}" 
+                                           placeholder="16 digit NIK ayah" 
+                                           maxlength="16" 
+                                           inputmode="numeric"
+                                           {{ $isFatherActive ? 'required' : '' }} 
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="father_education" class="db-label">Pendidikan Terakhir <span class="text-danger">*</span></label>
-                                <select class="db-select" id="father_education" name="father_education" required {{ $isLocked ? 'disabled' : '' }}>
-                                    <option value="">Pilih Pendidikan</option>
-                                    @php $fEdu = old('father_education', $father['education_code'] ?? ''); @endphp
-                                    @foreach($educationList as $code => $label)
-                                        <option value="{{ $code }}" {{ $fEdu == $code ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                <div class="col-md-6">
+                                    <label for="father_name" class="db-label">Nama Lengkap Ayah <span class="text-danger father-req-star" style="{{ $isFatherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="father_name" 
+                                           name="father_name" 
+                                           value="{{ old('father_name', $father['full_name'] ?? '') }}" 
+                                           placeholder="Nama lengkap ayah kandung" 
+                                           {{ $isFatherActive ? 'required' : '' }} 
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="father_occupation" class="db-label">Pekerjaan Ayah <span class="text-danger">*</span></label>
-                                @php
-                                    $fOccVal = old('father_occupation', $father['occupation_code'] ?? ($father['occupation'] ?? ''));
-                                    if (isset($occupationList[$fOccVal])) {
-                                        $fOccVal = $occupationList[$fOccVal];
-                                    }
-                                @endphp
-                                <input type="text"
-                                       class="db-input"
-                                       id="father_occupation"
-                                       name="father_occupation"
-                                       value="{{ $fOccVal }}"
-                                       placeholder="Contoh: Wiraswasta, PNS, Petani, dll"
-                                       required
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="father_birth_year" class="db-label">Tahun Lahir Ayah <span class="text-danger father-req-star" style="{{ $isFatherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <input type="number" 
+                                           class="db-input" 
+                                           id="father_birth_year" 
+                                           name="father_birth_year" 
+                                           value="{{ old('father_birth_year', $father['birth_year'] ?? '') }}" 
+                                           placeholder="Contoh: 1978" 
+                                           min="1930" 
+                                           max="2015" 
+                                           inputmode="numeric"
+                                           {{ $isFatherActive ? 'required' : '' }} 
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="father_income" class="db-label">Penghasilan Bulanan <span class="text-danger">*</span></label>
-                                <select class="db-select" id="father_income" name="father_income" required {{ $isLocked ? 'disabled' : '' }}>
-                                    <option value="">Pilih Penghasilan</option>
-                                    @php $fInc = old('father_income', $father['income_code'] ?? ''); @endphp
-                                    @foreach($incomeList as $code => $label)
-                                        <option value="{{ $code }}" {{ $fInc == $code ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="father_education" class="db-label">Pendidikan Terakhir <span class="text-danger father-req-star" style="{{ $isFatherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <select class="db-select" id="father_education" name="father_education" {{ $isFatherActive ? 'required' : '' }} {{ $isLocked ? 'disabled' : '' }}>
+                                        <option value="">Pilih Pendidikan</option>
+                                        @php $fEdu = old('father_education', $father['education_code'] ?? ''); @endphp
+                                        @foreach($educationList as $code => $label)
+                                            <option value="{{ $code }}" {{ $fEdu == $code ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="father_phone" class="db-label">No HP Ayah</label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="father_phone" 
-                                       name="father_phone" 
-                                       value="{{ old('father_phone', $father['phone_number'] ?? '') }}" 
-                                       placeholder="0812..." 
-                                       inputmode="tel"
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="father_occupation" class="db-label">Pekerjaan Ayah <span class="text-danger father-req-star" style="{{ $isFatherActive ? '' : 'display:none;' }}">*</span></label>
+                                    @php
+                                        $fOccVal = old('father_occupation', $father['occupation_code'] ?? ($father['occupation'] ?? ''));
+                                        if (isset($occupationList[$fOccVal])) {
+                                            $fOccVal = $occupationList[$fOccVal];
+                                        }
+                                    @endphp
+                                    <input type="text"
+                                           class="db-input"
+                                           id="father_occupation"
+                                           name="father_occupation"
+                                           value="{{ $fOccVal }}"
+                                           placeholder="Contoh: Wiraswasta, PNS, Petani, dll"
+                                           {{ $isFatherActive ? 'required' : '' }}
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="father_whatsapp" class="db-label">No WhatsApp Ayah</label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="father_whatsapp" 
-                                       name="father_whatsapp" 
-                                       value="{{ old('father_whatsapp', $father['whatsapp_number'] ?? '') }}" 
-                                       placeholder="0812..." 
-                                       inputmode="tel"
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="father_income" class="db-label">Penghasilan Bulanan <span class="text-danger father-req-star" style="{{ $isFatherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <select class="db-select" id="father_income" name="father_income" {{ $isFatherActive ? 'required' : '' }} {{ $isLocked ? 'disabled' : '' }}>
+                                        <option value="">Pilih Penghasilan</option>
+                                        @php $fInc = old('father_income', $father['income_code'] ?? ''); @endphp
+                                        @foreach($incomeList as $code => $label)
+                                            <option value="{{ $code }}" {{ $fInc == $code ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                            <div class="col-12">
-                                <label for="father_email" class="db-label">Alamat Email Ayah</label>
-                                <input type="email" 
-                                       class="db-input" 
-                                       id="father_email" 
-                                       name="father_email" 
-                                       value="{{ old('father_email', $father['email'] ?? '') }}" 
-                                       placeholder="ayah@email.com (opsional)" 
-                                       inputmode="email"
-                                       {{ $isLocked ? 'disabled' : '' }}>
+                                <div class="col-md-4">
+                                    <label for="father_phone" class="db-label">No HP Ayah</label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="father_phone" 
+                                           name="father_phone" 
+                                           value="{{ old('father_phone', $father['phone_number'] ?? '') }}" 
+                                           placeholder="0812..." 
+                                           inputmode="tel"
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="father_whatsapp" class="db-label">No WhatsApp Ayah</label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="father_whatsapp" 
+                                           name="father_whatsapp" 
+                                           value="{{ old('father_whatsapp', $father['whatsapp_number'] ?? '') }}" 
+                                           placeholder="0812..." 
+                                           inputmode="tel"
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="father_email" class="db-label">Alamat Email Ayah</label>
+                                    <input type="email" 
+                                           class="db-input" 
+                                           id="father_email" 
+                                           name="father_email" 
+                                           value="{{ old('father_email', $father['email'] ?? '') }}" 
+                                           placeholder="ayah@email.com (opsional)" 
+                                           inputmode="email"
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
                             </div>
+                        </div>
+
+                        <div id="father-optional-toggle" class="text-center my-3" style="{{ $isFatherActive ? 'display:none;' : '' }}">
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3" onclick="toggleParentOptionalWrapper('father')">
+                                <span class="material-symbols-outlined align-middle me-1" style="font-size:16px;">edit_note</span>
+                                <span id="father-toggle-btn-text">Buka Isian Jika Ingin Mengisi Data Ayah (Opsional)</span>
+                            </button>
                         </div>
                     </div>
 
                     {{-- Tab Ibu Kandung --}}
                     <div class="tab-pane fade" id="mother-pane" role="tabpanel">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="mother_nik" class="db-label">NIK Ibu <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="mother_nik" 
-                                       name="mother_nik" 
-                                       value="{{ old('mother_nik', $mother['nik'] ?? '') }}" 
-                                       placeholder="16 digit NIK ibu" 
-                                       maxlength="16" 
-                                       inputmode="numeric"
-                                       pattern="\d{16}"
-                                       required 
-                                       {{ $isLocked ? 'disabled' : '' }}>
+                        @php
+                            $mStatus = old('mother_status', $mother['status'] ?? 'ada');
+                            $isMotherActive = ($mStatus === 'ada');
+                        @endphp
+
+                        {{-- Pilihan Status Keberadaan Ibu di KK --}}
+                        <div class="db-parent-status-card mb-3 p-3 rounded-3" style="background:var(--lp-surface-subtle);border:1.5px solid var(--lp-surface-container);">
+                            <label class="db-label mb-2 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                <span class="d-flex align-items-center gap-1">
+                                    <span class="material-symbols-outlined text-primary" style="font-size:18px;">badge</span>
+                                    <strong>Keberadaan Ibu di Kartu Keluarga (KK) <span class="text-danger">*</span></strong>
+                                </span>
+                                <span class="badge bg-primary-subtle text-primary border" style="font-size:11px;font-weight:600;">Sesuai KK</span>
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="mother_status" value="ada" class="form-check-input mt-0" {{ $mStatus === 'ada' ? 'checked' : '' }} onchange="handleParentStatusChange('mother', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Ada di KK</span>
+                                    </label>
+                                </div>
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="mother_status" value="meninggal" class="form-check-input mt-0" {{ $mStatus === 'meninggal' ? 'checked' : '' }} onchange="handleParentStatusChange('mother', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Meninggal Dunia</span>
+                                    </label>
+                                </div>
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="mother_status" value="cerai" class="form-check-input mt-0" {{ $mStatus === 'cerai' ? 'checked' : '' }} onchange="handleParentStatusChange('mother', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Cerai / Pisah KK</span>
+                                    </label>
+                                </div>
+                                <div class="col-sm-6 col-md-3">
+                                    <label class="parent-status-option p-2 rounded-2 border d-flex align-items-center gap-2 h-100" style="cursor:pointer;background:#fff;">
+                                        <input type="radio" name="mother_status" value="tidak_diketahui" class="form-check-input mt-0" {{ $mStatus === 'tidak_diketahui' ? 'checked' : '' }} onchange="handleParentStatusChange('mother', this.value)" {{ $isLocked ? 'disabled' : '' }}>
+                                        <span class="small fw-semibold text-dark">Tidak Diketahui</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="mother_name" class="db-label">Nama Lengkap Ibu <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="mother_name" 
-                                       name="mother_name" 
-                                       value="{{ old('mother_name', $mother['full_name'] ?? '') }}" 
-                                       placeholder="Nama lengkap ibu kandung" 
-                                       required 
-                                       {{ $isLocked ? 'disabled' : '' }}>
+                            <div id="mother-status-notice" class="mt-2 alert alert-info py-2 px-3 small mb-0 rounded-2" style="display: {{ !$isMotherActive ? 'flex' : 'none' }}; align-items:center; gap:8px;">
+                                <span class="material-symbols-outlined text-info" style="font-size:20px;">info</span>
+                                <div>
+                                    Status Ibu adalah <strong id="mother-status-text">{{ $mStatus === 'meninggal' ? 'Meninggal Dunia' : ($mStatus === 'cerai' ? 'Cerai / Pisah KK' : 'Tidak Diketahui') }}</strong> (tidak tercantum dalam KK). Rincian data ibu di bawah ini <strong>tidak perlu diisi</strong> (opsional). Anda dapat langsung lanjut mengisi data Wali atau ke langkah selanjutnya.
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-4">
-                                <label for="mother_birth_year" class="db-label">Tahun Lahir Ibu <span class="text-danger">*</span></label>
-                                <input type="number" 
-                                       class="db-input" 
-                                       id="mother_birth_year" 
-                                       name="mother_birth_year" 
-                                       value="{{ old('mother_birth_year', $mother['birth_year'] ?? '') }}" 
-                                       placeholder="Contoh: 1980" 
-                                       min="1930" 
-                                       max="2015" 
-                                       inputmode="numeric"
-                                       required 
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                        <div id="mother-fields-wrapper" style="{{ !$isMotherActive ? 'display:none;' : '' }}">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="mother_nik" class="db-label">NIK Ibu <span class="text-danger mother-req-star" style="{{ $isMotherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="mother_nik" 
+                                           name="mother_nik" 
+                                           value="{{ old('mother_nik', $mother['nik'] ?? '') }}" 
+                                           placeholder="16 digit NIK ibu" 
+                                           maxlength="16" 
+                                           inputmode="numeric"
+                                           {{ $isMotherActive ? 'required' : '' }} 
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="mother_education" class="db-label">Pendidikan Terakhir <span class="text-danger">*</span></label>
-                                <select class="db-select" id="mother_education" name="mother_education" required {{ $isLocked ? 'disabled' : '' }}>
-                                    <option value="">Pilih Pendidikan</option>
-                                    @php $mEdu = old('mother_education', $mother['education_code'] ?? ''); @endphp
-                                    @foreach($educationList as $code => $label)
-                                        <option value="{{ $code }}" {{ $mEdu == $code ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                <div class="col-md-6">
+                                    <label for="mother_name" class="db-label">Nama Lengkap Ibu <span class="text-danger mother-req-star" style="{{ $isMotherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="mother_name" 
+                                           name="mother_name" 
+                                           value="{{ old('mother_name', $mother['full_name'] ?? '') }}" 
+                                           placeholder="Nama lengkap ibu kandung" 
+                                           {{ $isMotherActive ? 'required' : '' }} 
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="mother_occupation" class="db-label">Pekerjaan Ibu <span class="text-danger">*</span></label>
-                                @php
-                                    $mOccVal = old('mother_occupation', $mother['occupation_code'] ?? ($mother['occupation'] ?? ''));
-                                    if (isset($occupationList[$mOccVal])) {
-                                        $mOccVal = $occupationList[$mOccVal];
-                                    }
-                                @endphp
-                                <input type="text"
-                                       class="db-input"
-                                       id="mother_occupation"
-                                       name="mother_occupation"
-                                       value="{{ $mOccVal }}"
-                                       placeholder="Contoh: Ibu Rumah Tangga, Guru, Pedagang, dll"
-                                       required
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="mother_birth_year" class="db-label">Tahun Lahir Ibu <span class="text-danger mother-req-star" style="{{ $isMotherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <input type="number" 
+                                           class="db-input" 
+                                           id="mother_birth_year" 
+                                           name="mother_birth_year" 
+                                           value="{{ old('mother_birth_year', $mother['birth_year'] ?? '') }}" 
+                                           placeholder="Contoh: 1980" 
+                                           min="1930" 
+                                           max="2015" 
+                                           inputmode="numeric"
+                                           {{ $isMotherActive ? 'required' : '' }} 
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="mother_income" class="db-label">Penghasilan Bulanan <span class="text-danger">*</span></label>
-                                <select class="db-select" id="mother_income" name="mother_income" required {{ $isLocked ? 'disabled' : '' }}>
-                                    <option value="">Pilih Penghasilan</option>
-                                    @php $mInc = old('mother_income', $mother['income_code'] ?? ''); @endphp
-                                    @foreach($incomeList as $code => $label)
-                                        <option value="{{ $code }}" {{ $mInc == $code ? 'selected' : '' }}>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="mother_education" class="db-label">Pendidikan Terakhir <span class="text-danger mother-req-star" style="{{ $isMotherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <select class="db-select" id="mother_education" name="mother_education" {{ $isMotherActive ? 'required' : '' }} {{ $isLocked ? 'disabled' : '' }}>
+                                        <option value="">Pilih Pendidikan</option>
+                                        @php $mEdu = old('mother_education', $mother['education_code'] ?? ''); @endphp
+                                        @foreach($educationList as $code => $label)
+                                            <option value="{{ $code }}" {{ $mEdu == $code ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="mother_phone" class="db-label">No HP Ibu</label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="mother_phone" 
-                                       name="mother_phone" 
-                                       value="{{ old('mother_phone', $mother['phone_number'] ?? '') }}" 
-                                       placeholder="0812..." 
-                                       inputmode="tel"
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="mother_occupation" class="db-label">Pekerjaan Ibu <span class="text-danger mother-req-star" style="{{ $isMotherActive ? '' : 'display:none;' }}">*</span></label>
+                                    @php
+                                        $mOccVal = old('mother_occupation', $mother['occupation_code'] ?? ($mother['occupation'] ?? ''));
+                                        if (isset($occupationList[$mOccVal])) {
+                                            $mOccVal = $occupationList[$mOccVal];
+                                        }
+                                    @endphp
+                                    <input type="text"
+                                           class="db-input"
+                                           id="mother_occupation"
+                                           name="mother_occupation"
+                                           value="{{ $mOccVal }}"
+                                           placeholder="Contoh: Ibu Rumah Tangga, Guru, Pedagang, dll"
+                                           {{ $isMotherActive ? 'required' : '' }}
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
 
-                            <div class="col-md-4">
-                                <label for="mother_whatsapp" class="db-label">No WhatsApp Ibu</label>
-                                <input type="text" 
-                                       class="db-input" 
-                                       id="mother_whatsapp" 
-                                       name="mother_whatsapp" 
-                                       value="{{ old('mother_whatsapp', $mother['whatsapp_number'] ?? '') }}" 
-                                       placeholder="0812..." 
-                                       inputmode="tel"
-                                       {{ $isLocked ? 'disabled' : '' }}>
-                            </div>
+                                <div class="col-md-4">
+                                    <label for="mother_income" class="db-label">Penghasilan Bulanan <span class="text-danger mother-req-star" style="{{ $isMotherActive ? '' : 'display:none;' }}">*</span></label>
+                                    <select class="db-select" id="mother_income" name="mother_income" {{ $isMotherActive ? 'required' : '' }} {{ $isLocked ? 'disabled' : '' }}>
+                                        <option value="">Pilih Penghasilan</option>
+                                        @php $mInc = old('mother_income', $mother['income_code'] ?? ''); @endphp
+                                        @foreach($incomeList as $code => $label)
+                                            <option value="{{ $code }}" {{ $mInc == $code ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                            <div class="col-12">
-                                <label for="mother_email" class="db-label">Alamat Email Ibu</label>
-                                <input type="email" 
-                                       class="db-input" 
-                                       id="mother_email" 
-                                       name="mother_email" 
-                                       value="{{ old('mother_email', $mother['email'] ?? '') }}" 
-                                       placeholder="ibu@email.com (opsional)" 
-                                       inputmode="email"
-                                       {{ $isLocked ? 'disabled' : '' }}>
+                                <div class="col-md-4">
+                                    <label for="mother_phone" class="db-label">No HP Ibu</label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="mother_phone" 
+                                           name="mother_phone" 
+                                           value="{{ old('mother_phone', $mother['phone_number'] ?? '') }}" 
+                                           placeholder="0812..." 
+                                           inputmode="tel"
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="mother_whatsapp" class="db-label">No WhatsApp Ibu</label>
+                                    <input type="text" 
+                                           class="db-input" 
+                                           id="mother_whatsapp" 
+                                           name="mother_whatsapp" 
+                                           value="{{ old('mother_whatsapp', $mother['whatsapp_number'] ?? '') }}" 
+                                           placeholder="0812..." 
+                                           inputmode="tel"
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="mother_email" class="db-label">Alamat Email Ibu</label>
+                                    <input type="email" 
+                                           class="db-input" 
+                                           id="mother_email" 
+                                           name="mother_email" 
+                                           value="{{ old('mother_email', $mother['email'] ?? '') }}" 
+                                           placeholder="ibu@email.com (opsional)" 
+                                           inputmode="email"
+                                           {{ $isLocked ? 'disabled' : '' }}>
+                                </div>
                             </div>
+                        </div>
+
+                        <div id="mother-optional-toggle" class="text-center my-3" style="{{ $isMotherActive ? 'display:none;' : '' }}">
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3" onclick="toggleParentOptionalWrapper('mother')">
+                                <span class="material-symbols-outlined align-middle me-1" style="font-size:16px;">edit_note</span>
+                                <span id="mother-toggle-btn-text">Buka Isian Jika Ingin Mengisi Data Ibu (Opsional)</span>
+                            </button>
                         </div>
                     </div>
 
@@ -1262,7 +1376,100 @@
             }
         }
 
+        // Khusus Tahap 5: Jika kedua orang tua tidak ada di KK (meninggal/cerai/dsb), wajib isi wali
+        if (isValid && step === 5) {
+            const fStatus = document.querySelector('input[name="father_status"]:checked')?.value || 'ada';
+            const mStatus = document.querySelector('input[name="mother_status"]:checked')?.value || 'ada';
+            const hasGuardian = document.getElementById('has_guardian')?.checked;
+            const guardianName = document.getElementById('guardian_name')?.value?.trim();
+
+            if (fStatus !== 'ada' && mStatus !== 'ada' && (!hasGuardian || !guardianName)) {
+                alert('Perhatian: Karena status Ayah dan Ibu tidak tercantum di KK (Meninggal/Cerai/Pisah), Anda wajib mencentang dan mengisi data Wali calon siswa pada tab "Wali (Opsional)".');
+                const guardianTabBtn = document.getElementById('guardian-tab');
+                if (guardianTabBtn) {
+                    guardianTabBtn.click();
+                    const guardianCheck = document.getElementById('has_guardian');
+                    if (guardianCheck && !guardianCheck.checked) {
+                        guardianCheck.checked = true;
+                        toggleGuardianFields(true);
+                    }
+                    const guardianNameInput = document.getElementById('guardian_name');
+                    if (guardianNameInput) guardianNameInput.focus();
+                }
+                return false;
+            }
+        }
+
         return isValid;
+    }
+
+    function handleParentStatusChange(type, value) {
+        const isAda = (value === 'ada');
+        const noticeEl = document.getElementById(type + '-status-notice');
+        const noticeText = document.getElementById(type + '-status-text');
+        const wrapperEl = document.getElementById(type + '-fields-wrapper');
+        const toggleEl = document.getElementById(type + '-optional-toggle');
+        const toggleBtnText = document.getElementById(type + '-toggle-btn-text');
+        const stars = document.querySelectorAll('.' + type + '-req-star');
+
+        const statusLabels = {
+            'meninggal': 'Meninggal Dunia',
+            'cerai': 'Cerai / Pisah KK',
+            'tidak_diketahui': 'Tidak Diketahui'
+        };
+
+        if (noticeEl) noticeEl.style.display = isAda ? 'none' : 'flex';
+        if (noticeText) noticeText.textContent = statusLabels[value] || value;
+
+        if (isAda) {
+            if (wrapperEl) wrapperEl.style.display = 'block';
+            if (toggleEl) toggleEl.style.display = 'none';
+        } else {
+            if (wrapperEl) wrapperEl.style.display = 'none';
+            if (toggleEl) toggleEl.style.display = 'block';
+            if (toggleBtnText) toggleBtnText.textContent = `Buka Isian Jika Ingin Mengisi Data ${type === 'father' ? 'Ayah' : 'Ibu'} (Opsional)`;
+        }
+
+        // Toggle required attributes on inputs
+        const reqFields = [
+            type + '_nik',
+            type + '_name',
+            type + '_birth_year',
+            type + '_education',
+            type + '_occupation',
+            type + '_income'
+        ];
+
+        reqFields.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                if (isAda) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                    input.style.borderColor = '';
+                    input.style.boxShadow = '';
+                }
+            }
+        });
+
+        stars.forEach(star => {
+            star.style.display = isAda ? 'inline' : 'none';
+        });
+    }
+
+    function toggleParentOptionalWrapper(type) {
+        const wrapperEl = document.getElementById(type + '-fields-wrapper');
+        const toggleBtnText = document.getElementById(type + '-toggle-btn-text');
+        if (!wrapperEl) return;
+
+        if (wrapperEl.style.display === 'none' || wrapperEl.style.display === '') {
+            wrapperEl.style.display = 'block';
+            if (toggleBtnText) toggleBtnText.textContent = `Sembunyikan Isian Data ${type === 'father' ? 'Ayah' : 'Ibu'}`;
+        } else {
+            wrapperEl.style.display = 'none';
+            if (toggleBtnText) toggleBtnText.textContent = `Buka Isian Jika Ingin Mengisi Data ${type === 'father' ? 'Ayah' : 'Ibu'} (Opsional)`;
+        }
     }
 
     function nextStep(step) {
@@ -1300,10 +1507,31 @@
         const rw = document.getElementById('rw')?.value || '';
         const village = document.getElementById('village')?.value || '';
         const district = document.getElementById('district')?.value || '';
-        const fatherName = document.getElementById('father_name')?.value || '-';
+        const fatherName = document.getElementById('father_name')?.value || '';
         const fatherEmail = document.getElementById('father_email')?.value || '';
-        const motherName = document.getElementById('mother_name')?.value || '-';
+        const motherName = document.getElementById('mother_name')?.value || '';
         const motherEmail = document.getElementById('mother_email')?.value || '';
+
+        const fatherStatus = document.querySelector('input[name="father_status"]:checked')?.value || 'ada';
+        const motherStatus = document.querySelector('input[name="mother_status"]:checked')?.value || 'ada';
+
+        let fatherText = fatherName || '-';
+        if (fatherStatus === 'meninggal') {
+            fatherText = fatherName ? `${fatherName} (Meninggal Dunia - Tidak di KK)` : 'Meninggal Dunia (Tidak di KK)';
+        } else if (fatherStatus === 'cerai') {
+            fatherText = fatherName ? `${fatherName} (Cerai / Tidak Satu KK)` : 'Cerai / Pisah KK (Tidak di KK)';
+        } else if (fatherStatus === 'tidak_diketahui') {
+            fatherText = fatherName ? `${fatherName} (Tidak Diketahui)` : 'Tidak Diketahui / Tidak di KK';
+        }
+
+        let motherText = motherName || '-';
+        if (motherStatus === 'meninggal') {
+            motherText = motherName ? `${motherName} (Meninggal Dunia - Tidak di KK)` : 'Meninggal Dunia (Tidak di KK)';
+        } else if (motherStatus === 'cerai') {
+            motherText = motherName ? `${motherName} (Cerai / Tidak Satu KK)` : 'Cerai / Pisah KK (Tidak di KK)';
+        } else if (motherStatus === 'tidak_diketahui') {
+            motherText = motherName ? `${motherName} (Tidak Diketahui)` : 'Tidak Diketahui / Tidak di KK';
+        }
 
         const reviewName = document.getElementById('review-name');
         const reviewNikNisn = document.getElementById('review-nik-nisn');
@@ -1334,8 +1562,8 @@
         if (reviewTtl) reviewTtl.textContent = `${gender}, ${pob} (${dob}) — Anak ke-${birthOrder} dari ${siblingsCount} bersaudara`;
         if (reviewContact) reviewContact.textContent = `${mobile} (WhatsApp: ${wa})`;
         if (reviewAddress) reviewAddress.textContent = `${street}, RT ${rt}/RW ${rw}, Kel. ${village}, Kec. ${district}`;
-        if (reviewFather) reviewFather.textContent = fatherEmail ? `${fatherName} (${fatherEmail})` : fatherName;
-        if (reviewMother) reviewMother.textContent = motherEmail ? `${motherName} (${motherEmail})` : motherName;
+        if (reviewFather) reviewFather.textContent = (fatherEmail && fatherStatus === 'ada') ? `${fatherText} (${fatherEmail})` : fatherText;
+        if (reviewMother) reviewMother.textContent = (motherEmail && motherStatus === 'ada') ? `${motherText} (${motherEmail})` : motherText;
     }
 
     // Segmented tabs switching for parent tabs

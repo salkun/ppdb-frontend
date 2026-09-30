@@ -100,8 +100,8 @@
         $hasDocs = $docCount > 0;
         $isAllDocs = ($docCount >= 4);
 
-        // Formulir PPDB dinyatakan benar-benar sudah diisi jika calon siswa sudah submit data pokok (NIK & Jurusan)
-        $isFormFilled = !empty($formData['nik']) && !empty($formData['major']);
+        // Formulir PPDB dinyatakan benar-benar sudah diisi jika calon siswa sudah submit data pokok (NIK & Jurusan/Nama)
+        $isFormFilled = !empty($formData['nik']) && (!empty($formData['major']) || !empty($formData['full_name']) || !empty($registration['student']['major']));
 
         // Progress calculation
         $progressItems = 0;

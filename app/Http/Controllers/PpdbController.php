@@ -281,6 +281,15 @@ class PpdbController extends Controller
      */
     public function submitForm(Request $request)
     {
+        // Status Keberadaan Orang Tua di KK
+        $fatherStatus = $request->input('father_status', 'ada');
+        $isFatherRequired = ($fatherStatus === 'ada');
+
+        $motherStatus = $request->input('mother_status', 'ada');
+        $isMotherRequired = ($motherStatus === 'ada');
+
+        $bothParentsAbsent = (!$isFatherRequired && !$isMotherRequired);
+
         // 1. Validasi Input Form
         $validated = $request->validate([
             // Tahap 1: Biodata Pokok & Peminatan
@@ -319,29 +328,39 @@ class PpdbController extends Controller
             'email' => ['required', 'email', 'max:150'],
 
             // Tahap 5: Data Ayah Kandung
-            'father_nik' => ['required', 'string', 'digits:16'],
-            'father_name' => ['required', 'string', 'max:150'],
-            'father_birth_year' => ['required', 'digits:4'],
-            'father_education' => ['required', 'string'],
-            'father_occupation' => ['required', 'string'],
-            'father_income' => ['required', 'string'],
+            'father_status' => ['nullable', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
+            'father_nik' => array_values(array_filter([
+                $isFatherRequired ? 'required' : 'nullable',
+                'string',
+                ($isFatherRequired || $request->filled('father_nik')) ? 'digits:16' : null,
+            ])),
+            'father_name' => [$isFatherRequired ? 'required' : 'nullable', 'string', 'max:150'],
+            'father_birth_year' => [$isFatherRequired ? 'required' : 'nullable', 'digits:4'],
+            'father_education' => [$isFatherRequired ? 'required' : 'nullable', 'string'],
+            'father_occupation' => [$isFatherRequired ? 'required' : 'nullable', 'string'],
+            'father_income' => [$isFatherRequired ? 'required' : 'nullable', 'string'],
             'father_phone' => ['nullable', 'string', 'max:20'],
             'father_whatsapp' => ['nullable', 'string', 'max:20'],
             'father_email' => ['nullable', 'email', 'max:150'],
 
             // Data Ibu Kandung
-            'mother_nik' => ['required', 'string', 'digits:16'],
-            'mother_name' => ['required', 'string', 'max:150'],
-            'mother_birth_year' => ['required', 'digits:4'],
-            'mother_education' => ['required', 'string'],
-            'mother_occupation' => ['required', 'string'],
-            'mother_income' => ['required', 'string'],
+            'mother_status' => ['nullable', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
+            'mother_nik' => array_values(array_filter([
+                $isMotherRequired ? 'required' : 'nullable',
+                'string',
+                ($isMotherRequired || $request->filled('mother_nik')) ? 'digits:16' : null,
+            ])),
+            'mother_name' => [$isMotherRequired ? 'required' : 'nullable', 'string', 'max:150'],
+            'mother_birth_year' => [$isMotherRequired ? 'required' : 'nullable', 'digits:4'],
+            'mother_education' => [$isMotherRequired ? 'required' : 'nullable', 'string'],
+            'mother_occupation' => [$isMotherRequired ? 'required' : 'nullable', 'string'],
+            'mother_income' => [$isMotherRequired ? 'required' : 'nullable', 'string'],
             'mother_phone' => ['nullable', 'string', 'max:20'],
             'mother_whatsapp' => ['nullable', 'string', 'max:20'],
             'mother_email' => ['nullable', 'email', 'max:150'],
 
-            // Data Wali
-            'has_guardian' => ['nullable'],
+            // Data Wali (Wajib jika kedua orang tua tidak tercantum di KK)
+            'has_guardian' => [$bothParentsAbsent ? 'required' : 'nullable'],
             'guardian_nik' => ['nullable', 'required_if:has_guardian,1', 'string', 'digits:16'],
             'guardian_name' => ['nullable', 'required_if:has_guardian,1', 'string', 'max:150'],
             'guardian_birth_year' => ['nullable', 'required_if:has_guardian,1', 'digits:4'],
@@ -359,22 +378,51 @@ class PpdbController extends Controller
             'nisn.digits' => 'NISN harus 10 digit angka.',
             'family_card_number.digits' => 'Nomor Kartu Keluarga (KK) harus 16 digit.',
             'birth_order.required' => 'Urutan anak ke-berapa wajib diisi.',
+            'father_name.required' => 'Nama lengkap Ayah wajib diisi jika status tercantum di KK.',
+            'father_nik.required' => 'NIK Ayah wajib diisi 16 digit jika status tercantum di KK.',
             'father_nik.digits' => 'NIK Ayah harus 16 digit.',
+            'mother_name.required' => 'Nama lengkap Ibu wajib diisi jika status tercantum di KK.',
+            'mother_nik.required' => 'NIK Ibu wajib diisi 16 digit jika status tercantum di KK.',
             'mother_nik.digits' => 'NIK Ibu harus 16 digit.',
             'guardian_nik.digits' => 'NIK Wali harus 16 digit.',
+            'has_guardian.required' => 'Karena status Ayah dan Ibu tidak tercantum di KK (Meninggal/Cerai/Pisah), Anda wajib mencentang dan mengisi data Wali calon siswa.',
         ]);
 
         // 2. Merakit student_parents
+        $fatherStatusLabel = match ($fatherStatus) {
+            'meninggal' => 'Meninggal Dunia',
+            'cerai' => 'Cerai / Pisah KK',
+            'tidak_diketahui' => 'Tidak Diketahui',
+            default => 'Ada / Tercantum di KK',
+        };
+
+        $motherStatusLabel = match ($motherStatus) {
+            'meninggal' => 'Meninggal Dunia',
+            'cerai' => 'Cerai / Pisah KK',
+            'tidak_diketahui' => 'Tidak Diketahui',
+            default => 'Ada / Tercantum di KK',
+        };
+
+        $fatherFullName = $request->filled('father_name')
+            ? $request->father_name
+            : ($isFatherRequired ? null : $fatherStatusLabel);
+
+        $motherFullName = $request->filled('mother_name')
+            ? $request->mother_name
+            : ($isMotherRequired ? null : $motherStatusLabel);
+
         $studentParents = [
             [
                 'relationship_type' => 1,
                 'parent' => [
-                    'nik' => $request->father_nik,
-                    'full_name' => $request->father_name,
-                    'birth_year' => (string) $request->father_birth_year,
-                    'education_code' => $request->father_education,
-                    'occupation_code' => $request->father_occupation,
-                    'income_code' => $request->father_income,
+                    'nik' => $request->father_nik ?: null,
+                    'full_name' => $fatherFullName,
+                    'status' => $fatherStatus,
+                    'status_label' => $fatherStatusLabel,
+                    'birth_year' => $request->father_birth_year ? (string) $request->father_birth_year : null,
+                    'education_code' => $request->father_education ?: null,
+                    'occupation_code' => $request->father_occupation ?: null,
+                    'income_code' => $request->father_income ?: null,
                     'phone_number' => $request->father_phone ?: $request->father_whatsapp,
                     'whatsapp_number' => $request->father_whatsapp ?: $request->father_phone,
                     'email' => $request->father_email ?: null,
@@ -383,12 +431,14 @@ class PpdbController extends Controller
             [
                 'relationship_type' => 2,
                 'parent' => [
-                    'nik' => $request->mother_nik,
-                    'full_name' => $request->mother_name,
-                    'birth_year' => (string) $request->mother_birth_year,
-                    'education_code' => $request->mother_education,
-                    'occupation_code' => $request->mother_occupation,
-                    'income_code' => $request->mother_income,
+                    'nik' => $request->mother_nik ?: null,
+                    'full_name' => $motherFullName,
+                    'status' => $motherStatus,
+                    'status_label' => $motherStatusLabel,
+                    'birth_year' => $request->mother_birth_year ? (string) $request->mother_birth_year : null,
+                    'education_code' => $request->mother_education ?: null,
+                    'occupation_code' => $request->mother_occupation ?: null,
+                    'income_code' => $request->mother_income ?: null,
                     'phone_number' => $request->mother_phone ?: $request->mother_whatsapp,
                     'whatsapp_number' => $request->mother_whatsapp ?: $request->mother_phone,
                     'email' => $request->mother_email ?: null,

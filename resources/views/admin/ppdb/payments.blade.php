@@ -48,6 +48,35 @@
     </div>
 </div>
 
+<!-- Telegram Bot Notification & 1-Click Verification Banner -->
+<div class="card border-0 shadow-sm rounded-3 mb-4 bg-white p-3 p-md-3 border-start border-4 border-info">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px; background-color: #e0f2fe;">
+                <span class="material-symbols-outlined text-primary" style="font-size: 24px;">smart_toy</span>
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h6 class="fw-bold mb-0 text-dark">Verifikasi Pembayaran via Telegram Bot Aktif</h6>
+                    <span class="badge bg-success-subtle text-success fw-semibold border" style="font-size: 11px;">
+                        <span class="material-symbols-outlined align-middle" style="font-size: 13px;">check_circle</span> Online
+                    </span>
+                    <span class="badge bg-light text-primary border" style="font-size: 11px;">@paymen_ppdb_bot</span>
+                </div>
+                <div class="text-muted small mt-1">
+                    Setiap bukti transfer yang diunggah santri otomatis dikirim ke grup Telegram panitia lengkap dengan tombol <strong>[✅ Verifikasi Lunas]</strong> dan <strong>[❌ Tolak Bukti]</strong> 1-klik tanpa perlu login ke web.
+                </div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <a href="https://t.me/paymen_ppdb_bot" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size: 16px;">send</span>
+                <span>Buka Bot Telegram</span>
+            </a>
+        </div>
+    </div>
+</div>
+
 <!-- Nav Pills & Search Toolbar -->
 <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white p-3 p-md-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
@@ -170,8 +199,16 @@
                                 <span class="badge bg-secondary-subtle text-secondary py-1 px-2">Belum Bayar</span>
                             @endif
                         </td>
-                        <td class="text-muted small">
-                            {{ date('d/m/Y H:i', strtotime($pay['created_at'] ?? 'now')) }}
+                        <td class="small">
+                            @php
+                                $trxTime = !empty($pay['updated_at']) && $pay['payment_status'] !== 'unpaid'
+                                    ? $pay['updated_at']
+                                    : ($pay['created_at'] ?? 'now');
+                            @endphp
+                            <div class="fw-semibold text-dark">{{ date('d/m/Y H:i', strtotime($trxTime)) }} WIB</div>
+                            @if(!empty($pay['created_at']) && $trxTime !== $pay['created_at'])
+                                <div class="text-muted" style="font-size: 10.5px;">Daftar: {{ date('d/m/Y', strtotime($pay['created_at'])) }}</div>
+                            @endif
                         </td>
                         <td class="pe-3 pe-md-4 text-end">
                             <button type="button" class="btn btn-sm btn-primary py-1 px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#verifyModal{{ $pay['id'] }}" style="font-size: 12.5px;">
@@ -195,6 +232,12 @@
                                                 <div class="p-3 bg-light rounded-3 mb-3 border">
                                                     <div class="fw-bold text-dark mb-1">{{ $acc['full_name'] ?? '-' }}</div>
                                                     <div class="text-muted small">NIK: {{ $acc['nik'] ?? '-' }} &bull; Email: {{ $acc['email'] ?? '-' }}</div>
+                                                    <div class="text-muted small mt-1">
+                                                        <span class="fw-semibold">Waktu Masuk:</span> {{ date('d/m/Y H:i', strtotime($trxTime)) }} WIB
+                                                        @if(!empty($pay['payment_verified_at']))
+                                                            <br><span class="fw-semibold">Diverifikasi:</span> {{ date('d/m/Y H:i', strtotime($pay['payment_verified_at'])) }} WIB (oleh: {{ $pay['payment_verified_by'] ?? 'Admin' }})
+                                                        @endif
+                                                    </div>
                                                 </div>
 
                                                 @if($proofPath)
