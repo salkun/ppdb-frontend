@@ -287,13 +287,6 @@ class TelegramNotificationService
         $reg->sync_message = "Status pembayaran {$targetStatus} diverifikasi via Telegram oleh {$adminDisplay}";
         $reg->save();
 
-        // Coba sinkronkan ke Master FastAPI jika online
-        $this->syncPaymentToBackend($reg, $targetStatus);
-
-        if ($isPaid) {
-            PaymentEmailService::sendVerified($reg);
-        }
-
         // Jawaban Popup Alert langsung ke admin yang menekan tombol
         $alertMsg = $isPaid
             ? "✅ SUKSES: Pembayaran a.n. {$studentName} berhasil diverifikasi LUNAS oleh {$adminDisplay}!"
@@ -312,13 +305,23 @@ class TelegramNotificationService
                 . "Calon siswa <b>{$safeStudentName}</b> telah diverifikasi <b>LUNAS</b> oleh {$safeAdminDisplay}.\n"
                 . "• <b>Nominal:</b> Rp 400.000\n"
                 . "• <b>Waktu:</b> {$processedTime}\n\n"
-                . "Siswa sekarang dapat melanjutkan ke pengisian formulir lengkap & cetak kartu ujian PPDB."
+                . "Siswa sekarang dapat melanjutkan ke pengisian formulir lengkap dan cetak kartu ujian PPDB."
                 : "⚠️ <b>BUKTI PEMBAYARAN DITOLAK</b>\n\n"
                 . "Bukti pembayaran calon siswa <b>{$safeStudentName}</b> telah ditolak oleh {$safeAdminDisplay}.\n"
                 . "• <b>Waktu:</b> {$processedTime}\n\n"
                 . "Siswa diminta mengunggah ulang bukti pembayaran yang sah.";
 
             $this->sendMessage($targetChatId, $summaryAction, null, $messageId ? (int) $messageId : null);
+        }
+
+        // Tugas lambat dijalankan SETELAH balasan Telegram terkirim (batas webhook Telegram ~5 detik)
+        try {
+            $this->syncPaymentToBackend($reg, $targetStatus);
+            if ($isPaid) {
+                PaymentEmailService::sendVerified($reg);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Tugas pasca-verifikasi Telegram gagal: ' . $e->getMessage());
         }
 
         Log::info("Verifikasi Telegram PPDB sukses: {$regId} menjadi {$targetStatus} oleh {$adminDisplay}");
