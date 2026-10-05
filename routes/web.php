@@ -40,6 +40,23 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware(['check.api.token'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/ppdb/payment-status', function () {
+        $accountId = session('account_id');
+        $email = session('email');
+        $account = \App\Models\PpdbAccount::with('registration')
+            ->where(function ($q) use ($accountId, $email) {
+                if ($accountId) {
+                    $q->where('id', $accountId)->orWhere('remote_id', $accountId);
+                } elseif ($email) {
+                    $q->where('email', $email);
+                } else {
+                    $q->whereRaw('1 = 0');
+                }
+            })->first();
+
+        return response()->json(['payment_status' => $account?->registration?->payment_status ?? 'unpaid'])
+            ->header('Cache-Control', 'no-store');
+    })->name('ppdb.payment-status');
     Route::post('/ppdb/upload-payment', [PpdbController::class, 'uploadPayment'])->name('ppdb.upload-payment');
     Route::get('/ppdb/form', [PpdbController::class, 'showForm'])->name('ppdb.form');
     Route::post('/ppdb/form', [PpdbController::class, 'submitForm'])->name('ppdb.form.submit');
@@ -80,6 +97,15 @@ Route::prefix('admin')->group(function () {
         
         // Modul Verifikasi Pembayaran
         Route::get('/ppdb/payments', [AdminPpdbController::class, 'payments'])->name('admin.ppdb.payments');
+        Route::post('/ppdb/bank-setting', function (\Illuminate\Http\Request $request) {
+            $data = $request->validate([
+                'bank_name' => 'required|string|max:100',
+                'account_number' => 'required|string|max:50',
+                'account_holder' => 'required|string|max:150',
+            ]);
+            \App\Support\BankSetting::save($data);
+            return back()->with('bank_saved', 'Rekening pembayaran berhasil disimpan.');
+        })->name('admin.ppdb.bank-setting');
         
         // Ekspor & Dossier
         Route::get('/ppdb/export', [AdminPpdbController::class, 'export'])->name('admin.ppdb.export');

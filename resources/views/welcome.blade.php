@@ -769,14 +769,22 @@
                             <span class="material-symbols-outlined" style="font-size:20px;">dashboard</span>
                             <span>Buka Dashboard Saya</span>
                         </a>
+                        <a class="lp-btn-secondary" href="#biaya">
+                            <span class="material-symbols-outlined" style="font-size:20px;color:var(--lp-primary);">payments</span>
+                            <span>Rincian Biaya</span>
+                        </a>
                     @else
                         <a class="lp-btn-primary" href="{{ route('register') }}">
                             <span>Daftar Sekarang</span>
                             <span class="material-symbols-outlined" style="font-size:20px;">arrow_forward</span>
                         </a>
+                        <a class="lp-btn-secondary" href="#biaya">
+                            <span class="material-symbols-outlined" style="font-size:20px;color:var(--lp-primary);">payments</span>
+                            <span>Rincian Biaya</span>
+                        </a>
                         <a class="lp-btn-secondary" href="#persyaratan">
                             <span class="material-symbols-outlined" style="font-size:20px;color:var(--lp-primary);">upload_file</span>
-                            <span>Cek Berkas Softfile</span>
+                            <span>Cek Berkas</span>
                         </a>
                         <a class="lp-btn-green" href="https://wa.me/6287821055283" target="_blank" rel="noopener">
                             <span class="material-symbols-outlined" style="font-size:19px;">chat</span>
@@ -832,25 +840,25 @@
     <section class="lp-info-section" id="informasi">
         <div class="lp-section">
             <div style="text-align:center;display:flex;flex-direction:column;align-items:center;">
-                <span class="lp-section-tag">Akses Cepat PPDB</span>
-                <h2 class="lp-section-title">Panduan Pokok Pendaftaran PPDB</h2>
+                <span class="lp-section-tag">Akses Cepat SPMB</span>
+                <h2 class="lp-section-title">Panduan Pokok Pendaftaran SPMB</h2>
                 <p class="lp-section-desc">Akses cepat ketentuan berkas digital, peminatan program studi, dan transparansi rincian biaya pendidikan.</p>
             </div>
 
             <div class="lp-info-grid">
-                {{-- Card 1: Persyaratan Softfile (Blue) --}}
+                {{-- Card 1: Persyaratan Berkas (Blue) --}}
                 <div class="lp-info-card" style="--hover-border:rgba(0,90,180,0.4);">
                     <div>
                         <div class="lp-info-card-icon" style="background:var(--lp-primary);color:var(--lp-on-primary);">
                             <span class="material-symbols-outlined" style="font-size:26px;">cloud_upload</span>
                         </div>
-                        <span class="lp-info-card-tag" style="background:rgba(214,227,255,0.5);color:var(--lp-primary);">100% Soft File</span>
+                        <span class="lp-info-card-tag" style="background:rgba(214,227,255,0.5);color:var(--lp-primary);">100% Berkas Digital</span>
                         <h3>Persyaratan Berkas Digital</h3>
                         <p>Cukup siapkan file scan atau foto jelas dokumen resmi (KK, Akta Lahir, NISN) untuk diunggah langsung via portal.</p>
                     </div>
                     <div class="lp-info-card-footer">
                         <a class="lp-info-card-link" href="#persyaratan" style="color:var(--lp-primary);">
-                            <span>Lihat Detail Softfile</span>
+                            <span>Lihat Detail Berkas</span>
                             <span class="material-symbols-outlined">arrow_forward</span>
                         </a>
                     </div>
@@ -882,7 +890,7 @@
                         </div>
                         <span class="lp-info-card-tag" style="background:var(--lp-green-light);color:var(--lp-green);">Transparansi Finansial</span>
                         <h3>Rincian Biaya Transparan</h3>
-                        <p>Rincian tabel biaya resmi transparan untuk santri Putra dan Putri dengan diskon khusus bagi alumni &amp; bersaudara.</p>
+                        <p>Rincian tabel biaya resmi transparan untuk murid Putra dan Putri dengan diskon khusus bagi alumni &amp; bersaudara.</p>
                     </div>
                     <div class="lp-info-card-footer">
                         <a class="lp-info-card-link" href="#biaya" style="color:var(--lp-green);">
@@ -896,7 +904,7 @@
     </section>
 
     {{-- ============================================================ --}}
-    {{-- SECTION 3: PERSYARATAN SOFTFILE --}}
+    {{-- SECTION 3: PERSYARATAN BERKAS --}}
     {{-- ============================================================ --}}
     <section class="lp-softfile-section" id="persyaratan">
         <div class="lp-section">
@@ -911,7 +919,7 @@
                             <span style="padding:2px 10px;border-radius:9999px;background:var(--lp-yellow);color:#451a03;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;">PENTING &amp; PRAKTIS</span>
                             <span style="padding:2px 10px;border-radius:9999px;background:var(--lp-green-light);color:var(--lp-green);font-size:12px;font-weight:700;">Bebas Ribet</span>
                         </div>
-                        <h3 class="lp-font-headline" style="font-size:22px;font-weight:900;color:#fff;margin:0;">100% Berkas Digital (Soft File)</h3>
+                        <h3 class="lp-font-headline" style="font-size:22px;font-weight:900;color:#fff;margin:0;">100% Berkas Digital</h3>
                         <p style="font-size:14px;color:rgba(191,219,254,1);margin-top:4px;max-width:600px;">
                             <strong>Tidak perlu membawa berkas fisik atau fotokopi ke sekolah saat pendaftaran awal.</strong> Cukup unggah file scan atau foto jelas berkas asli melalui formulir pendaftaran online.
                         </p>
@@ -932,9 +940,9 @@
                             <span class="material-symbols-outlined" style="font-size:18px;">checklist</span>
                             Kelengkapan Berkas Digital
                         </span>
-                        <h2 class="lp-font-headline" style="font-size:30px;font-weight:800;color:var(--lp-on-surface);margin:0;">Persyaratan Unggah Softfile</h2>
+                        <h2 class="lp-font-headline" style="font-size:30px;font-weight:800;color:var(--lp-on-surface);margin:0;">Persyaratan Unggah Berkas</h2>
                         <p style="font-size:16px;color:var(--lp-on-surface-variant);line-height:1.6;">
-                            Calon santri baru hanya perlu menyiapkan dokumen-dokumen utama berikut dalam bentuk digital. Pastikan teks terbaca jelas, tidak terpotong, dan tidak buram saat difoto atau discan.
+                            Calon murid baru hanya perlu menyiapkan dokumen-dokumen utama berikut dalam bentuk digital. Pastikan teks terbaca jelas, tidak terpotong, dan tidak buram saat difoto atau discan.
                         </p>
                         <div class="lp-softfile-format-box">
                             <div style="display:flex;align-items:center;gap:8px;color:var(--lp-primary);font-weight:700;font-size:14px;">
@@ -947,7 +955,7 @@
                                 <span class="lp-softfile-format-tag" style="color:var(--lp-yellow-dark);">PNG (Jelas)</span>
                             </div>
                             <p style="font-size:12px;color:var(--lp-on-surface-variant);line-height:1.6;margin-top:8px;">
-                                Dokumen asli cukup diperlihatkan nanti saat sesi wawancara dan observasi santri baru tanpa perlu menyerahkan fotokopi legalisir.
+                                Dokumen asli cukup diperlihatkan nanti saat sesi wawancara dan observasi murid baru tanpa perlu menyerahkan fotokopi legalisir.
                             </p>
                         </div>
                     </div>
@@ -961,7 +969,7 @@
                             <div style="flex:1;">
                                 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
                                     <span style="font-weight:700;font-size:16px;color:var(--lp-on-surface);">Scan / Foto Asli Kartu Keluarga (KK)</span>
-                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-primary-light);color:var(--lp-primary);font-size:11px;font-weight:700;">Wajib (Softfile)</span>
+                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-primary-light);color:var(--lp-primary);font-size:11px;font-weight:700;">Wajib (Berkas)</span>
                                 </div>
                                 <p style="font-size:12px;color:var(--lp-on-surface-variant);margin-top:2px;">File format PDF atau foto JPG/PNG yang jelas, memperlihatkan seluruh nomor KK dan data anggota keluarga ber-barcode aktif.</p>
                             </div>
@@ -975,9 +983,9 @@
                             <div style="flex:1;">
                                 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
                                     <span style="font-weight:700;font-size:16px;color:var(--lp-on-surface);">Scan / Foto Asli Akta Kelahiran</span>
-                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-green-light);color:var(--lp-green);font-size:11px;font-weight:700;">Wajib (Softfile)</span>
+                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-green-light);color:var(--lp-green);font-size:11px;font-weight:700;">Wajib (Berkas)</span>
                                 </div>
-                                <p style="font-size:12px;color:var(--lp-on-surface-variant);margin-top:2px;">File format PDF atau foto JPG/PNG asli untuk validasi tanggal lahir dan data kependudukan calon santri.</p>
+                                <p style="font-size:12px;color:var(--lp-on-surface-variant);margin-top:2px;">File format PDF atau foto JPG/PNG asli untuk validasi tanggal lahir dan data kependudukan calon murid.</p>
                             </div>
                             <div class="lp-softfile-item-check"><span class="material-symbols-outlined" style="font-size:18px;">done</span></div>
                         </div>
@@ -989,7 +997,7 @@
                             <div style="flex:1;">
                                 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
                                     <span style="font-weight:700;font-size:16px;color:var(--lp-on-surface);">Tangkapan Layar / Bukti Cetak Digital NISN</span>
-                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-yellow-light);color:var(--lp-yellow-dark);font-size:11px;font-weight:700;">Wajib (Softfile)</span>
+                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-yellow-light);color:var(--lp-yellow-dark);font-size:11px;font-weight:700;">Wajib (Berkas)</span>
                                 </div>
                                 <p style="font-size:12px;color:var(--lp-on-surface-variant);margin-top:2px;">Screenshot status aktif Nomor Induk Siswa Nasional dari laman resmi Kemendikbudristek (nisn.data.kemdikbud.go.id) atau surat keterangan sekolah.</p>
                             </div>
@@ -1003,7 +1011,7 @@
                             <div style="flex:1;">
                                 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
                                     <span style="font-weight:700;font-size:16px;color:var(--lp-on-surface);">Pas Foto Digital Calon Siswa (Terbaru)</span>
-                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-red-light);color:var(--lp-red);font-size:11px;font-weight:700;">Softfile Foto</span>
+                                    <span style="padding:2px 8px;border-radius:4px;background:var(--lp-red-light);color:var(--lp-red);font-size:11px;font-weight:700;">Berkas Foto</span>
                                 </div>
                                 <p style="font-size:12px;color:var(--lp-on-surface-variant);margin-top:2px;">File foto rapi (format JPG/PNG) ukuran 3x4 berlatar belakang merah atau biru, berpakaian sopan atau berseragam sekolah asal.</p>
                             </div>
@@ -1022,7 +1030,7 @@
         <div class="lp-section">
             <div style="text-align:center;display:flex;flex-direction:column;align-items:center;max-width:820px;margin:0 auto 2.5rem;">
                 <span class="lp-section-tag">Kurikulum Holistik Terpadu</span>
-                <h2 class="lp-section-title">4 Pilihan Program Unggulan &amp; Pembiasaan Santri</h2>
+                <h2 class="lp-section-title">4 Pilihan Program Unggulan &amp; Pembiasaan Murid</h2>
                 <p class="lp-section-desc">Pilih program peminatan untuk melihat rincian kurikulum spesifik, target capaian lulusan berjenjang kelas 7 hingga 9, serta program unggulan harian hingga tahunan.</p>
             </div>
 
@@ -1208,7 +1216,7 @@
                         <div class="lp-prog-box">
                             <div class="lp-prog-box-header">
                                 <span class="material-symbols-outlined" style="color:var(--lp-green);font-size:22px;">hourglass_top</span>
-                                <h4>Kegiatan Rutin Harian Santri</h4>
+                                <h4>Kegiatan Rutin Harian Murid</h4>
                             </div>
                             <div style="display:flex;flex-direction:column;gap:12px;">
                                 <div style="background:#fff;border:1px solid var(--lp-surface-container);border-radius:14px;padding:14px;display:flex;align-items:flex-start;gap:12px;">
@@ -1239,7 +1247,7 @@
                     <div class="lp-panel-footer">
                         <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--lp-on-surface-variant);">
                             <span class="material-symbols-outlined" style="font-size:18px;color:var(--lp-green);">verified</span>
-                            <span>Menerima santri putra dan putri dengan kuota kelas terbatas.</span>
+                            <span>Menerima murid putra dan putri dengan kuota kelas terbatas.</span>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
                             <button type="button" class="lp-btn-panel-cta" onclick="lpGoToFee('tahfizh')" style="background:var(--lp-surface);border:1px solid var(--lp-surface-container);color:var(--lp-on-surface);">
@@ -1263,7 +1271,7 @@
                             </div>
                             <div class="lp-panel-title-area">
                                 <h3>Program Unggulan Kelas ICT (Information &amp; Communication Technology)</h3>
-                                <p>Mempersiapkan santri unggul di era digital melalui pembelajaran komputasi terapan, logika rekayasa perangkat lunak, robotika cerdas, dan produksi multimedia.</p>
+                                <p>Mempersiapkan murid unggul di era digital melalui pembelajaran komputasi terapan, logika rekayasa perangkat lunak, robotika cerdas, dan produksi multimedia.</p>
                             </div>
                         </div>
                         <div class="lp-panel-stat-pills">
@@ -1355,14 +1363,14 @@
                                         <span class="material-symbols-outlined" style="font-size:18px;">devices</span>
                                         Kit Robotika &amp; Modul Sensor Lengkap
                                     </div>
-                                    <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:4px 0 0 0;line-height:1.45;">Tiap santri berkesempatan merakit langsung mikrokontroler, aktuator, sensor gas, suhu, dan robot beroda cerdas.</p>
+                                    <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:4px 0 0 0;line-height:1.45;">Tiap murid berkesempatan merakit langsung mikrokontroler, aktuator, sensor gas, suhu, dan robot beroda cerdas.</p>
                                 </div>
                                 <div style="background:#fff;border:1px solid var(--lp-surface-container);border-radius:14px;padding:14px;">
                                     <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--lp-primary);">
                                         <span class="material-symbols-outlined" style="font-size:18px;">workspace_premium</span>
                                         Sertifikasi &amp; Gelar Pameran ICT Expo
                                     </div>
-                                    <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:4px 0 0 0;line-height:1.45;">Karya proyek santri dipamerkan ke publik dan diuji kelayakannya sebelum wisuda kelulusan.</p>
+                                    <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:4px 0 0 0;line-height:1.45;">Karya proyek murid dipamerkan ke publik dan diuji kelayakannya sebelum wisuda kelulusan.</p>
                                 </div>
                             </div>
                         </div>
@@ -1371,7 +1379,7 @@
                     <div class="lp-panel-footer">
                         <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--lp-on-surface-variant);">
                             <span class="material-symbols-outlined" style="font-size:18px;color:var(--lp-primary);">verified</span>
-                            <span>Santri dibimbing langsung oleh instruktur praktisi teknologi informasi profesional.</span>
+                            <span>Murid dibimbing langsung oleh instruktur praktisi teknologi informasi profesional.</span>
                         </div>
                         <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
                             <button type="button" class="lp-btn-panel-cta" onclick="lpGoToFee('ict')" style="background:var(--lp-surface);border:1px solid var(--lp-surface-container);color:var(--lp-on-surface);">
@@ -1621,7 +1629,7 @@
                                     KELAS 7
                                 </span>
                                 <h4>Adaptasi &amp; Pondasi Karakter</h4>
-                                <p>Penguatan literasi, numerasi dasar, adaptasi lingkungan baru, pembiasaan shalat fardhu berjamaah di masjid, dan pembinaan adab santri mulia.</p>
+                                <p>Penguatan literasi, numerasi dasar, adaptasi lingkungan baru, pembiasaan shalat fardhu berjamaah di masjid, dan pembinaan adab murid mulia.</p>
                             </div>
                             <div class="lp-milestone-card">
                                 <span class="lp-milestone-badge" style="background:var(--lp-primary-light);color:var(--lp-primary-dark);">
@@ -1656,7 +1664,7 @@
                                 </div>
                                 <div style="background:#fff;border:1px solid var(--lp-surface-container);border-radius:14px;padding:14px;">
                                     <div style="font-weight:700;font-size:14px;color:var(--lp-primary-dark);">Bimbingan Prestasi &amp; Olimpiade Sains (OSN)</div>
-                                    <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:4px 0 0 0;line-height:1.45;">Klub pembinaan khusus bagi santri berpotensi di bidang Matematika, IPA, IPS, Bahasa, dan Karya Ilmiah Remaja.</p>
+                                    <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:4px 0 0 0;line-height:1.45;">Klub pembinaan khusus bagi murid berpotensi di bidang Matematika, IPA, IPS, Bahasa, dan Karya Ilmiah Remaja.</p>
                                 </div>
                             </div>
                         </div>
@@ -1733,10 +1741,10 @@
                             <span>SALURAN YOUTUBE RESMI SEKOLAH</span>
                         </div>
 
-                        <h3 class="lp-yt-title">Saksikan Suasana Belajar &amp; Keseharian Santri Kami</h3>
+                        <h3 class="lp-yt-title">Saksikan Suasana Belajar &amp; Keseharian Murid Kami</h3>
                         
                         <p class="lp-yt-desc">
-                            Lihat secara nyata lingkungan kampus SMPS 2 Al-Muhajirin yang asri dan representatif, praktikum laboratorium komputer, halaqah tahfizh berstandar mutqin, kemeriahan English camp, hingga aktivitas ibadah berjamaah santri.
+                            Lihat secara nyata lingkungan kampus SMPS 2 Al-Muhajirin yang asri dan representatif, praktikum laboratorium komputer, halaqah tahfizh berstandar mutqin, kemeriahan English camp, hingga aktivitas ibadah berjamaah murid.
                         </p>
 
                         <div class="lp-yt-features-list">
@@ -1750,7 +1758,7 @@
                             </div>
                             <div class="lp-yt-feature-item">
                                 <span class="material-symbols-outlined">diversity_3</span>
-                                <span>Aktivitas Keseharian, Pembiasaan Ibadah, &amp; Karakter Santri</span>
+                                <span>Aktivitas Keseharian, Pembiasaan Ibadah, &amp; Karakter Murid</span>
                             </div>
                         </div>
 
@@ -1791,8 +1799,8 @@
         <div class="lp-section">
             <div style="text-align:center;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;">
                 <span class="lp-section-tag">Transparansi Finansial</span>
-                <h2 class="lp-section-title">Rincian Biaya PPDB TP 2027â€“2028</h2>
-                <p class="lp-section-desc">Pilih tab peminatan untuk melihat tabel rincian biaya pendidikan secara lengkap antara santri Putra dan Putri.</p>
+                <h2 class="lp-section-title">Rincian Biaya SPMB TP 2027–2028</h2>
+                <p class="lp-section-desc">Pilih tab peminatan untuk melihat tabel rincian biaya pendidikan secara lengkap antara murid Putra dan Putri.</p>
             </div>
 
             {{-- Tab Controls --}}
@@ -1817,7 +1825,7 @@
                                 <span style="font-size:16px;font-weight:700;color:var(--lp-on-surface);" id="lpActiveProgramName">Program: Kelas Reguler</span>
                                 <span id="lpProgramBadge" style="padding:2px 8px;background:rgba(0,90,180,0.1);color:var(--lp-primary);font-weight:700;font-size:11px;border-radius:6px;">Kelas Reguler</span>
                             </div>
-                            <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:0;" id="lpProgramDesc">Rincian resmi biaya masuk tahun ajaran baru TP 2027â€“2028</p>
+                            <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:0;" id="lpProgramDesc">Rincian resmi biaya masuk tahun ajaran baru TP 2027–2028</p>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -1856,7 +1864,7 @@
                 <div class="lp-pricing-summary">
                     <div class="lp-pricing-summary-card" style="background:var(--lp-primary-subtle);border-color:rgba(0,90,180,0.2);">
                         <div>
-                            <span style="font-size:12px;font-weight:700;color:var(--lp-on-surface-variant);">Total Estimasi Santri Putra:</span>
+                            <span style="font-size:12px;font-weight:700;color:var(--lp-on-surface-variant);">Total Estimasi Murid Putra:</span>
                             <p class="lp-pricing-summary-val" style="color:var(--lp-primary);margin:0;" id="lpBadgePutra">Rp10.945.000</p>
                         </div>
                         <div class="lp-pricing-summary-icon" style="background:rgba(0,90,180,0.1);color:var(--lp-primary);">
@@ -1865,7 +1873,7 @@
                     </div>
                     <div class="lp-pricing-summary-card" style="background:rgba(220,252,231,0.6);border-color:rgba(22,163,74,0.2);">
                         <div>
-                            <span style="font-size:12px;font-weight:700;color:var(--lp-on-surface-variant);">Total Estimasi Santri Putri:</span>
+                            <span style="font-size:12px;font-weight:700;color:var(--lp-on-surface-variant);">Total Estimasi Murid Putri:</span>
                             <p class="lp-pricing-summary-val" style="color:var(--lp-green);margin:0;" id="lpBadgePutri">Rp11.145.000</p>
                         </div>
                         <div class="lp-pricing-summary-icon" style="background:rgba(22,163,74,0.1);color:var(--lp-green);">
@@ -1925,7 +1933,7 @@
             <div style="text-align:center;display:flex;flex-direction:column;align-items:center;">
                 <span class="lp-section-tag">Tahapan Terstruktur</span>
                 <h2 class="lp-section-title">Alur Pendaftaran Mudah &amp; Cepat</h2>
-                <p class="lp-section-desc">Empat langkah sederhana menjadi santri berprestasi di SMP Full Day Al-Muhajirin Purwakarta.</p>
+                <p class="lp-section-desc">Empat langkah sederhana menjadi murid berprestasi di SMP Full Day Al-Muhajirin Purwakarta.</p>
             </div>
 
             <div class="lp-timeline-grid">
@@ -1934,14 +1942,14 @@
                     <div class="lp-timeline-step" style="background:var(--lp-primary);color:var(--lp-on-primary);box-shadow:0 4px 12px rgba(0,90,180,0.25);">01</div>
                     <span class="lp-timeline-label" style="color:var(--lp-primary);">Tahap Pertama</span>
                     <h3>Daftar Akun Online</h3>
-                    <p>Isi identitas diri awal calon santri dan buat akun portal PPDB secara mandiri melalui website.</p>
+                    <p>Isi identitas diri awal calon murid dan buat akun portal SPMB secara mandiri melalui website.</p>
                 </div>
 
                 {{-- Step 2 --}}
                 <div class="lp-timeline-card fade-in-entry" style="border-color:rgba(234,179,8,0.4);">
                     <div class="lp-timeline-step" style="background:var(--lp-yellow);color:#451a03;">02</div>
                     <span class="lp-timeline-label" style="color:var(--lp-yellow-dark);">Tahap Kedua</span>
-                    <h3>Upload Softfile &amp; Program</h3>
+                    <h3>Upload Berkas &amp; Program</h3>
                     <p>Unggah file scan/foto jelas KK, Akta, NISN, Pas Foto digital dan tentukan pilihan kelas peminatan secara online.</p>
                 </div>
 
@@ -1950,15 +1958,15 @@
                     <div class="lp-timeline-step" style="background:var(--lp-red);color:var(--lp-on-primary);box-shadow:0 4px 12px rgba(220,38,38,0.25);">03</div>
                     <span class="lp-timeline-label" style="color:var(--lp-red);">Tahap Ketiga</span>
                     <h3>Verifikasi &amp; Asesmen</h3>
-                    <p>Pemeriksaan softfile oleh panitia, dilanjutkan observasi minat bakat serta wawancara santri &amp; orang tua.</p>
+                    <p>Pemeriksaan berkas oleh panitia, dilanjutkan observasi minat bakat serta wawancara murid &amp; orang tua.</p>
                 </div>
 
                 {{-- Step 4 --}}
                 <div class="lp-timeline-card fade-in-entry">
-                    <div class="lp-timeline-step" style="background:var(--lp-green);color:var(--lp-on-primary);box-shadow:0 4px 12px rgba(22,163,74,0.25);">04</div>
+                    <div class="lp-timeline-step" style="background:var(--lp-green);color:var(--lp-on-primary);box-shadow:0 4px 12px rgba(220,38,38,0.25);">04</div>
                     <span class="lp-timeline-label" style="color:var(--lp-green);">Tahap Akhir</span>
                     <h3>Pengumuman &amp; Registrasi</h3>
-                    <p>Hasil seleksi diumumkan via akun portal, dilanjutkan proses konfirmasi daftar ulang administrasi santri baru.</p>
+                    <p>Hasil seleksi diumumkan via akun portal, dilanjutkan proses konfirmasi daftar ulang administrasi murid baru.</p>
                 </div>
             </div>
         </div>
@@ -1978,7 +1986,7 @@
                     </div>
                     <div class="lp-cta-badge">KUOTA TERBATAS TIAP ROMBEL</div>
                     <h2 class="lp-cta-title">Siap Bergabung Bersama SMP Full Day Al-Muhajirin?</h2>
-                    <p class="lp-cta-desc">Pendaftaran sangat mudah dengan sistem <strong>100% softfile dokumen</strong>. Amankan kursi calon santri sebelum kuota tiap kelas peminatan terpenuhi!</p>
+                    <p class="lp-cta-desc">Pendaftaran sangat mudah dengan sistem <strong>100% berkas digital</strong>. Amankan kursi calon murid sebelum kuota tiap kelas peminatan terpenuhi!</p>
                     <div class="lp-cta-buttons">
                         <a class="lp-btn-red" href="{{ route('register') }}">
                             <span class="material-symbols-outlined" style="font-size:20px;">how_to_reg</span>

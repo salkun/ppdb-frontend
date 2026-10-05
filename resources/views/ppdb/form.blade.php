@@ -17,7 +17,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div>
                 <h1 class="db-page-title">Formulir Pendaftaran Calon Siswa</h1>
-                <p class="db-page-subtitle">Lengkapi 6 tahap isian data calon siswa dan orang tua. Data tersimpan aman di sistem PPDB.</p>
+                <p class="db-page-subtitle">Lengkapi 6 tahap isian data calon siswa dan orang tua. Data tersimpan aman di sistem SPMB.</p>
             </div>
             <div>
                 @if($isLocked)

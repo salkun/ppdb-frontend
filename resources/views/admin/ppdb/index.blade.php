@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
-@section('title', 'Dashboard Admin PPDB')
-@section('header_title', 'Dashboard Monitoring PPDB Online')
+@section('title', 'Dashboard Admin SPMB')
+@section('header_title', 'Dashboard Monitoring SPMB Online')
 
 @section('content')
 <!-- 1. Header Banner -->
@@ -199,7 +199,14 @@
                                             <div class="text-muted small">NIK: {{ $acc['nik'] ?? '-' }}</div>
                                         </td>
                                         <td>
-                                            <span class="fw-semibold text-dark">Rp 400.000</span>
+                                            @php
+                                                $pvAmount = isset($pv['payment_amount']) && $pv['payment_amount'] !== '' && $pv['payment_amount'] !== null ? (float)$pv['payment_amount'] : 400000;
+                                            @endphp
+                                            @if($pvAmount == 0)
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2">Rp 0 (Prestasi)</span>
+                                            @else
+                                                <span class="fw-semibold text-dark">Rp {{ number_format($pvAmount, 0, ',', '.') }}</span>
+                                            @endif
                                         </td>
                                         <td>
                                             @if($proofPath)
@@ -258,7 +265,10 @@
 
                                                                 <div class="mb-3">
                                                                     <label class="form-label fw-bold text-dark small mb-1">Nominal Terverifikasi (Rp):</label>
-                                                                    <input type="number" class="form-control" name="payment_amount" value="400000" step="1000" required>
+                                                                    <input type="number" class="form-control" name="payment_amount" value="{{ (int)(isset($pv['payment_amount']) && $pv['payment_amount'] !== '' && $pv['payment_amount'] !== null ? $pv['payment_amount'] : 400000) }}" min="0" step="1000" required>
+                                                                    <div class="form-text small" style="font-size: 11px;">
+                                                                        Isi <strong>0</strong> jika lolos jalur prestasi / beasiswa (bebas biaya).
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer border-top bg-light py-2">

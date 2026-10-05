@@ -167,3 +167,31 @@ if (!function_exists('ppdb_get_student_documents')) {
     }
 }
 
+if (!function_exists('ppdb_is_form_filled')) {
+    /**
+     * Mengecek apakah calon siswa sudah benar-benar mengisi formulir biodata pendaftaran (bukan hanya upload berkas).
+     *
+     * @param array|\App\Models\PpdbRegistration|null $reg
+     * @return bool
+     */
+    function ppdb_is_form_filled($reg): bool
+    {
+        if (empty($reg)) {
+            return false;
+        }
+
+        $formData = is_array($reg) ? ($reg['form_data'] ?? []) : ($reg->form_data ?? []);
+        if (!is_array($formData)) {
+            $formData = json_decode((string)$formData, true) ?: [];
+        }
+
+        // Formulir wajib memiliki NIK dan (Jurusan, Asal Sekolah, atau Rincian Identitas)
+        $hasNik = !empty($formData['nik']) || !empty($formData['identity']['family_card_number'] ?? null);
+        $hasMajor = !empty($formData['major']) || !empty($reg['student']['major'] ?? null);
+        $hasSchool = !empty($formData['school_origin']);
+        $hasIdentity = !empty($formData['identity']['gender']) || !empty($formData['place_of_birth']);
+
+        return $hasNik && ($hasMajor || $hasSchool || $hasIdentity);
+    }
+}
+

@@ -128,10 +128,34 @@ class PpdbController extends Controller
             $paymentMethod = 'transfer';
         }
 
+        $registration = $this->getCurrentRegistration();
+
+        // 1. Proteksi jika sudah berstatus LUNAS
+        if ($registration && $registration->payment_status === 'paid') {
+            return redirect()->route('dashboard')->with('success', 'Pembayaran Anda telah diverifikasi lunas.');
+        }
+
+        // 2. Proteksi jika pendaftar baru saja mengunggah bukti dalam 15 detik terakhir (cegah spam/multiple submit)
+        if ($registration && $registration->payment_status === 'pending_verification' && $registration->updated_at && $registration->updated_at->diffInSeconds(now()) < 15) {
+            return redirect()->route('dashboard')->with('warning', 'Bukti pembayaran Anda sudah diterima dan sedang menunggu verifikasi panitia.');
+        }
+
+        // 3. Atomic cache lock anti double-click (20 detik cooldown)
+        $cooldownKey = 'upload_payment_cooldown_' . ($registration?->id ?: (session('account_id') ?: session()->getId()));
+        if (!\Illuminate\Support\Facades\Cache::add($cooldownKey, true, 20)) {
+            return redirect()->route('dashboard')->with('warning', 'Unggahan bukti pembayaran Anda sedang diproses. Mohon tunggu sejenak.');
+        }
+
+        $hasExistingSender = !empty($registration?->sender_bank_name) && !empty($registration?->sender_name);
+
         $request->validate([
             'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:5120'],
             'payment_method' => ['nullable', 'in:transfer,cash'],
+            'sender_bank_name' => [($paymentMethod === 'transfer' && !$hasExistingSender) ? 'required' : 'nullable', 'string', 'max:100'],
+            'sender_name' => [($paymentMethod === 'transfer' && !$hasExistingSender) ? 'required' : 'nullable', 'string', 'max:150'],
         ], [
+            'sender_bank_name.required' => 'Nama bank pengirim wajib diisi.',
+            'sender_name.required' => 'Nama pengirim wajib diisi.',
             'file.required' => $paymentMethod === 'cash'
                 ? 'Silakan unggah foto kuitansi pembayaran tunai (cash).'
                 : 'Silakan pilih berkas bukti transfer bank.',
@@ -140,9 +164,15 @@ class PpdbController extends Controller
             'file.max' => 'Ukuran berkas maksimal adalah 5MB.',
         ]);
 
+        $senderBank = $paymentMethod === 'transfer'
+            ? (trim((string) $request->input('sender_bank_name')) ?: ($registration?->sender_bank_name ?? null))
+            : null;
+        $senderName = $paymentMethod === 'transfer'
+            ? (trim((string) $request->input('sender_name')) ?: ($registration?->sender_name ?? null))
+            : null;
+
         try {
             $file = $request->file('file');
-            $registration = $this->getCurrentRegistration();
 
             // 1. Simpan berkas fisik ke folder public/uploads/ppdb_payments/
             $uploadDir = public_path('uploads/ppdb_payments');
@@ -166,6 +196,8 @@ class PpdbController extends Controller
                 $registration->update([
                     'payment_status' => 'pending_verification',
                     'payment_method' => $paymentMethod,
+                    'sender_bank_name' => $senderBank,
+                    'sender_name' => $senderName,
                     'payment_proof_path' => $webPath,
                     'sync_status' => 'pending',
                     'sync_message' => 'Bukti pembayaran baru (' . ($paymentMethod === 'cash' ? 'Tunai/Cash' : 'Transfer TF') . ') diunggah oleh siswa',
@@ -189,6 +221,8 @@ class PpdbController extends Controller
                 $studentData = [
                     'full_name' => session('full_name', $registration?->account?->full_name ?? 'Calon Siswa'),
                     'email' => session('email', $registration?->account?->email ?? '-'),
+                    'sender_bank_name' => $senderBank,
+                    'sender_name' => $senderName,
                 ];
 
                 $uploadedFilePath = $uploadDir . DIRECTORY_SEPARATOR . $filename;
@@ -217,6 +251,9 @@ class PpdbController extends Controller
             return redirect()->route('dashboard')->with('success', $successMsg);
 
         } catch (\Exception $e) {
+            if (isset($cooldownKey)) {
+                \Illuminate\Support\Facades\Cache::forget($cooldownKey);
+            }
             Log::error('PPDB Payment Upload Error: ' . $e->getMessage(), ['exception' => $e]);
             return redirect()->route('dashboard')->with('error', 'Terjadi kendala saat memproses unggahan bukti pembayaran. Silakan coba kembali atau hubungi panitia PPDB.');
         }
@@ -636,6 +673,10 @@ class PpdbController extends Controller
                 return redirect()->route('dashboard')->with('warning', 'Menu upload berkas masih terkunci. Pembayaran harus diverifikasi terlebih dahulu.');
             }
 
+            if (!ppdb_is_form_filled($registrationModel)) {
+                return redirect()->route('dashboard')->with('warning', 'Menu upload berkas masih terkunci. Silakan lengkapi formulir pendaftaran terlebih dahulu.');
+            }
+
             $formData = is_array($registrationModel->form_data)
                 ? $registrationModel->form_data
                 : (json_decode($registrationModel->form_data ?? '', true) ?: []);
@@ -687,6 +728,10 @@ class PpdbController extends Controller
 
         if ($registration->payment_status !== 'paid') {
             return redirect()->route('dashboard')->with('warning', 'Pembayaran harus diverifikasi terlebih dahulu sebelum mengunggah berkas.');
+        }
+
+        if (!ppdb_is_form_filled($registration)) {
+            return redirect()->route('dashboard')->with('warning', 'Silakan lengkapi formulir pendaftaran terlebih dahulu sebelum mengunggah berkas persyaratan.');
         }
 
         $formData = is_array($registration->form_data)

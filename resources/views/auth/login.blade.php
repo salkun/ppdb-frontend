@@ -20,7 +20,7 @@
                         Portal Calon Siswa
                     </span>
                     <span class="lp-badge lp-badge-yellow" style="font-size: 11.5px;">
-                        PMB TP 2027–2028
+                        SPMB TP 2027–2028
                     </span>
                 </div>
                 <h1 class="lp-auth-title">Masuk ke Portal Murid</h1>
@@ -110,7 +110,7 @@
                 </a>
 
                 <div class="mt-3 pt-3" style="border-top: 1px dashed var(--lp-surface-container); display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                    <a href="https://wa.me/6287821055283?text=Halo%20Panitia%20PMB%20SMPS2%20Al-Muhajirin,%20saya%20butuh%20bantuan%20login%20portal" target="_blank" rel="noopener" class="lp-auth-help-pill">
+                    <a href="https://wa.me/6287821055283?text=Halo%20Panitia%20SPMB%20SMPS2%20Al-Muhajirin,%20saya%20butuh%20bantuan%20login%20portal" target="_blank" rel="noopener" class="lp-auth-help-pill">
                         <span class="material-symbols-outlined" style="font-size: 16px;">chat</span>
                         <span>Butuh bantuan login? Hubungi Panitia WA</span>
                     </a>

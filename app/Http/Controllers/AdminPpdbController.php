@@ -158,6 +158,8 @@ class AdminPpdbController extends Controller
             'account_id' => $reg->account_id,
             'payment_status' => $reg->payment_status,
             'payment_method' => $reg->payment_method ?? 'transfer',
+            'sender_bank_name' => $reg->sender_bank_name,
+            'sender_name' => $reg->sender_name,
             'payment_amount' => (float) $reg->payment_amount,
             'payment_proof_path' => $reg->payment_proof_path,
             'payment_verified_at' => $reg->payment_verified_at ? $reg->payment_verified_at->toIso8601String() : null,
@@ -198,6 +200,35 @@ class AdminPpdbController extends Controller
     }
 
     /**
+     * Helper: Paginate an array using LengthAwarePaginator with allowed per_page options (10/20/30/50/100).
+     */
+    protected function paginateArray(array $items, int $defaultPerPage = 20, Request $request = null): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        $request = $request ?: request();
+        $allowedPerPage = [10, 20, 30, 50, 100];
+        $reqPerPage = (int) $request->query('per_page', $defaultPerPage);
+        $perPage = in_array($reqPerPage, $allowedPerPage) ? $reqPerPage : $defaultPerPage;
+
+        $page = (int) ($request->query('page') ?: 1);
+        if ($page < 1) $page = 1;
+
+        $total = count($items);
+        $offset = ($page - 1) * $perPage;
+        $slicedItems = array_slice($items, $offset, $perPage);
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $slicedItems,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+    }
+
+    /**
      * PPDB Admin Dashboard: Ringkasan KPI, Statistik Jurusan & Verifikasi Cepat.
      */
     public function index(Request $request)
@@ -211,9 +242,15 @@ class AdminPpdbController extends Controller
                 'pending_payment' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'pending_verification')),
                 'paid' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'paid')),
                 'accepted' => count(array_filter($allRegistrations, fn($r) => ($r['registration_status'] ?? '') === 'accepted')),
-                'with_form' => count(array_filter($allRegistrations, fn($r) => !empty($r['form_data']['nik']) && !empty($r['form_data']['major']))),
+                'with_form' => count(array_filter($allRegistrations, fn($r) => ppdb_is_form_filled($r))),
                 'total_amount' => array_reduce($allRegistrations, function ($acc, $r) {
-                    return ($r['payment_status'] ?? '') === 'paid' ? $acc + (float)($r['payment_amount'] ?? 400000) : $acc;
+                    if (($r['payment_status'] ?? '') !== 'paid') {
+                        return $acc;
+                    }
+                    $amt = isset($r['payment_amount']) && $r['payment_amount'] !== '' && $r['payment_amount'] !== null
+                        ? (float)$r['payment_amount']
+                        : 400000.0;
+                    return $acc + $amt;
                 }, 0),
             ];
 
@@ -337,10 +374,18 @@ class AdminPpdbController extends Controller
                 'pending' => count(array_filter($allRegistrations, fn($r) => ($r['registration_status'] ?? 'pending') === 'pending')),
             ];
 
+            $paginatedStudents = $this->paginateArray($students, 20, $request);
+
             return view('admin.ppdb.students', [
-                'students' => $students,
+                'students' => $paginatedStudents,
                 'stats' => $stats,
-                'filters' => compact('search', 'major', 'paymentStatus', 'registrationStatus'),
+                'filters' => [
+                    'search' => $search,
+                    'major' => $major,
+                    'paymentStatus' => $paymentStatus,
+                    'registrationStatus' => $registrationStatus,
+                    'perPage' => $paginatedStudents->perPage(),
+                ],
                 'backendUrl' => $this->backendUrl(),
             ]);
 
@@ -375,8 +420,9 @@ class AdminPpdbController extends Controller
                     'nik' => $acc['nik'] ?? '-',
                     'phone' => $phone,
                     'payment_status' => $r['payment_status'] ?? 'unpaid',
+                    'payment_amount' => isset($r['payment_amount']) && $r['payment_amount'] !== '' && $r['payment_amount'] !== null ? (float)$r['payment_amount'] : 400000.0,
                     'registration_status' => $r['registration_status'] ?? 'pending',
-                    'has_form' => !empty($form['nik']) && !empty($form['major']),
+                    'has_form' => ppdb_is_form_filled($r),
                     'sync_status' => $r['sync_status'] ?? 'pending',
                     'created_at' => $r['created_at'] ?? now()->toIso8601String(),
                 ];
@@ -410,14 +456,20 @@ class AdminPpdbController extends Controller
                 'total' => count($allRegistrations),
                 'paid' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'paid')),
                 'unpaid' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') !== 'paid')),
-                'has_form' => count(array_filter($allRegistrations, fn($r) => !empty($r['form_data']['nik']) && !empty($r['form_data']['major']))),
+                'has_form' => count(array_filter($allRegistrations, fn($r) => ppdb_is_form_filled($r))),
             ];
 
+            $paginatedUsers = $this->paginateArray($users, 20, $request);
+
             return view('admin.ppdb.users', [
-                'users' => $users,
+                'users' => $paginatedUsers,
                 'stats' => $stats,
                 'totalAccounts' => count($allRegistrations),
-                'filters' => compact('search', 'status'),
+                'filters' => [
+                    'search' => $search,
+                    'status' => $status,
+                    'perPage' => $paginatedUsers->perPage(),
+                ],
                 'backendUrl' => $this->backendUrl(),
             ]);
 
@@ -439,6 +491,7 @@ class AdminPpdbController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['nullable', 'string', 'min:6'],
             'payment_status' => ['required', 'in:unpaid,pending_verification,paid,rejected'],
+            'payment_amount' => ['nullable', 'numeric', 'min:0'],
         ], [
             'full_name.required' => 'Nama lengkap calon siswa wajib diisi.',
             'email.required' => 'Alamat email wajib diisi.',
@@ -489,9 +542,20 @@ class AdminPpdbController extends Controller
                 }
 
                 $isPaid = $request->payment_status === 'paid';
+                $currentAmount = isset($reg->payment_amount) ? (float)$reg->payment_amount : null;
+                $paymentAmount = ($request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '')
+                    ? (float) $request->payment_amount
+                    : ($request->payment_status === 'paid' ? ($currentAmount !== null ? $currentAmount : 400000.0) : 400000.0);
+                $paymentStatus = $request->payment_status;
+                if ($paymentAmount == 0.0 && $request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '') {
+                    $paymentStatus = 'paid';
+                }
+
                 $reg->update([
-                    'payment_status' => $request->payment_status,
-                    'payment_amount' => $isPaid ? 400000.0 : (float)($reg->payment_amount ?? 0),
+                    'payment_status' => $paymentStatus,
+                    'payment_amount' => $paymentAmount,
+                    'payment_verified_at' => $paymentStatus === 'paid' ? ($reg->payment_verified_at ?: now()) : null,
+                    'payment_verified_by' => $paymentStatus === 'paid' ? ($reg->payment_verified_by ?: (session('admin_user.username') ?? 'Admin')) : null,
                     'form_data' => $formData,
                     'sync_status' => 'pending',
                     'sync_message' => 'Data diperbarui di lokal, siap disinkronkan',
@@ -505,8 +569,8 @@ class AdminPpdbController extends Controller
                     'full_name' => $request->full_name,
                     'email' => $request->email,
                     'nik' => $cleanNik ?: '',
-                    'payment_status' => $request->payment_status,
-                    'payment_amount' => $request->payment_status === 'paid' ? 400000.0 : 0.0,
+                    'payment_status' => $paymentStatus ?? $request->payment_status,
+                    'payment_amount' => $paymentAmount,
                     'registration_status' => $reg?->registration_status ?? 'pending',
                     'form_data' => $formData ?? [],
                 ];
@@ -588,43 +652,63 @@ class AdminPpdbController extends Controller
         try {
             $cleanNik = !empty($request->nik) ? preg_replace('/[^0-9]/', '', $request->nik) : null;
 
-            // 1. Simpan ke tabel ppdb_accounts lokal
-            $account = PpdbAccount::updateOrCreate(
-                ['email' => $request->email],
-                [
+            // 1. Simpan ke tabel ppdb_accounts lokal (dukung restore jika sebelumnya soft-deleted)
+            $account = PpdbAccount::withTrashed()->where('email', $request->email)->first();
+            if ($account) {
+                if ($account->trashed()) {
+                    $account->restore();
+                }
+                $account->update([
                     'nik' => $cleanNik,
                     'full_name' => $request->full_name,
                     'password' => Hash::make($request->password),
                     'phone' => $request->phone,
                     'sync_status' => 'pending',
                     'sync_message' => 'Menunggu sinkronisasi ke Master API',
-                ]
-            );
-
-            // 2. Buat entri registrasi lokal
-            $isPaid = $request->boolean('mark_as_paid');
-            PpdbRegistration::updateOrCreate(
-                ['account_id' => $account->id],
-                [
-                    'payment_status' => $isPaid ? 'paid' : 'unpaid',
-                    'payment_method' => $isPaid ? $request->input('payment_method', 'cash') : 'transfer',
-                    'payment_amount' => $isPaid ? 400000.0 : 0.0,
-                    'payment_verified_at' => $isPaid ? now() : null,
-                    'payment_verified_by' => $isPaid ? (session('admin_user.username') ?? 'Admin') : null,
-                    'registration_status' => 'pending',
-                    'form_data' => [
-                        'full_name' => $request->full_name,
-                        'nik' => $cleanNik,
-                        'contact' => [
-                            'email' => $request->email,
-                            'mobile_number' => $request->phone,
-                            'whatsapp_number' => $request->phone,
-                        ],
-                    ],
+                ]);
+            } else {
+                $account = PpdbAccount::create([
+                    'email' => $request->email,
+                    'nik' => $cleanNik,
+                    'full_name' => $request->full_name,
+                    'password' => Hash::make($request->password),
+                    'phone' => $request->phone,
                     'sync_status' => 'pending',
                     'sync_message' => 'Menunggu sinkronisasi ke Master API',
-                ]
-            );
+                ]);
+            }
+
+            // 2. Buat entri registrasi lokal (dukung restore jika sebelumnya soft-deleted)
+            $isPaid = $request->boolean('mark_as_paid');
+            $reg = PpdbRegistration::withTrashed()->where('account_id', $account->id)->first();
+            $regData = [
+                'account_id' => $account->id,
+                'payment_status' => $isPaid ? 'paid' : 'unpaid',
+                'payment_method' => $isPaid ? $request->input('payment_method', 'cash') : 'transfer',
+                'payment_amount' => $isPaid ? 400000.0 : 0.0,
+                'payment_verified_at' => $isPaid ? now() : null,
+                'payment_verified_by' => $isPaid ? (session('admin_user.username') ?? 'Admin') : null,
+                'registration_status' => 'pending',
+                'form_data' => [
+                    'full_name' => $request->full_name,
+                    'nik' => $cleanNik,
+                    'contact' => [
+                        'email' => $request->email,
+                        'mobile_number' => $request->phone,
+                        'whatsapp_number' => $request->phone,
+                    ],
+                ],
+                'sync_status' => 'pending',
+                'sync_message' => 'Menunggu sinkronisasi ke Master API',
+            ];
+            if ($reg) {
+                if ($reg->trashed()) {
+                    $reg->restore();
+                }
+                $reg->update($regData);
+            } else {
+                $reg = PpdbRegistration::create($regData);
+            }
 
             // 3. Coba kirim langsung ke backend jika online
             try {
@@ -876,12 +960,15 @@ class AdminPpdbController extends Controller
                 'has_proof' => count(array_filter($docs, fn($d) => $d['has_payment_proof'])),
             ];
 
+            $paginatedDocs = $this->paginateArray($docs, 20, $request);
+
             return view('admin.ppdb.documents', [
-                'documents' => $docs,
+                'documents' => $paginatedDocs,
                 'stats' => $stats,
                 'filters' => [
                     'search' => $search,
                     'docStatus' => $docStatus,
+                    'perPage' => $paginatedDocs->perPage(),
                 ],
                 'backendUrl' => $this->backendUrl(),
             ]);
@@ -898,6 +985,7 @@ class AdminPpdbController extends Controller
     public function payments(Request $request)
     {
         $status = $request->query('status');
+        $search = $request->query('search');
 
         try {
             $allRegistrations = $this->fetchRegistrations();
@@ -915,8 +1003,10 @@ class AdminPpdbController extends Controller
                     'nik' => $acc['nik'] ?? '-',
                     'phone' => $form['contact']['mobile_number'] ?? ($acc['phone'] ?? '-'),
                     'payment_method' => $r['payment_method'] ?? 'transfer',
+                    'sender_bank_name' => $r['sender_bank_name'] ?? null,
+                    'sender_name' => $r['sender_name'] ?? null,
                     'payment_status' => $r['payment_status'] ?? 'unpaid',
-                    'payment_amount' => (float)($r['payment_amount'] ?? 0),
+                    'payment_amount' => (float)(isset($r['payment_amount']) && $r['payment_amount'] !== '' && $r['payment_amount'] !== null ? $r['payment_amount'] : 400000),
                     'payment_proof_path' => $r['payment_proof_path'] ?? null,
                     'payment_verified_at' => $r['payment_verified_at'] ?? null,
                     'payment_verified_by' => $r['payment_verified_by'] ?? null,
@@ -925,25 +1015,59 @@ class AdminPpdbController extends Controller
                 ];
             }
 
-            if (!empty($status)) {
-                if ($status === 'pending' || $status === 'pending_verification') {
-                    $payments = array_values(array_filter($payments, fn($p) => in_array($p['payment_status'], ['pending', 'pending_verification'])));
-                } else {
-                    $payments = array_values(array_filter($payments, fn($p) => $p['payment_status'] === $status));
-                }
-            }
-
+            // Hitung statistik komprehensif global
             $stats = [
                 'total' => count($allRegistrations),
                 'pending' => count(array_filter($allRegistrations, fn($r) => in_array($r['payment_status'] ?? '', ['pending', 'pending_verification']))),
                 'paid' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'paid')),
                 'rejected' => count(array_filter($allRegistrations, fn($r) => ($r['payment_status'] ?? '') === 'rejected')),
+                'unpaid' => count(array_filter($allRegistrations, fn($r) => !in_array($r['payment_status'] ?? '', ['paid', 'pending', 'pending_verification', 'rejected']))),
+                'total_revenue' => array_reduce($allRegistrations, function ($acc, $r) {
+                    return ($r['payment_status'] ?? '') === 'paid'
+                        ? $acc + (float)(isset($r['payment_amount']) && $r['payment_amount'] !== '' && $r['payment_amount'] !== null ? $r['payment_amount'] : 400000)
+                        : $acc;
+                }, 0),
             ];
 
+            // Filter Status
+            $filterStatus = $status ?: 'all';
+            $filteredPayments = $payments;
+
+            if ($filterStatus === 'pending') {
+                $filteredPayments = array_filter($filteredPayments, fn($p) => in_array($p['payment_status'], ['pending', 'pending_verification']));
+            } elseif ($filterStatus === 'paid') {
+                $filteredPayments = array_filter($filteredPayments, fn($p) => $p['payment_status'] === 'paid');
+            } elseif ($filterStatus === 'rejected') {
+                $filteredPayments = array_filter($filteredPayments, fn($p) => $p['payment_status'] === 'rejected');
+            } elseif ($filterStatus === 'unpaid') {
+                $filteredPayments = array_filter($filteredPayments, fn($p) => !in_array($p['payment_status'], ['paid', 'pending', 'pending_verification', 'rejected']));
+            }
+
+            // Filter Pencarian
+            if (!empty($search)) {
+                $q = strtolower(trim($search));
+                $filteredPayments = array_filter($filteredPayments, function ($p) use ($q) {
+                    return str_contains(strtolower($p['full_name']), $q)
+                        || str_contains(strtolower($p['email']), $q)
+                        || str_contains(strtolower($p['nik']), $q)
+                        || str_contains(strtolower($p['phone']), $q)
+                        || str_contains(strtolower($p['sender_bank_name'] ?? ''), $q)
+                        || str_contains(strtolower($p['sender_name'] ?? ''), $q);
+                });
+            }
+
+            $filteredPayments = array_values($filteredPayments);
+            $paginatedPayments = $this->paginateArray($filteredPayments, 20, $request);
+
             return view('admin.ppdb.payments', [
-                'payments' => $payments,
+                'payments' => $paginatedPayments,
                 'stats' => $stats,
-                'filterStatus' => $status,
+                'filterStatus' => $filterStatus,
+                'filters' => [
+                    'status' => $filterStatus,
+                    'search' => $search ?: '',
+                    'perPage' => $paginatedPayments->perPage(),
+                ],
                 'backendUrl' => $this->backendUrl(),
             ]);
 
@@ -1101,10 +1225,18 @@ class AdminPpdbController extends Controller
                 ->orWhere('account_id', $id)
                 ->first();
 
+            $verifiedAmount = ($request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '')
+                ? (float) $request->payment_amount
+                : 400000.00;
+            $paymentStatus = $request->payment_status;
+            if ($verifiedAmount == 0.0) {
+                $paymentStatus = 'paid';
+            }
+
             if ($reg) {
                 $updateData = [
-                    'payment_status' => $request->payment_status,
-                    'payment_amount' => (float) ($request->payment_amount ?? 400000.00),
+                    'payment_status' => $paymentStatus,
+                    'payment_amount' => $verifiedAmount,
                     'payment_verified_at' => now(),
                     'payment_verified_by' => session('admin_user.username') ?? 'Admin',
                     'sync_status' => 'pending',
@@ -1113,15 +1245,19 @@ class AdminPpdbController extends Controller
                 if ($request->filled('payment_method')) {
                     $updateData['payment_method'] = $request->payment_method;
                 }
+                $wasPaid = $reg->payment_status === 'paid';
                 $reg->update($updateData);
+                if ($paymentStatus === 'paid' && !$wasPaid) {
+                    \App\Services\PaymentEmailService::sendVerified($reg->fresh());
+                }
             }
 
             // Coba kirim langsung ke backend jika online
             try {
                 $targetRemoteId = $reg?->remote_id ?: $id;
                 $this->httpWithAdminToken()->put($this->backendUrl() . '/api/ppdb/verify-payment/' . $targetRemoteId, [
-                    'payment_status' => $request->payment_status,
-                    'payment_amount' => (float) ($request->payment_amount ?? 400000.00),
+                    'payment_status' => $paymentStatus,
+                    'payment_amount' => $verifiedAmount,
                 ]);
             } catch (\Throwable $e) {
                 // Offline fallback
@@ -1346,9 +1482,19 @@ class AdminPpdbController extends Controller
                 }
 
                 // 2. Update Registration
+                $paymentAmount = ($request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '')
+                    ? (float) $request->payment_amount
+                    : 400000.0;
+                $paymentStatus = $request->payment_status;
+                if ($paymentAmount == 0.0 && $request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '') {
+                    $paymentStatus = 'paid';
+                }
+
                 $reg->update([
-                    'payment_status' => $request->payment_status,
-                    'payment_amount' => (float) ($request->payment_amount ?? 0),
+                    'payment_status' => $paymentStatus,
+                    'payment_amount' => $paymentAmount,
+                    'payment_verified_at' => $paymentStatus === 'paid' ? ($reg->payment_verified_at ?: now()) : null,
+                    'payment_verified_by' => $paymentStatus === 'paid' ? ($reg->payment_verified_by ?: (session('admin_user.username') ?? 'Admin')) : null,
                     'registration_status' => $request->registration_status,
                     'form_data' => $currentForm,
                     'sync_status' => 'pending',
@@ -1363,8 +1509,8 @@ class AdminPpdbController extends Controller
                     'full_name' => $request->full_name,
                     'nik' => $request->nik,
                     'email' => $request->email,
-                    'payment_status' => $request->payment_status,
-                    'payment_amount' => (float) ($request->payment_amount ?? 0),
+                    'payment_status' => $paymentStatus ?? $request->payment_status,
+                    'payment_amount' => $paymentAmount ?? 400000.0,
                     'registration_status' => $request->registration_status,
                     'form_data' => $currentForm,
                 ];
@@ -1432,7 +1578,7 @@ class AdminPpdbController extends Controller
                     return back()->with('error', 'Calon siswa harus berstatus LUNAS (PAID) terlebih dahulu sebelum dapat diterima.');
                 }
 
-                if (empty($reg->form_data)) {
+                if (!ppdb_is_form_filled($reg)) {
                     return back()->with('error', 'Formulir pendaftaran calon siswa belum diisi.');
                 }
 

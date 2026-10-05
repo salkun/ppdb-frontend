@@ -46,7 +46,7 @@
                             <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 38px; height: 38px; object-fit: contain;">
                         </div>
                         <div>
-                            <span class="db-sidebar-brand-text">PPDB Online</span>
+                            <span class="db-sidebar-brand-text">SPMB Online</span>
                             <div class="db-sidebar-brand-sub">
                                 <span class="db-sidebar-brand-dot"></span>
                                 <span>SMPS2 AL-MUHAJIRIN</span>
@@ -116,7 +116,7 @@
                             <img src="{{ asset('logo/logo.png') }}" alt="Logo SMPS2 Al-Muhajirin" style="width: 36px; height: 36px; object-fit: contain;">
                         </div>
                         <div>
-                            <span style="font-weight:700;font-size:15px;color:var(--lp-on-surface);display:block;">PPDB Online</span>
+                            <span style="font-weight:700;font-size:15px;color:var(--lp-on-surface);display:block;">SPMB Online</span>
                             <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">SMPS2 AL-MUHAJIRIN</span>
                         </div>
                     </div>
@@ -261,7 +261,7 @@
                         <span class="lp-brand-text">SMPS2 Al-Muhajirin</span>
                         <div class="lp-brand-sub">
                             <span class="lp-brand-dot"></span>
-                            <span class="lp-brand-badge">PMB TP 2027–2028</span>
+                            <span class="lp-brand-badge">SPMB TP 2027–2028</span>
                         </div>
                     </div>
                 </a>
@@ -284,7 +284,7 @@
                             <span>Dashboard</span>
                         </a>
                     @else
-                        <a class="lp-btn-login" href="{{ route('login') }}" title="Masuk Akun Santri">
+                        <a class="lp-btn-login" href="{{ route('login') }}" title="Masuk Akun Murid">
                             <span class="material-symbols-outlined" style="font-size:18px;">login</span>
                             <span>Masuk</span>
                         </a>
@@ -311,7 +311,7 @@
                         </div>
                         <div>
                             <span style="font-weight:700;font-size:15px;color:var(--lp-on-surface);display:block;">SMPS2 Al-Muhajirin</span>
-                            <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">PMB TP 2027–2028</span>
+                            <span style="font-size:11px;font-weight:700;color:var(--lp-primary);">SPMB TP 2027–2028</span>
                         </div>
                     </div>
                     <button onclick="document.getElementById('lpMobileDrawer').classList.remove('open')" style="background:none;border:none;cursor:pointer;padding:4px;" aria-label="Tutup">
@@ -449,7 +449,7 @@
                         <span class="lp-footer-dot"></span>
                         <span style="color:var(--lp-primary-light);font-weight:700;">100% Berkas Digital</span>
                         <span class="lp-footer-dot"></span>
-                        <span style="color:#fff;font-weight:600;">PPDB TP 2027–2028</span>
+                        <span style="color:#fff;font-weight:600;">SPMB TP 2027–2028</span>
                     </div>
                 </div>
             </div>

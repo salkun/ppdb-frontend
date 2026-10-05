@@ -1,12 +1,13 @@
 @extends('admin.layout')
 
-@section('title', 'Data Siswa PPDB')
-@section('header_title', 'Data Calon Peserta Didik Baru')
+@section('title', 'Data Siswa SPMB')
+@section('header_title', 'Data Calon Murid Baru')
 
 @section('content')
 <!-- Filter Toolbar Card -->
 <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white p-3 p-md-4">
     <form method="GET" action="{{ route('admin.ppdb.students') }}" class="row g-2 align-items-center">
+        <input type="hidden" name="per_page" value="{{ $filters['perPage'] ?? 20 }}">
         <!-- Search -->
         <div class="col-12 col-md-4 col-lg-3">
             <div class="input-group">
@@ -73,9 +74,9 @@
     <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill" style="font-size: 12px;">
-                {{ count($students) }} Siswa Ditemukan
+                {{ $students->total() }} Siswa Ditemukan
             </span>
-            <span class="text-muted small d-none d-sm-inline">Daftar pendaftar terdaftar di sistem PPDB</span>
+            <span class="text-muted small d-none d-sm-inline">Daftar pendaftar terdaftar di sistem SPMB</span>
         </div>
 
         <div class="d-flex align-items-center gap-2">
@@ -139,13 +140,13 @@
                         $form = $reg['form_data'] ?? [];
                         $major = $form['major'] ?? ($reg['student']['major'] ?? null);
                         $hasProof = !empty($reg['payment_proof_path']);
-                        $hasForm = !empty($form);
+                        $hasForm = ppdb_is_form_filled($reg);
                         $docData = ppdb_get_student_documents($reg, $backendUrl);
                         $upDocs = $docData['uploaded_count'];
                     @endphp
                     <tr>
                         <td class="ps-3 ps-md-4 text-center text-muted fw-semibold">
-                            {{ $index + 1 }}
+                            {{ ($students->firstItem() ?? 1) + $index }}
                         </td>
                         <td>
                             <div class="fw-bold text-dark">{{ $acc['full_name'] ?? ($form['full_name'] ?? 'Calon Siswa') }}</div>
@@ -366,7 +367,10 @@
 
                                                     <div class="mb-3">
                                                         <label class="form-label fw-bold text-dark small mb-1">Nominal Terverifikasi (Rp):</label>
-                                                        <input type="number" class="form-control" name="payment_amount" value="400000" step="1000" required>
+                                                        <input type="number" class="form-control" name="payment_amount" value="{{ (int)(isset($reg['payment_amount']) && $reg['payment_amount'] !== '' && $reg['payment_amount'] !== null ? $reg['payment_amount'] : 400000) }}" min="0" step="1000" required>
+                                                        <div class="form-text small" style="font-size: 11px;">
+                                                            Isi <strong>0</strong> jika lolos jalur prestasi / beasiswa (bebas biaya).
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer border-top bg-light py-2">
@@ -392,7 +396,7 @@
                                         </div>
                                         <div class="modal-body p-3 p-md-4">
                                             <p class="text-dark small mb-2">
-                                                Apakah Anda yakin ingin menghapus data calon siswa ini secara permanen dari sistem PPDB?
+                                                Apakah Anda yakin ingin menghapus data calon siswa ini secara permanen dari sistem SPMB?
                                             </p>
                                             <div class="p-3 bg-light rounded-3 mb-2 border">
                                                 <div class="fw-bold text-dark">{{ $acc['full_name'] ?? 'Calon Siswa' }}</div>
@@ -426,5 +430,7 @@
             </tbody>
         </table>
     </div>
+
+    @include('admin.ppdb.partials.pagination', ['paginator' => $students])
 </div>
 @endsection

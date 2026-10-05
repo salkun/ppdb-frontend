@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>@yield('title', 'Admin Panel PPDB') — SMP Al-Muhajirin</title>
+    <title>@yield('title', 'Admin Panel SPMB') — SMP Al-Muhajirin</title>
 
     <!-- Official Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('logo/favicon-32x32.png') }}">
@@ -44,7 +44,7 @@
                         <img src="{{ asset('logo/logo.png') }}" alt="Logo SMP Al-Muhajirin" style="width: 36px; height: 36px; object-fit: contain;">
                     </div>
                     <div>
-                        <div class="admin-brand-title">PPDB Admin</div>
+                        <div class="admin-brand-title">SPMB Admin</div>
                         <div class="admin-brand-sub">SMP AL-MUHAJIRIN</div>
                     </div>
                 </a>
@@ -140,7 +140,7 @@
                         <img src="{{ asset('logo/logo.png') }}" alt="Logo SMP Al-Muhajirin" style="width: 34px; height: 34px; object-fit: contain;">
                     </div>
                     <div>
-                        <div class="fw-bold text-dark" style="font-size: 15px;">PPDB Admin</div>
+                        <div class="fw-bold text-dark" style="font-size: 15px;">SPMB Admin</div>
                         <div class="text-primary fw-semibold" style="font-size: 11px;">SMP AL-MUHAJIRIN</div>
                     </div>
                 </div>
@@ -234,7 +234,7 @@
                         <span class="material-symbols-outlined" style="font-size:22px;">menu</span>
                     </button>
                     <div>
-                        <h5 class="fw-bold text-dark mb-0 fs-6">@yield('header_title', 'PPDB Admin Panel')</h5>
+                        <h5 class="fw-bold text-dark mb-0 fs-6">@yield('header_title', 'SPMB Admin Panel')</h5>
                     </div>
                 </div>
 
@@ -294,7 +294,7 @@
             <!-- Workspace Footer -->
             <footer class="py-3 px-3 px-lg-4 border-top bg-white text-muted small mt-auto" style="font-size: 12px;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <span>&copy; {{ date('Y') }} PPDB Online SMP Al-Muhajirin Purwakarta. All rights reserved.</span>
+                    <span>&copy; {{ date('Y') }} SPMB Online SMP Al-Muhajirin Purwakarta. All rights reserved.</span>
                     <span class="fw-semibold text-primary">SINKRONISASI AKTIF</span>
                 </div>
             </footer>

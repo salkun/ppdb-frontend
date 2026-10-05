@@ -62,12 +62,21 @@ class TelegramNotificationService
 
             $regIdParam = $registrationId ?: 'unknown';
 
+            $senderLine = '';
+            if ($paymentMethod !== 'cash') {
+                $senderBank = htmlspecialchars($studentData['sender_bank_name'] ?? '-', ENT_QUOTES, 'UTF-8');
+                $senderName = htmlspecialchars($studentData['sender_name'] ?? '-', ENT_QUOTES, 'UTF-8');
+                $senderLine = "• <b>Bank Pengirim:</b> {$senderBank}\n"
+                    . "• <b>Nama Pengirim:</b> {$senderName}\n";
+            }
+
             $caption = "📢 <b>NOTIFIKASI BUKTI PEMBAYARAN PPDB</b>\n\n"
                 . "Telah diterima unggahan bukti pembayaran pendaftaran:\n"
                 . "• <b>Nama Siswa:</b> {$fullName}\n"
                 . $nikLine
                 . "• <b>Email:</b> {$email}\n"
                 . "• <b>Metode:</b> <b>{$methodLabel}</b>\n"
+                . $senderLine
                 . "• <b>Nominal:</b> <b>{$nominal}</b> (Biaya Registrasi)\n"
                 . "• <b>Waktu:</b> {$uploadTime}\n"
                 . "• <b>Status:</b> ⏳ <b>Menunggu Verifikasi</b>\n\n"
@@ -217,45 +226,19 @@ class TelegramNotificationService
         $studentName = $reg->account?->full_name ?? ($reg->form_data['full_name'] ?? 'Calon Siswa');
         $processedTime = now()->setTimezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') . ' WIB';
 
-        // Cek jika status sudah sama sebelumnya
-        if ($reg->payment_status === $targetStatus) {
-            $statusText = ($targetStatus === 'paid') ? 'LUNAS' : 'DITOLAK';
-            $this->answerCallbackQuery($callbackId, "ℹ️ Pembayaran a.n. {$studentName} sudah berstatus {$statusText}.", true);
-            return ['success' => true, 'message' => "Already {$targetStatus}."];
-        }
-
-        // Update database MySQL lokal
         $isPaid = ($targetStatus === 'paid');
-        $reg->payment_status = $targetStatus;
-        if ($isPaid) {
-            $reg->payment_amount = $reg->payment_amount ?: 400000.00;
-        }
-        $reg->payment_verified_at = now();
-        $reg->payment_verified_by = "Telegram" . ($isPaid ? "" : " (Ditolak)") . ": {$adminDisplay}";
-        $reg->sync_status = 'pending';
-        $reg->sync_message = "Status pembayaran {$targetStatus} diverifikasi via Telegram oleh {$adminDisplay}";
-        $reg->save();
-
-        // Coba sinkronkan ke Master FastAPI jika online
-        $this->syncPaymentToBackend($reg, $targetStatus);
-
-        // Jawaban Popup Alert ke pengguna yang menekan tombol di Telegram
-        $alertMsg = $isPaid
-            ? "✅ SUKSES: Pembayaran a.n. {$studentName} berhasil diverifikasi LUNAS!"
-            : "❌ Pembayaran a.n. {$studentName} telah DITOLAK.";
-        $this->answerCallbackQuery($callbackId, $alertMsg, false);
-
-        // Perbarui Tampilan Pesan / Caption di Telegram agar jelas & mencegah double click
+        $safeStudentName = htmlspecialchars($studentName, ENT_QUOTES, 'UTF-8');
+        $safeAdminDisplay = htmlspecialchars($adminDisplay, ENT_QUOTES, 'UTF-8');
         $adminUrl = url('/admin/ppdb/registrations/' . $reg->id);
         $statusBadge = $isPaid ? "✅ <b>STATUS: DIVERIFIKASI LUNAS</b>" : "❌ <b>STATUS: BUKTI PEMBAYARAN DITOLAK</b>";
+        $statusText = $isPaid ? "LUNAS" : "DITOLAK";
 
-        $cleanedCaption = preg_replace('/• <b>Status:<\/b>.*$/m', '', $currentCaption);
-        $cleanedCaption = trim($cleanedCaption);
-
-        $newCaption = $cleanedCaption . "\n\n"
+        $newCaption = "📢 <b>BUKTI PEMBAYARAN PPDB — {$statusText}</b>\n\n"
+            . "• <b>Nama Siswa:</b> {$safeStudentName}\n"
+            . "• <b>Nominal:</b> <b>Rp 400.000</b>\n"
             . "═══════════════════════════\n"
             . "{$statusBadge}\n"
-            . "• <b>Diproses Oleh:</b> {$adminDisplay}\n"
+            . "• <b>Diproses Oleh:</b> {$safeAdminDisplay}\n"
             . "• <b>Waktu:</b> {$processedTime}\n"
             . "• <b>Sistem:</b> MySQL Database Updated ✓";
 
@@ -264,7 +247,7 @@ class TelegramNotificationService
             'inline_keyboard' => [
                 [
                     [
-                        'text' => $isPaid ? '✓ Telah DIVERIFIKASI LUNAS' : '✗ Bukti Telah DITOLAK',
+                        'text' => $isPaid ? '✓ Telah DIVERIFIKASI LUNAS (' . $safeAdminDisplay . ')' : '✗ Bukti Telah DITOLAK (' . $safeAdminDisplay . ')',
                         'callback_data' => 'noop',
                     ],
                 ],
@@ -277,15 +260,65 @@ class TelegramNotificationService
             ],
         ];
 
-        if ($messageId && !empty($chatId)) {
-            $this->editMessageCaption((string) $chatId, (int) $messageId, $newCaption, $updatedKeyboard);
+        $targetChatId = !empty($chatId) ? (string) $chatId : $this->chatId;
 
-            // Kirim pesan rangkuman ke grup
+        // Cek jika status sudah sama sebelumnya
+        if ($reg->payment_status === $targetStatus) {
+            $statusText = ($targetStatus === 'paid') ? 'LUNAS' : 'DITOLAK';
+            $byText = !empty($reg->payment_verified_by) ? " ({$reg->payment_verified_by})" : "";
+            $this->answerCallbackQuery($callbackId, "ℹ️ Pembayaran a.n. {$studentName} sudah berstatus {$statusText}{$byText}.", true);
+
+            // Perbarui juga tampilan tombol & caption pada pesan ini agar tombol verifikasinya dinonaktifkan
+            if ($messageId && !empty($targetChatId)) {
+                $this->editMessageCaption($targetChatId, (int) $messageId, $newCaption, $updatedKeyboard);
+            }
+
+            return ['success' => true, 'message' => "Already {$targetStatus}."];
+        }
+
+        // Update database MySQL lokal
+        $reg->payment_status = $targetStatus;
+        if ($isPaid) {
+            $reg->payment_amount = 400000.00;
+        }
+        $reg->payment_verified_at = now();
+        $reg->payment_verified_by = "Telegram" . ($isPaid ? "" : " (Ditolak)") . ": {$adminDisplay}";
+        $reg->sync_status = 'pending';
+        $reg->sync_message = "Status pembayaran {$targetStatus} diverifikasi via Telegram oleh {$adminDisplay}";
+        $reg->save();
+
+        // Coba sinkronkan ke Master FastAPI jika online
+        $this->syncPaymentToBackend($reg, $targetStatus);
+
+        if ($isPaid) {
+            PaymentEmailService::sendVerified($reg);
+        }
+
+        // Jawaban Popup Alert langsung ke admin yang menekan tombol
+        $alertMsg = $isPaid
+            ? "✅ SUKSES: Pembayaran a.n. {$studentName} berhasil diverifikasi LUNAS oleh {$adminDisplay}!"
+            : "❌ Pembayaran a.n. {$studentName} telah DITOLAK oleh {$adminDisplay}.";
+        $this->answerCallbackQuery($callbackId, $alertMsg, true);
+
+        $targetChatId = !empty($chatId) ? (string) $chatId : $this->chatId;
+        if (!empty($targetChatId)) {
+            if ($messageId) {
+                $this->editMessageCaption($targetChatId, (int) $messageId, $newCaption, $updatedKeyboard);
+            }
+
+            // Kirim pesan rangkuman ke grup dengan reply_to_message_id
             $summaryAction = $isPaid
-                ? "🎉 <b>VERIFIKASI PEMBAYARAN BERHASIL</b>\n\nCalon siswa <b>{$studentName}</b> telah diverifikasi <b>LUNAS</b> oleh {$adminDisplay}.\nSiswa sekarang dapat melanjutkan ke pengisian formulir lengkap & cetak kartu ujian PPDB."
-                : "⚠️ <b>BUKTI PEMBAYARAN DITOLAK</b>\n\nBukti pembayaran calon siswa <b>{$studentName}</b> telah ditolak oleh {$adminDisplay}.\nSiswa diminta mengunggah ulang bukti pembayaran yang sah.";
+                ? "🎉 <b>VERIFIKASI PEMBAYARAN BERHASIL</b>\n\n"
+                . "Calon siswa <b>{$safeStudentName}</b> telah diverifikasi <b>LUNAS</b> oleh {$safeAdminDisplay}.\n"
+                . "• <b>Nominal:</b> Rp 400.000\n"
+                . "• <b>Waktu:</b> {$processedTime}\n\n"
+                . "Siswa sekarang dapat melanjutkan ke pengisian formulir lengkap & cetak kartu ujian PPDB."
+                : "⚠️ <b>BUKTI PEMBAYARAN DITOLAK</b>\n\n"
+                . "Bukti pembayaran calon siswa <b>{$safeStudentName}</b> telah ditolak oleh {$safeAdminDisplay}.\n"
+                . "• <b>Waktu:</b> {$processedTime}\n\n"
+                . "Siswa diminta mengunggah ulang bukti pembayaran yang sah.";
 
-            $this->sendMessage((string) $chatId, $summaryAction);
+            $this->sendMessage($targetChatId, $summaryAction, null, $messageId ? (int) $messageId : null);
         }
 
         Log::info("Verifikasi Telegram PPDB sukses: {$regId} menjadi {$targetStatus} oleh {$adminDisplay}");
@@ -421,7 +454,7 @@ class TelegramNotificationService
 
         $reg->payment_status = $targetStatus;
         if ($isPaid) {
-            $reg->payment_amount = $reg->payment_amount ?: 400000.00;
+            $reg->payment_amount = 400000.00;
         }
         $reg->payment_verified_at = now();
         $reg->payment_verified_by = "Telegram: {$adminDisplay}";
@@ -429,6 +462,10 @@ class TelegramNotificationService
         $reg->save();
 
         $this->syncPaymentToBackend($reg, $targetStatus);
+
+        if ($isPaid) {
+            PaymentEmailService::sendVerified($reg);
+        }
 
         $badge = $isPaid ? 'LUNAS (PAID) ✅' : 'DITOLAK ❌';
         $reply = "✓ <b>STATUS PEMBAYARAN DIPERBARUI</b>\n\n"
@@ -454,7 +491,7 @@ class TelegramNotificationService
 
             Http::timeout(5)->put("{$backendUrl}/api/ppdb/verify-payment/{$targetRemoteId}", [
                 'payment_status' => $status,
-                'payment_amount' => (float) ($reg->payment_amount ?? 400000.00),
+                'payment_amount' => (float) (isset($reg->payment_amount) && $reg->payment_amount !== null && $reg->payment_amount !== '' ? $reg->payment_amount : 400000.00),
             ]);
         } catch (\Throwable $e) {
             // Offline fallback
@@ -498,11 +535,25 @@ class TelegramNotificationService
             ];
 
             if ($replyMarkup !== null) {
-                $payload['reply_markup'] = json_encode($replyMarkup);
+                $payload['reply_markup'] = is_array($replyMarkup) ? $replyMarkup : json_decode($replyMarkup, true);
             }
 
             $res = Http::timeout(8)->post("https://api.telegram.org/bot{$this->botToken}/editMessageCaption", $payload);
-            return $res->successful();
+            if (!$res->successful()) {
+                Log::warning('Telegram editMessageCaption gagal, mencoba editMessageText: ' . $res->body());
+                $textPayload = [
+                    'chat_id' => $chatId,
+                    'message_id' => $messageId,
+                    'text' => $newCaption,
+                    'parse_mode' => 'HTML',
+                ];
+                if ($replyMarkup !== null) {
+                    $textPayload['reply_markup'] = is_array($replyMarkup) ? $replyMarkup : json_decode($replyMarkup, true);
+                }
+                $resText = Http::timeout(8)->post("https://api.telegram.org/bot{$this->botToken}/editMessageText", $textPayload);
+                return $resText->successful();
+            }
+            return true;
         } catch (\Throwable $e) {
             Log::warning('Gagal editMessageCaption Telegram: ' . $e->getMessage());
             return false;
@@ -512,7 +563,7 @@ class TelegramNotificationService
     /**
      * Mengirim pesan teks baru ke chat / grup Telegram.
      */
-    public function sendMessage(string $chatId, string $text, ?array $replyMarkup = null): bool
+    public function sendMessage(string $chatId, string $text, ?array $replyMarkup = null, ?int $replyToMessageId = null): bool
     {
         if (empty($this->botToken)) return false;
 
@@ -525,10 +576,24 @@ class TelegramNotificationService
             ];
 
             if ($replyMarkup !== null) {
-                $payload['reply_markup'] = json_encode($replyMarkup);
+                $payload['reply_markup'] = is_array($replyMarkup) ? $replyMarkup : json_decode($replyMarkup, true);
+            }
+
+            if ($replyToMessageId !== null) {
+                $payload['reply_to_message_id'] = $replyToMessageId;
             }
 
             $res = Http::timeout(8)->post("https://api.telegram.org/bot{$this->botToken}/sendMessage", $payload);
+
+            if (!$res->successful() && $replyToMessageId !== null) {
+                unset($payload['reply_to_message_id']);
+                $res = Http::timeout(8)->post("https://api.telegram.org/bot{$this->botToken}/sendMessage", $payload);
+            }
+
+            if (!$res->successful()) {
+                Log::warning('Telegram sendMessage returned error: ' . $res->body());
+            }
+
             return $res->successful();
         } catch (\Throwable $e) {
             Log::warning('Gagal sendMessage Telegram: ' . $e->getMessage());

@@ -100,8 +100,8 @@
         $hasDocs = $docCount > 0;
         $isAllDocs = ($docCount >= 4);
 
-        // Formulir PPDB dinyatakan benar-benar sudah diisi jika calon siswa sudah submit data pokok (NIK & Jurusan/Nama)
-        $isFormFilled = !empty($formData['nik']) && (!empty($formData['major']) || !empty($formData['full_name']) || !empty($registration['student']['major']));
+        // Formulir PPDB dinyatakan benar-benar sudah diisi jika calon siswa sudah submit biodata lengkap
+        $isFormFilled = ppdb_is_form_filled($registration);
 
         // Progress calculation
         $progressItems = 0;
@@ -127,7 +127,7 @@
                 </div>
                 <div class="db-profile-info">
                     <div class="db-profile-greeting">
-                        <h3>Halo, {{ $user['full_name'] ?? 'Calon Siswa' }}! 👋</h3>
+                        <h3>Halo, {{ $user['full_name'] ?? 'Calon Siswa' }}! </h3>
                         <span class="db-profile-badge-tp">TP 2027/2028</span>
                     </div>
                     <div class="db-profile-meta">
@@ -207,7 +207,7 @@
                     </div>
                     <div class="db-next-step-content">
                         <div class="db-next-step-title">Langkah Saat Ini: Menunggu Verifikasi Pembayaran</div>
-                        <div class="db-next-step-desc">Bukti pembayaran Anda sedang diperiksa panitia PPDB. Akses pengisian formulir akan terbuka otomatis setelah disetujui.</div>
+                        <div class="db-next-step-desc">Bukti pembayaran Anda sedang diperiksa panitia SPMB. Jadwal verifikasi pembayaran registrasi diproses <strong>dari jam 07.30 – 16.00 WIB</strong>. Akses pengisian formulir akan terbuka otomatis setelah disetujui.</div>
                     </div>
                 </div>
                 <div class="db-next-step-badge-review">
@@ -223,7 +223,14 @@
                     </div>
                     <div class="db-next-step-content">
                         <div class="db-next-step-title">Langkah Selanjutnya: Isi Formulir Pendaftaran (Wajib)</div>
-                        <div class="db-next-step-desc">Pembayaran Rp 400.000 telah lunas & terverifikasi! Silakan lengkapi biodata calon siswa, data orang tua/wali, dan pilihan jurusan.</div>
+                        @php
+                            $dashPayAmt = isset($registration['payment_amount']) && $registration['payment_amount'] !== '' && $registration['payment_amount'] !== null ? (float)$registration['payment_amount'] : 400000;
+                        @endphp
+                        @if($dashPayAmt == 0)
+                            <div class="db-next-step-desc">Pendaftaran Jalur Prestasi / Bebas Biaya telah terverifikasi resmi! Silakan lengkapi biodata calon murid, data orang tua/wali, dan pilihan jurusan.</div>
+                        @else
+                            <div class="db-next-step-desc">Pembayaran Rp 400.000 telah lunas & terverifikasi! Silakan lengkapi biodata calon murid, data orang tua/wali, dan pilihan jurusan.</div>
+                        @endif
                     </div>
                 </div>
                 <a href="{{ route('ppdb.form') }}" class="db-next-step-btn primary">
@@ -314,16 +321,34 @@
             </div>
         </div>
 
+        {{-- Info Jadwal Verifikasi Pembayaran --}}
+        <div style="background: rgba(0, 90, 180, 0.04); border: 1px solid rgba(0, 90, 180, 0.15); border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--lp-on-surface);">
+            <span class="material-symbols-outlined" style="font-size: 20px; color: var(--lp-primary); flex-shrink: 0;">schedule</span>
+            <div>
+                <strong>Jadwal Verifikasi Pembayaran Registrasi:</strong> Panitia melayani verifikasi <strong>dari jam 07.30 – 16.00 WIB</strong>. Bukti yang diunggah di luar jam operasional akan diverifikasi pada jam kerja berikutnya.
+            </div>
+        </div>
+
         <div class="db-payment-amount">
-            <div class="db-payment-nominal">Rp 400.000</div>
+            @php
+                $dispPayAmt = isset($registration['payment_amount']) && $registration['payment_amount'] !== '' && $registration['payment_amount'] !== null ? (float)$registration['payment_amount'] : 400000;
+            @endphp
+            <div class="db-payment-nominal">
+                @if($paymentStatus === 'paid' && $dispPayAmt == 0)
+                    Rp 0 <span style="font-size:14px;font-weight:600;color:var(--lp-green);">(Jalur Prestasi / Bebas Biaya)</span>
+                @else
+                    Rp 400.000
+                @endif
+            </div>
             <div class="db-payment-bank" id="payInfoTransfer" style="{{ $payMethod === 'cash' ? 'display:none;' : '' }}">
-                <span class="db-payment-bank-label">Rekening Tujuan (Bank Mandiri)</span>
-                <span class="db-payment-bank-num">1730004960275</span>
-                <span style="font-size:11px;color:var(--lp-on-surface-variant);display:block;margin-top:2px;">a.n. PUTRI MUNAWWAROH</span>
+                @php $bank = \App\Support\BankSetting::get(); @endphp
+                <span class="db-payment-bank-label">Rekening Tujuan ({{ $bank['bank_name'] }})</span>
+                <span class="db-payment-bank-num">{{ $bank['account_number'] }}</span>
+                <span style="font-size:11px;color:var(--lp-on-surface-variant);display:block;margin-top:2px;">a.n. {{ $bank['account_holder'] }}</span>
             </div>
             <div class="db-payment-bank" id="payInfoCash" style="{{ $payMethod === 'cash' ? '' : 'display:none;' }};background:rgba(13,148,136,0.06);border-color:rgba(13,148,136,0.25);">
                 <span class="db-payment-bank-label" style="color:#0f766e;">Lokasi Pembayaran Tunai</span>
-                <span class="db-payment-bank-num" style="color:#0f766e;font-size:14px;">Loket TU / Panitia PPDB</span>
+                <span class="db-payment-bank-num" style="color:#0f766e;font-size:14px;">Loket TU / Panitia SPMB</span>
                 <span style="font-size:11px;color:#115e59;display:block;margin-top:2px;">Gedung SMPS2 Al-Muhajirin</span>
             </div>
         </div>
@@ -350,7 +375,7 @@
                 <div style="flex:1;min-width:200px;">
                     <div style="font-weight:700;font-size:14px;color:var(--lp-yellow-dark);">Menunggu Verifikasi Panitia</div>
                     <div style="font-size:13px;color:var(--lp-on-surface-variant);margin-top:2px;">
-                        Bukti {{ $payMethod === 'cash' ? 'kuitansi tunai' : 'transfer' }} Anda sedang ditinjau panitia. Estimasi maks. 1x24 jam kerja. Akses formulir akan terbuka otomatis setelah disetujui.
+                        Bukti {{ $payMethod === 'cash' ? 'kuitansi tunai' : 'transfer' }} Anda sedang ditinjau panitia. Jadwal verifikasi pembayaran registrasi: <strong>dari jam 07.30 – 16.00 WIB</strong>. Akses formulir akan terbuka otomatis setelah disetujui.
                     </div>
                 </div>
                 @if(!empty($paymentProof))
@@ -361,7 +386,7 @@
             </div>
 
             <!-- Form Kirim Ulang Bukti jika diperlukan -->
-            <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem 1.25rem;">
+            <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data" class="payment-upload-form" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem 1.25rem;">
                 @csrf
                 <input type="hidden" name="payment_method" value="{{ $payMethod }}">
                 <div style="font-size:13px;font-weight:700;color:var(--lp-on-surface);margin-bottom:4px;">Perlu mengirim ulang berkas bukti?</div>
@@ -370,8 +395,8 @@
                 </div>
                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                     <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required style="flex:1;min-width:200px;font-size:13px;padding:8px 12px;border:1.5px solid var(--lp-surface-container);border-radius:10px;background:#fff;font-family:inherit;">
-                    <button type="submit" class="db-feature-btn db-feature-btn-outline" style="font-size:12px;padding:8px 14px;">
-                        <span class="material-symbols-outlined" style="font-size:16px;">upload</span> Kirim Ulang
+                    <button type="submit" class="db-feature-btn db-feature-btn-outline btn-submit-payment" style="font-size:12px;padding:8px 14px;">
+                        <span class="material-symbols-outlined" style="font-size:16px;">upload</span> <span>Kirim Ulang</span>
                     </button>
                 </div>
             </form>
@@ -402,7 +427,7 @@
                                     <span class="pay-method-radio"></span>
                                 </div>
                                 <div style="font-size:12px;color:var(--lp-on-surface-variant);margin-top:3px;line-height:1.4;">
-                                    Transfer via ATM / m-Banking / Internet Banking ke Rekening Resmi Mandiri a.n. PUTRI MUNAWWAROH.
+                                    Transfer via ATM / m-Banking / Internet Banking ke Rekening Resmi {{ $bank['bank_name'] }} a.n. {{ $bank['account_holder'] }}.
                                 </div>
                             </div>
                         </div>
@@ -420,7 +445,7 @@
                                     <span class="pay-method-radio"></span>
                                 </div>
                                 <div style="font-size:12px;color:var(--lp-on-surface-variant);margin-top:3px;line-height:1.4;">
-                                    Bayar langsung ke Ruang TU / Panitia PPDB di sekolah & minta kuitansi bukti resmi.
+                                    Bayar langsung ke Ruang TU / Panitia SPMB di sekolah & minta kuitansi bukti resmi.
                                 </div>
                             </div>
                         </div>
@@ -432,22 +457,33 @@
             <div id="payTransferGuide" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:0.85rem 1.15rem;margin-bottom:1.25rem;font-size:13px;color:#1e40af;display:{{ $payMethod === 'cash' ? 'none' : 'flex' }};align-items:flex-start;gap:10px;">
                 <span class="material-symbols-outlined" style="font-size:20px;flex-shrink:0;color:#2563eb;margin-top:2px;">info</span>
                 <div>
-                    <strong>Instruksi Transfer:</strong> Silakan transfer <strong>Rp 400.000</strong> ke Rekening Mandiri <code>1730004960275</code> a.n. <strong>PUTRI MUNAWWAROH</strong>. Simpan struk fisik ATM atau screenshot m-Banking Anda, lalu unggah di bawah ini.
+                    <strong>Instruksi Transfer:</strong> Silakan transfer <strong>Rp 400.000</strong> ke Rekening {{ $bank['bank_name'] }} <code>{{ $bank['account_number'] }}</code> a.n. <strong>{{ $bank['account_holder'] }}</strong>. Simpan struk fisik ATM atau screenshot m-Banking Anda, lalu unggah di bawah ini.
                 </div>
             </div>
 
             <div id="payCashGuide" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:0.85rem 1.15rem;margin-bottom:1.25rem;font-size:13px;color:#166534;display:{{ $payMethod === 'cash' ? 'flex' : 'none' }};align-items:flex-start;gap:10px;">
                 <span class="material-symbols-outlined" style="font-size:20px;flex-shrink:0;color:#16a34a;margin-top:2px;">storefront</span>
                 <div>
-                    <strong>Instruksi Bayar Tunai:</strong> Lakukan pembayaran tunai <strong>Rp 400.000</strong> langsung di Loket Tata Usaha / Panitia PPDB SMPS2 Al-Muhajirin. Pastikan Anda menerima <strong>Kuitansi Fisik Resmi</strong> bertanda tangan bendahara/panitia, lalu foto kuitansi tersebut dan unggah di bawah ini.
+                    <strong>Instruksi Bayar Tunai:</strong> Lakukan pembayaran tunai <strong>Rp 400.000</strong> langsung di Loket Tata Usaha / Panitia SPMB SMPS2 Al-Muhajirin. Pastikan Anda menerima <strong>Kuitansi Fisik Resmi</strong> bertanda tangan bendahara/panitia, lalu foto kuitansi tersebut dan unggah di bawah ini.
                 </div>
             </div>
 
             <!-- Form Upload Bukti Pembayaran -->
-            <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data" id="paymentUploadForm">
+            <form action="{{ route('ppdb.upload-payment') }}" method="POST" enctype="multipart/form-data" id="paymentUploadForm" class="payment-upload-form">
                 @csrf
                 <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="{{ $payMethod }}">
-                
+
+                <div id="senderFields" style="display:{{ $payMethod === 'cash' ? 'none' : 'grid' }};grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:1.25rem;">
+                    <div>
+                        <label style="font-size:13px;font-weight:700;color:var(--lp-on-surface);margin-bottom:6px;display:block;">Nama Bank Pengirim <span class="text-danger">*</span></label>
+                        <input type="text" name="sender_bank_name" value="{{ old('sender_bank_name') }}" maxlength="100" placeholder="Contoh: BCA, BRI, BNI" class="form-control" {{ $payMethod === 'cash' ? '' : 'required' }}>
+                    </div>
+                    <div>
+                        <label style="font-size:13px;font-weight:700;color:var(--lp-on-surface);margin-bottom:6px;display:block;">Nama Pengirim <span class="text-danger">*</span></label>
+                        <input type="text" name="sender_name" value="{{ old('sender_name') }}" maxlength="150" placeholder="Nama pemilik rekening pengirim" class="form-control" {{ $payMethod === 'cash' ? '' : 'required' }}>
+                    </div>
+                </div>
+
                 <label style="font-size: 13px; font-weight: 700; color: var(--lp-on-surface); margin-bottom: 8px; display: block;">
                     2. Unggah Bukti Pembayaran: <span class="text-danger">*</span> (Wajib Diunggah)
                 </label>
@@ -460,7 +496,7 @@
                         {{ $payMethod === 'cash' ? 'Klik atau seret foto kuitansi tunai ke sini' : 'Klik atau seret bukti transfer ke sini' }}
                     </div>
                     <div id="payUploadHint" style="font-size:13px;color:var(--lp-on-surface-variant);">
-                        {{ $payMethod === 'cash' ? 'Foto kuitansi fisik resmi pembayaran tunai dari panitia PPDB' : 'Foto struk ATM, screenshot m-Banking, atau PDF slip setoran' }}
+                        {{ $payMethod === 'cash' ? 'Foto kuitansi fisik resmi pembayaran tunai dari panitia SPMB' : 'Foto struk ATM, screenshot m-Banking, atau PDF slip setoran' }}
                     </div>
                     <div style="font-size:11px;color:var(--lp-outline);margin-top:6px;">Format: JPG, PNG, WEBP, PDF — Maks. 5MB</div>
                     <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required style="display:none;" onchange="this.closest('form').querySelector('.upload-filename').textContent = this.files[0]?.name || '';">
@@ -468,8 +504,8 @@
 
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;flex-wrap:wrap;gap:8px;">
                     <span class="upload-filename" style="font-size:13px;color:var(--lp-primary);font-weight:600;"></span>
-                    <button type="submit" class="db-feature-btn db-feature-btn-primary">
-                        <span class="material-symbols-outlined" style="font-size:16px;">upload</span>
+                    <button type="submit" class="db-feature-btn db-feature-btn-primary btn-submit-payment" id="btnSubmitPayment">
+                        <span class="material-symbols-outlined" id="paySubmitBtnIcon" style="font-size:16px;">upload</span>
                         <span id="paySubmitBtnText">{{ $payMethod === 'cash' ? 'Unggah Kuitansi Tunai' : 'Unggah Bukti Transfer' }}</span>
                     </button>
                 </div>
@@ -531,7 +567,7 @@
             </div>
 
             {{-- Card 2: Upload Berkas (WAJIB) --}}
-            <div class="db-feature-card {{ $isAllDocs ? 'completed' : '' }} {{ $paymentStatus !== 'paid' ? 'locked' : '' }}">
+            <div class="db-feature-card {{ $isAllDocs ? 'completed' : '' }} {{ ($paymentStatus !== 'paid' || !$isFormFilled) ? 'locked' : '' }}">
                 <div class="db-feature-icon" style="background:var(--lp-yellow);color:#451a03;">
                     <span class="material-symbols-outlined">cloud_upload</span>
                 </div>
@@ -539,7 +575,7 @@
                     <span class="material-symbols-outlined" style="font-size:12px;">priority_high</span>
                     WAJIB UPLOAD
                 </div>
-                <h4>Upload Berkas Softfile</h4>
+                <h4>Upload Berkas</h4>
                 <p>Unggah scan/foto KK, Akta Kelahiran, NISN, dan Pas Foto digital 3x4 berformat JPG/PNG/PDF.</p>
 
                 @if($paymentStatus !== 'paid')
@@ -547,6 +583,15 @@
                         <span class="material-symbols-outlined" style="font-size:16px;">lock</span>
                         Terkunci — Selesaikan pembayaran di atas
                     </div>
+                @elseif(!$isFormFilled)
+                    <div class="db-feature-status" style="background:var(--lp-surface-subtle);color:var(--lp-outline);">
+                        <span class="material-symbols-outlined" style="font-size:16px;">lock</span>
+                        Terkunci — Isi formulir pendaftaran dahulu
+                    </div>
+                    <a href="{{ route('ppdb.form') }}" class="db-feature-btn db-feature-btn-outline" style="font-size:12px;margin-top:6px;">
+                        <span class="material-symbols-outlined" style="font-size:16px;">edit_note</span>
+                        Isi Formulir Dahulu
+                    </a>
                 @elseif($isAllDocs)
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                         <div class="db-feature-status" style="background:var(--lp-green-light);color:var(--lp-green);">
@@ -636,7 +681,7 @@
             <span class="material-symbols-outlined" style="font-size:26px;color:var(--lp-red);">cancel</span>
             <div>
                 <div style="font-weight:700;font-size:15px;color:var(--lp-red);">Tidak Lolos Seleksi</div>
-                <div style="font-size:13px;color:var(--lp-on-surface-variant);">Keputusan resmi dewan panitia PPDB. Silakan hubungi panitia untuk informasi lebih lanjut.</div>
+                <div style="font-size:13px;color:var(--lp-on-surface-variant);">Keputusan resmi dewan panitia SPMB. Silakan hubungi panitia untuk informasi lebih lanjut.</div>
             </div>
         </div>
     @endif
@@ -714,7 +759,16 @@
             <div class="db-announcement-header-icon">
                 <span class="material-symbols-outlined" style="font-size:20px;">campaign</span>
             </div>
-            <h3>Pengumuman Panitia PPDB</h3>
+            <h3>Pengumuman Panitia SPMB</h3>
+        </div>
+        <div class="db-announcement-item">
+            <div class="db-announcement-meta">
+                <span class="material-symbols-outlined" style="font-size:14px;">schedule</span> Layanan Harian
+                <span style="margin:0 4px;">•</span>
+                <span style="color:var(--lp-primary);">Jam Operasional</span>
+            </div>
+            <h4>Jadwal Verifikasi Pembayaran Registrasi</h4>
+            <p>Verifikasi bukti pembayaran registrasi calon murid baru diproses panitia <strong>dari jam 07.30 – 16.00 WIB</strong>. Apabila Anda mengirim bukti di luar jam tersebut, verifikasi akan dilanjutkan pada jam operasional berikutnya.</p>
         </div>
         <div class="db-announcement-item">
             <div class="db-announcement-meta">
@@ -722,8 +776,8 @@
                 <span style="margin:0 4px;">•</span>
                 <span style="color:var(--lp-primary);">Informasi Penting</span>
             </div>
-            <h4>Jadwal Asesmen & Observasi Calon Santri Baru</h4>
-            <p>Jadwal asesmen minat bakat dan wawancara santri baru akan diinformasikan melalui portal ini dan WhatsApp setelah proses verifikasi berkas selesai. Pastikan nomor WhatsApp Anda aktif.</p>
+            <h4>Jadwal Asesmen & Observasi Calon Murid Baru</h4>
+            <p>Jadwal asesmen minat bakat dan wawancara murid baru akan diinformasikan melalui portal ini dan WhatsApp setelah proses verifikasi berkas selesai. Pastikan nomor WhatsApp Anda aktif.</p>
         </div>
         <div class="db-announcement-item">
             <div class="db-announcement-meta">
@@ -731,7 +785,7 @@
                 <span style="margin:0 4px;">•</span>
                 <span style="color:var(--lp-green);">Panduan</span>
             </div>
-            <h4>Pastikan Berkas Softfile Lengkap & Terbaca Jelas</h4>
+            <h4>Pastikan Berkas Lengkap & Terbaca Jelas</h4>
             <p>Scan/foto Kartu Keluarga, Akta Kelahiran, NISN, dan Pas Foto harus dalam format JPG/PNG/PDF dengan ukuran maksimal 5MB. Pastikan semua teks pada dokumen terbaca dengan jelas.</p>
         </div>
         <div class="db-announcement-item">
@@ -740,8 +794,8 @@
                 <span style="margin:0 4px;">•</span>
                 <span style="color:var(--lp-yellow-dark);">Bantuan</span>
             </div>
-            <h4>Butuh Bantuan? Hubungi Panitia PPDB</h4>
-            <p>Untuk pertanyaan teknis seputar pengisian formulir atau upload berkas, hubungi panitia PPDB melalui WhatsApp di <strong>0878-2105-5283</strong> atau <strong>0878-2228-2012</strong>.</p>
+            <h4>Butuh Bantuan? Hubungi Panitia SPMB</h4>
+            <p>Untuk pertanyaan teknis seputar pengisian formulir atau upload berkas, hubungi panitia SPMB melalui WhatsApp di <strong>0878-2105-5283</strong> atau <strong>0878-2228-2012</strong>.</p>
         </div>
     </div>
 
@@ -750,9 +804,48 @@
 
 @push('scripts')
 <script>
+    @if($paymentStatus === 'pending_verification')
+    (function () {
+        var current = 'pending_verification';
+        var timer = setInterval(check, 10000);
+
+        function check() {
+            if (document.hidden) return;
+            fetch(@json(route('ppdb.payment-status')), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (d) {
+                    if (!d || d.payment_status === current) return;
+                    if (d.payment_status !== 'paid' && d.payment_status !== 'rejected') return;
+                    clearInterval(timer);
+                    showBanner(d.payment_status);
+                    setTimeout(function () { window.location.reload(); }, 2500);
+                })
+                .catch(function () {});
+        }
+
+        function showBanner(status) {
+            var ok = status === 'paid';
+            var el = document.createElement('div');
+            el.setAttribute('role', 'status');
+            el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;padding:14px 22px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.18);color:#fff;background:' + (ok ? '#16a34a' : '#dc2626');
+            el.textContent = ok
+                ? 'Pembayaran Anda telah terverifikasi! Memuat ulang halaman...'
+                : 'Bukti pembayaran ditolak panitia. Memuat ulang halaman...';
+            document.body.appendChild(el);
+        }
+
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+    })();
+    @endif
     function selectPaymentMethod(method) {
         var inputMethod = document.getElementById('selectedPaymentMethod');
         if (inputMethod) inputMethod.value = method;
+
+        var senderBox = document.getElementById('senderFields');
+        if (senderBox) {
+            senderBox.style.display = method === 'cash' ? 'none' : 'grid';
+            senderBox.querySelectorAll('input').forEach(function(i) { i.required = method !== 'cash'; });
+        }
 
         var cards = document.querySelectorAll('.pay-method-card');
         cards.forEach(function(card) {
@@ -777,7 +870,7 @@
             if (guideTf) guideTf.style.display = 'none';
             if (guideCash) guideCash.style.display = 'flex';
             if (uploadTitle) uploadTitle.textContent = 'Klik atau seret foto kuitansi tunai ke sini';
-            if (uploadHint) uploadHint.textContent = 'Foto kuitansi fisik resmi pembayaran tunai dari panitia PPDB';
+            if (uploadHint) uploadHint.textContent = 'Foto kuitansi fisik resmi pembayaran tunai dari panitia SPMB';
             if (submitBtnText) submitBtnText.textContent = 'Unggah Kuitansi Tunai (Cash)';
         } else {
             if (infoTf) infoTf.style.display = 'block';
@@ -789,5 +882,38 @@
             if (submitBtnText) submitBtnText.textContent = 'Unggah Bukti Transfer (TF)';
         }
     }
+
+    // Mencegah double-click submit berkas & feedback visual 'Mengunggah...'
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.payment-upload-form').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (form.dataset.submitting === 'true') {
+                    e.preventDefault();
+                    return false;
+                }
+
+                form.dataset.submitting = 'true';
+
+                var btn = form.querySelector('.btn-submit-payment') || form.querySelector('button[type="submit"]');
+                var btnText = form.querySelector('#paySubmitBtnText') || (btn ? btn.querySelector('span:not(.material-symbols-outlined)') : null);
+                var btnIcon = form.querySelector('#paySubmitBtnIcon') || (btn ? btn.querySelector('.material-symbols-outlined') : null);
+
+                if (btnText) {
+                    btnText.textContent = 'Mengunggah... Mohon tunggu';
+                }
+                if (btnIcon) {
+                    btnIcon.textContent = 'hourglass_top';
+                }
+
+                setTimeout(function () {
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.75';
+                        btn.style.cursor = 'not-allowed';
+                    }
+                }, 20);
+            });
+        });
+    });
 </script>
 @endpush

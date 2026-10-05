@@ -181,9 +181,9 @@
                 </div>
                 <div class="tc-sign">
                     <div class="tc-sign-date">Purwakarta, {{ date('d M Y') }}</div>
-                    <div class="tc-sign-role">Ketua Panitia PPDB</div>
+                    <div class="tc-sign-role">Ketua Panitia SPMB</div>
                     <div class="tc-sign-space"></div>
-                    <div class="tc-sign-name">( Panitia PPDB )</div>
+                    <div class="tc-sign-name">( Panitia SPMB )</div>
                     <div class="tc-sign-badge">VERIFIED DIGITAL</div>
                 </div>
             </div>

@@ -63,7 +63,7 @@ class AuthController extends Controller
                 PpdbRegistration::create([
                     'account_id' => $account->id,
                     'payment_status' => 'unpaid',
-                    'payment_amount' => 0.0,
+                    'payment_amount' => 400000.0,
                     'registration_status' => 'pending',
                     'form_data' => [
                         'full_name' => $request->full_name,
@@ -157,7 +157,7 @@ class AuthController extends Controller
                         PpdbRegistration::create([
                             'account_id' => $account->id,
                             'payment_status' => 'unpaid',
-                            'payment_amount' => 0.0,
+                            'payment_amount' => 400000.0,
                             'registration_status' => 'pending',
                             'remote_id' => null,
                             'sync_status' => 'pending',
@@ -195,7 +195,7 @@ class AuthController extends Controller
                     PpdbRegistration::create([
                         'account_id' => $localAccount->id,
                         'payment_status' => 'unpaid',
-                        'payment_amount' => 0.0,
+                        'payment_amount' => 400000.0,
                         'registration_status' => 'pending',
                         'sync_status' => 'pending',
                     ]);

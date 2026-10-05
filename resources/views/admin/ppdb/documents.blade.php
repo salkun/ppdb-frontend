@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', 'Data Berkas PPDB')
+@section('title', 'Data Berkas SPMB')
 @section('header_title', 'Monitoring Kelengkapan Berkas Calon Siswa')
 
 @section('content')
@@ -51,6 +51,7 @@
 <!-- Filter Toolbar Card -->
 <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white p-3 p-md-4">
     <form method="GET" action="{{ route('admin.ppdb.documents') }}" class="row g-2 align-items-center">
+        <input type="hidden" name="per_page" value="{{ $filters['perPage'] ?? 20 }}">
         <!-- Search -->
         <div class="col-12 col-md-6 col-lg-4">
             <div class="input-group">
@@ -95,7 +96,7 @@
     <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill" style="font-size: 12px;">
-                {{ count($documents) }} Data Berkas Siswa
+                {{ $documents->total() }} Data Berkas Siswa
             </span>
             <span class="text-muted small d-none d-sm-inline">Matriks kelengkapan dokumen administratif calon siswa</span>
         </div>
@@ -129,7 +130,7 @@
                     @endphp
                     <tr>
                         <td class="ps-3 ps-md-4 text-center text-muted fw-semibold">
-                            {{ $index + 1 }}
+                            {{ ($documents->firstItem() ?? 1) + $index }}
                         </td>
                         <td>
                             <div class="fw-bold text-dark">{{ $doc['full_name'] }}</div>
@@ -323,5 +324,7 @@
             </tbody>
         </table>
     </div>
+
+    @include('admin.ppdb.partials.pagination', ['paginator' => $documents])
 </div>
 @endsection

@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', 'Data User PPDB')
+@section('title', 'Data User SPMB')
 @section('header_title', 'Data Akun Calon Siswa & Orang Tua')
 
 @section('content')
@@ -144,6 +144,7 @@
         <!-- Form Filter -->
         <div class="col-lg-7">
             <form method="GET" action="{{ route('admin.ppdb.users') }}" class="row g-2 align-items-center">
+                <input type="hidden" name="per_page" value="{{ $filters['perPage'] ?? 20 }}">
                 <!-- Search Input -->
                 <div class="col-12 col-sm-7">
                     <div class="input-group">
@@ -214,7 +215,7 @@
     <div class="card-header bg-white border-bottom py-3 px-3 px-md-4 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill" style="font-size: 12px;">
-                {{ count($users) }} Data Akun Ditampilkan
+                {{ $users->total() }} Data Akun Terdaftar
             </span>
             <span class="text-muted small d-none d-md-inline">Seluruh akun memiliki akses masuk ke portal pendaftaran siswa</span>
         </div>
@@ -248,7 +249,7 @@
                     @endphp
                     <tr>
                         <td class="ps-3 ps-md-4 text-center text-muted fw-semibold">
-                            {{ $index + 1 }}
+                            {{ ($users->firstItem() ?? 1) + $index }}
                         </td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
@@ -349,7 +350,8 @@
                                             email: '{{ addslashes($u['email']) }}',
                                             nik: '{{ addslashes($u['nik']) }}',
                                             phone: '{{ addslashes($u['phone'] ?? '') }}',
-                                            payment: '{{ $u['payment_status'] }}'
+                                            payment: '{{ $u['payment_status'] }}',
+                                            payment_amount: '{{ isset($u['payment_amount']) && $u['payment_amount'] !== '' && $u['payment_amount'] !== null ? (int)$u['payment_amount'] : 400000 }}'
                                         })">
                                     <span class="material-symbols-outlined" style="font-size:17px;">edit</span>
                                 </button>
@@ -394,6 +396,8 @@
             </tbody>
         </table>
     </div>
+
+    @include('admin.ppdb.partials.pagination', ['paginator' => $users])
 </div>
 
 <!-- ========================================================
@@ -580,9 +584,27 @@
                         <select class="form-select" name="payment_status" id="editUserPayment" required>
                             <option value="unpaid">Belum Membayar (Unpaid)</option>
                             <option value="pending_verification">Perlu Verifikasi Bukti Transfer</option>
-                            <option value="paid">Lunas (Rp 400.000 Tervalidasi)</option>
+                            <option value="paid">Lunas (Tervalidasi)</option>
                             <option value="rejected">Ditolak</option>
                         </select>
+                    </div>
+
+                    <!-- Nominal Biaya Pendaftaran -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-dark">Nominal Biaya Pendaftaran (Rp)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light">Rp</span>
+                            <input type="number" 
+                                   class="form-control" 
+                                   name="payment_amount" 
+                                   id="editUserPaymentAmount" 
+                                   value="400000" 
+                                   step="1000" 
+                                   min="0">
+                        </div>
+                        <div class="form-text small" style="font-size: 11px;">
+                            Isi <strong>0</strong> jika pendaftar lolos jalur prestasi / beasiswa (bebas biaya).
+                        </div>
                     </div>
 
                     <!-- Reset / Ubah Password (Opsional) -->
@@ -663,7 +685,7 @@
                         Anda akan menghapus akun atas nama <strong class="text-dark" id="deleteUserName"></strong> (<span id="deleteUserEmail"></span>).
                     </p>
                     <div class="alert alert-danger p-2 small mb-0 text-start">
-                        <strong>Perhatian:</strong> Tindakan ini permanen. Seluruh data biodata formulir, bukti pembayaran, dan akses akun pendaftar akan dihapus secara permanen dari sistem PPDB.
+                        <strong>Perhatian:</strong> Tindakan ini permanen. Seluruh data biodata formulir, bukti pembayaran, dan akses akun pendaftar akan dihapus secara permanen dari sistem SPMB.
                     </div>
                 </div>
 
@@ -807,6 +829,13 @@ function openEditUserModal(user) {
     document.getElementById('editUserNik').value = user.nik && user.nik !== '-' ? user.nik : '';
     document.getElementById('editUserPhone').value = user.phone || '';
     document.getElementById('editUserPayment').value = user.payment || 'unpaid';
+    
+    const payAmtInput = document.getElementById('editUserPaymentAmount');
+    if (payAmtInput) {
+        payAmtInput.value = (user.payment_amount !== undefined && user.payment_amount !== null && user.payment_amount !== '') 
+            ? user.payment_amount 
+            : (user.payment === 'paid' ? 400000 : 0);
+    }
     
     // Reset password field
     const passInput = document.getElementById('editUserPassword');

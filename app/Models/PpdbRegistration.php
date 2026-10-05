@@ -20,6 +20,8 @@ class PpdbRegistration extends Model
         'account_id',
         'payment_status',
         'payment_method',
+        'sender_bank_name',
+        'sender_name',
         'payment_amount',
         'payment_proof_path',
         'payment_verified_at',

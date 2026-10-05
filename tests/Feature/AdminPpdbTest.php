@@ -20,7 +20,7 @@ class AdminPpdbTest extends TestCase
         $response = $this->get('/admin/login');
         $response->assertStatus(200);
         $response->assertSee('SMPS2 Al-Muhajirin');
-        $response->assertSee('panitia PPDB');
+        $response->assertSee('panitia SPMB');
     }
 
     /**

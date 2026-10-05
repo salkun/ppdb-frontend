@@ -136,6 +136,7 @@ class PpdbFlowTest extends TestCase
                 'form_data' => [
                     'full_name' => 'Ahmad Fauzi',
                     'nik' => '3201012345670001',
+                    'major' => 'reguler',
                     'documents' => [
                         'kk' => 'uploads/ppdb_documents/kk.pdf',
                         'akta' => 'uploads/ppdb_documents/akta.jpg',
@@ -431,7 +432,11 @@ class PpdbFlowTest extends TestCase
                 'id' => 'mock-reg-id-999',
                 'payment_status' => 'paid',
                 'registration_status' => 'pending',
-                'form_data' => null,
+                'form_data' => [
+                    'full_name' => 'Ahmad Fauzi',
+                    'nik' => '3201012345670001',
+                    'major' => 'reguler',
+                ],
             ], 200),
         ]);
 
@@ -454,7 +459,11 @@ class PpdbFlowTest extends TestCase
                 'id' => 'mock-reg-id-999',
                 'payment_status' => 'paid',
                 'registration_status' => 'pending',
-                'form_data' => null,
+                'form_data' => [
+                    'full_name' => 'Ahmad Fauzi',
+                    'nik' => '3201012345670001',
+                    'major' => 'reguler',
+                ],
             ], 200),
             '*/api/ppdb/registrations/*' => Http::response([
                 'status' => 'success',
@@ -485,7 +494,11 @@ class PpdbFlowTest extends TestCase
                 'id' => 'mock-reg-id-999',
                 'payment_status' => 'paid',
                 'registration_status' => 'pending',
-                'form_data' => null,
+                'form_data' => [
+                    'full_name' => 'Ahmad Fauzi',
+                    'nik' => '3201012345670001',
+                    'major' => 'reguler',
+                ],
             ], 200),
         ]);
 
@@ -533,6 +546,8 @@ class PpdbFlowTest extends TestCase
             'email' => $account->email,
         ])->post('/ppdb/upload-payment', [
             'payment_method' => 'transfer',
+            'sender_bank_name' => 'BCA',
+            'sender_name' => 'Siswa Transfer Bank',
             'file' => $file,
         ]);
 

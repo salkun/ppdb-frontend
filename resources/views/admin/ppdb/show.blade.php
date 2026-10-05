@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('title', 'Dossier Pendaftar — ' . ($account['full_name'] ?? 'Calon Siswa'))
-@section('header_title', 'Dossier Calon Peserta Didik')
+@section('header_title', 'Dossier Calon Murid')
 
 @section('content')
 
@@ -10,7 +10,7 @@
     $rStatus = $registration['registration_status'] ?? 'pending';
     $paymentProof = $registration['payment_proof_path'] ?? null;
     $hasProof = !empty($paymentProof);
-    $hasForm = !empty($formData);
+    $hasForm = ppdb_is_form_filled($registration);
 
     // Dictionaries for human-readable labels
     $educationList = [
@@ -180,7 +180,17 @@
                     <span class="material-symbols-outlined text-primary" style="font-size:20px;">payments</span>
                     Biaya & Pembayaran
                 </h6>
-                <span class="badge bg-primary-subtle text-primary fw-semibold">Rp 400.000</span>
+                @php
+                    $regPayAmount = isset($registration['payment_amount']) && $registration['payment_amount'] !== '' && $registration['payment_amount'] !== null ? (float)$registration['payment_amount'] : 400000;
+                @endphp
+                @if($regPayAmount == 0 && ($registration['payment_status'] ?? '') === 'paid')
+                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold d-inline-flex align-items-center gap-1">
+                        <span class="material-symbols-outlined" style="font-size:14px;">workspace_premium</span>
+                        Rp 0 (Jalur Prestasi)
+                    </span>
+                @else
+                    <span class="badge bg-primary-subtle text-primary fw-semibold">Rp {{ number_format($regPayAmount, 0, ',', '.') }}</span>
+                @endif
             </div>
             <div class="card-body p-3 px-md-4">
                 @php
@@ -202,6 +212,13 @@
                         </span>
                     @endif
                 </div>
+
+                @if($payMethod !== 'cash' && (!empty($registration['sender_bank_name']) || !empty($registration['sender_name'])))
+                    <div class="mb-3 p-2 rounded-3 bg-light border small">
+                        <div class="d-flex justify-content-between"><span class="text-muted fw-bold text-uppercase">Bank Pengirim</span><span class="fw-semibold">{{ $registration['sender_bank_name'] ?? '-' }}</span></div>
+                        <div class="d-flex justify-content-between mt-1"><span class="text-muted fw-bold text-uppercase">Nama Pengirim</span><span class="fw-semibold">{{ $registration['sender_name'] ?? '-' }}</span></div>
+                    </div>
+                @endif
 
                 <!-- Struk Transfer / Kuitansi Tunai Preview -->
                 <div class="mb-3">
@@ -276,7 +293,10 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-muted small fw-bold text-uppercase mb-1">Nominal Terverifikasi (Rp)</label>
-                        <input type="number" class="form-control form-control-sm" name="payment_amount" value="{{ (int)($registration['payment_amount'] ?: 400000) }}" required>
+                        <input type="number" class="form-control form-control-sm" name="payment_amount" value="{{ (int)(isset($registration['payment_amount']) && $registration['payment_amount'] !== '' && $registration['payment_amount'] !== null ? $registration['payment_amount'] : 400000) }}" min="0" step="1000" required>
+                        <div class="form-text small" style="font-size: 11px;">
+                            Isi <strong>0</strong> jika pendaftar lolos melalui jalur prestasi / beasiswa (bebas biaya).
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-sm w-100 fw-semibold">
                         Simpan Status Pembayaran

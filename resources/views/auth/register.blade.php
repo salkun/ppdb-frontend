@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pendaftaran Akun Baru PMB — SMPS2 Al-Muhajirin')
+@section('title', 'Pendaftaran Akun Baru SPMB — SMPS2 Al-Muhajirin')
 
 @section('content')
 <div class="lp-auth-page" style="font-family: var(--font-landing);">
@@ -20,11 +20,11 @@
                         Pendaftaran Siswa Baru
                     </span>
                     <span class="lp-badge lp-badge-yellow" style="font-size: 11.5px;">
-                        PMB TP 2027–2028
+                        SPMB TP 2027–2028
                     </span>
                 </div>
-                <h1 class="lp-auth-title">Buat Akun PMB Online</h1>
-                <p class="lp-auth-subtitle">Lengkapi formulir singkat berikut untuk membuat akun pendaftaran calon santri baru.</p>
+                <h1 class="lp-auth-title">Buat Akun SPMB Online</h1>
+                <p class="lp-auth-subtitle">Lengkapi formulir singkat berikut untuk membuat akun pendaftaran calon murid baru.</p>
             </div>
 
             @if(session('error'))
@@ -135,7 +135,7 @@
                     Sudah memiliki akun pendaftaran sebelumnya?
                 </span>
                 <a href="{{ route('login') }}" style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; color: var(--lp-primary); text-decoration: none;">
-                    <span>Masuk ke Akun Portal Santri</span>
+                    <span>Masuk ke Akun Portal Murid</span>
                     <span class="material-symbols-outlined" style="font-size: 16px;">login</span>
                 </a>
             </div>

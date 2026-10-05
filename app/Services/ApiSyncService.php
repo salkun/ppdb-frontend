@@ -263,7 +263,7 @@ class ApiSyncService
                 $payEndpoint = $this->backendUrl() . '/api/ppdb/verify-payment/' . $remoteRegId;
                 $payRes = $client->put($payEndpoint, [
                     'payment_status' => 'paid',
-                    'payment_amount' => (float) ($registration->payment_amount ?: 400000.0),
+                    'payment_amount' => (float) (isset($registration->payment_amount) && $registration->payment_amount !== null && $registration->payment_amount !== '' ? $registration->payment_amount : 400000.0),
                 ]);
 
                 if ($payRes->successful()) {

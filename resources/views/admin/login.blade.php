@@ -295,11 +295,11 @@
             <div>
                 <span class="adm-status-badge">
                     <span class="adm-status-dot"></span>
-                    PANEL OPERATOR SIAKAD &amp; PMB
+                    PANEL OPERATOR SIAKAD &amp; SPMB
                 </span>
             </div>
             <h1 class="adm-title">SMPS2 Al-Muhajirin</h1>
-            <p class="adm-subtitle">Portal login khusus panitia PPDB dan staf tata usaha terotorisasi.</p>
+            <p class="adm-subtitle">Portal login khusus panitia SPMB dan staf tata usaha terotorisasi.</p>
         </div>
 
         @if(session('error'))
@@ -382,7 +382,7 @@
         <div class="adm-footer">
             <a href="{{ route('home') }}" class="adm-back-link">
                 <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>
-                <span>Kembali ke Beranda Utama PPDB</span>
+                <span>Kembali ke Beranda Utama SPMB</span>
             </a>
             <div class="mt-3" style="font-size: 11px; color: #64748b;">
                 Akses terenkripsi &bull; SMPS2 Al-Muhajirin Purwakarta

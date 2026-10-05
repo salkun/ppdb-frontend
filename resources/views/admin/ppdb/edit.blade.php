@@ -1,13 +1,14 @@
 @extends('admin.layout')
 
 @section('title', 'Edit Data Pendaftar — ' . ($account['full_name'] ?? 'Calon Siswa'))
-@section('header_title', 'Edit Data Calon Peserta Didik')
+@section('header_title', 'Edit Data Calon Murid')
 
 @section('content')
 @php
     $pStatus = old('payment_status', $registration['payment_status'] ?? 'unpaid');
     $rStatus = old('registration_status', $registration['registration_status'] ?? 'pending');
-    $pAmount = old('payment_amount', $registration['payment_amount'] ?? 400000);
+    $rawAmount = isset($registration['payment_amount']) && $registration['payment_amount'] !== '' && $registration['payment_amount'] !== null ? $registration['payment_amount'] : 400000;
+    $pAmount = old('payment_amount', $rawAmount);
     $major = old('major', $formData['major'] ?? '');
     $gender = old('gender', $formData['identity']['gender'] ?? ($formData['gender'] ?? ''));
     $dob = old('date_of_birth', $formData['identity']['date_of_birth'] ?? ($formData['date_of_birth'] ?? ''));
@@ -345,6 +346,9 @@
                                value="{{ (int) $pAmount }}" 
                                step="1000" 
                                min="0">
+                    </div>
+                    <div class="form-text small" style="font-size: 11.5px;">
+                        Setel <strong>0</strong> untuk jalur prestasi, beasiswa, atau pembebasan biaya pendaftaran.
                     </div>
                 </div>
 
