@@ -756,4 +756,26 @@ class TelegramNotificationService
             ];
         }
     }
+
+    /**
+     * Mengirim pesan teks kustom ke Telegram panitia (misal notifikasi backup).
+     */
+    public function sendCustomMessage(string $text): bool
+    {
+        if (!$this->isConfigured()) {
+            return false;
+        }
+
+        try {
+            $response = Http::timeout(10)->post("https://api.telegram.org/bot{$this->botToken}/sendMessage", [
+                'chat_id' => $this->chatId,
+                'text' => $text,
+                'parse_mode' => 'Markdown',
+            ]);
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::error('Telegram Custom Message Error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

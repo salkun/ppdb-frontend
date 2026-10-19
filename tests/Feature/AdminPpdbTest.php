@@ -125,6 +125,104 @@ class AdminPpdbTest extends TestCase
     }
 
     /**
+     * Test admin dashboard renders school origin chart and stats.
+     */
+    public function test_admin_dashboard_renders_school_origin_chart_and_stats(): void
+    {
+        Http::fake([
+            '*/api/ppdb/registrations*' => Http::response([
+                [
+                    'id' => 'reg-uuid-1',
+                    'account_id' => 'acc-uuid-1',
+                    'payment_status' => 'paid',
+                    'payment_amount' => 400000.0,
+                    'registration_status' => 'accepted',
+                    'form_data' => [
+                        'school_origin' => 'SD Negeri 1 Purwakarta',
+                        'major' => 'reguler',
+                        'identity' => ['gender' => 'Laki-laki'],
+                    ],
+                    'created_at' => '2026-09-08T10:00:00Z',
+                    'account' => [
+                        'nik' => '3201012345670001',
+                        'full_name' => 'Budi Santoso',
+                        'email' => 'budi@example.com',
+                    ],
+                ],
+                [
+                    'id' => 'reg-uuid-2',
+                    'account_id' => 'acc-uuid-2',
+                    'payment_status' => 'paid',
+                    'payment_amount' => 400000.0,
+                    'registration_status' => 'accepted',
+                    'form_data' => [
+                        'school_origin' => 'sd negeri 1 purwakarta',
+                        'major' => 'tahfidz',
+                        'identity' => ['gender' => 'Perempuan'],
+                    ],
+                    'created_at' => '2026-09-08T11:00:00Z',
+                    'account' => [
+                        'nik' => '3201012345670002',
+                        'full_name' => 'Siti Nurhaliza',
+                        'email' => 'siti@example.com',
+                    ],
+                ],
+                [
+                    'id' => 'reg-uuid-3',
+                    'account_id' => 'acc-uuid-3',
+                    'payment_status' => 'pending_verification',
+                    'payment_amount' => 400000.0,
+                    'registration_status' => 'pending',
+                    'form_data' => [
+                        'school_origin' => 'MIS Al-Muhajirin',
+                        'major' => 'bahasa',
+                        'gender' => 'Perempuan',
+                    ],
+                    'created_at' => '2026-09-08T12:00:00Z',
+                    'account' => [
+                        'nik' => '3201012345670003',
+                        'full_name' => 'Dewi Lestari',
+                        'email' => 'dewi@example.com',
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->withSession([
+            'admin_api_token' => 'admin-jwt-token-12345',
+            'is_admin' => true,
+        ])->get('/admin/ppdb');
+
+        $response->assertStatus(200);
+        $response->assertSee('Grafik Pendaftar Berdasarkan Asal Sekolah');
+        $response->assertSee('schoolOriginChart');
+        $response->assertSee('majorChart');
+        $response->assertSee('genderChart');
+        $response->assertSee('Grafik Peminatan Jurusan');
+        $response->assertSee('Grafik Laki-laki vs Perempuan');
+        $response->assertSee('SD Negeri 1 Purwakarta');
+        $response->assertSee('MIS Al-Muhajirin');
+        $response->assertSee('Peringkat Asal Sekolah');
+        $response->assertViewHas('schoolStats', function ($stats) {
+            return isset($stats['total_unique'])
+                && $stats['total_unique'] === 2
+                && $stats['total_filled'] === 3
+                && ($stats['all']['SD Negeri 1 Purwakarta'] ?? 0) === 2
+                && ($stats['all']['MIS Al-Muhajirin'] ?? 0) === 1;
+        });
+        $response->assertViewHas('majorCounts', function ($counts) {
+            return ($counts['reguler'] ?? 0) === 1
+                && ($counts['tahfidz'] ?? 0) === 1
+                && ($counts['bahasa'] ?? 0) === 1
+                && ($counts['ict'] ?? 0) === 0;
+        });
+        $response->assertViewHas('genderCounts', function ($counts) {
+            return ($counts['laki_laki'] ?? 0) === 1
+                && ($counts['perempuan'] ?? 0) === 2;
+        });
+    }
+
+    /**
      * Test admin can verify payment.
      */
     public function test_admin_verify_payment(): void
@@ -437,6 +535,10 @@ class AdminPpdbTest extends TestCase
             ],
         ]);
 
+        @mkdir(public_path('uploads/ppdb_documents'), 0777, true);
+        file_put_contents(public_path('uploads/ppdb_documents/kk_sample.pdf'), '%PDF-1.4 sample');
+        file_put_contents(public_path('uploads/ppdb_documents/akta_sample.jpg'), 'sample');
+
         try {
             // 1. Cek pada halaman Data Berkas (/admin/ppdb/documents)
             $docResponse = $this->withSession([
@@ -465,6 +567,8 @@ class AdminPpdbTest extends TestCase
             $showResponse->assertSee('uploads/ppdb_documents/kk_sample.pdf');
             $showResponse->assertSee('uploads/ppdb_documents/akta_sample.jpg');
         } finally {
+            @unlink(public_path('uploads/ppdb_documents/kk_sample.pdf'));
+            @unlink(public_path('uploads/ppdb_documents/akta_sample.jpg'));
             $reg->forceDelete();
             $account->forceDelete();
         }
@@ -795,6 +899,105 @@ class AdminPpdbTest extends TestCase
             $this->assertEquals('Meninggal Dunia', $parents[0]['parent']['status_label']);
             $this->assertEquals('cerai', $parents[1]['parent']['status']);
             $this->assertEquals('Wali Sah Santri', $parents[2]['parent']['full_name']);
+        } finally {
+            $reg->forceDelete();
+            $account->forceDelete();
+        }
+    }
+
+    /**
+     * Test admin can delete single document.
+     */
+    public function test_admin_can_delete_single_document(): void
+    {
+        $uniqueEmail = 'del_doc_single_' . uniqid() . '@example.com';
+        $account = PpdbAccount::create([
+            'email' => $uniqueEmail,
+            'full_name' => 'Siswa Single Doc Test',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $reg = PpdbRegistration::create([
+            'account_id' => $account->id,
+            'payment_status' => 'paid',
+            'payment_proof_path' => 'uploads/ppdb_payments/proof_safe.jpg',
+            'form_data' => [
+                'full_name' => 'Siswa Single Doc Test',
+                'documents' => [
+                    'kk' => 'uploads/ppdb_documents/kk_del.pdf',
+                    'akta' => 'uploads/ppdb_documents/akta_keep.jpg',
+                ],
+            ],
+        ]);
+
+        try {
+            $response = $this->withSession([
+                'admin_api_token' => 'admin-jwt-token-12345',
+                'is_admin' => true,
+            ])->delete('/admin/ppdb/registrations/' . $reg->id . '/documents/kk');
+
+            $response->assertRedirect();
+            $response->assertSessionHas('success');
+
+            $reg->refresh();
+            $docs = $reg->form_data['documents'] ?? [];
+            $this->assertArrayNotHasKey('kk', $docs);
+            $this->assertEquals('uploads/ppdb_documents/akta_keep.jpg', $docs['akta'] ?? null);
+            $this->assertEquals('uploads/ppdb_payments/proof_safe.jpg', $reg->payment_proof_path);
+            $this->assertEquals('paid', $reg->payment_status);
+        } finally {
+            $reg->forceDelete();
+            $account->forceDelete();
+        }
+    }
+
+    /**
+     * Test admin can delete all 4 student requirement documents simultaneously.
+     */
+    public function test_admin_can_delete_all_four_documents_simultaneously(): void
+    {
+        $uniqueEmail = 'del_all_docs_' . uniqid() . '@example.com';
+        $account = PpdbAccount::create([
+            'email' => $uniqueEmail,
+            'full_name' => 'Siswa All Docs Test',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $reg = PpdbRegistration::create([
+            'account_id' => $account->id,
+            'payment_status' => 'paid',
+            'payment_proof_path' => 'uploads/ppdb_payments/proof_keep.jpg',
+            'form_data' => [
+                'full_name' => 'Siswa All Docs Test',
+                'documents' => [
+                    'kk' => 'uploads/ppdb_documents/kk_all.pdf',
+                    'akta' => 'uploads/ppdb_documents/akta_all.jpg',
+                    'nisn' => 'uploads/ppdb_documents/nisn_all.jpg',
+                    'foto' => 'uploads/ppdb_documents/foto_all.jpg',
+                ],
+            ],
+        ]);
+
+        try {
+            $response = $this->withSession([
+                'admin_api_token' => 'admin-jwt-token-12345',
+                'is_admin' => true,
+            ])->delete('/admin/ppdb/registrations/' . $reg->id . '/documents/all');
+
+            $response->assertRedirect();
+            $response->assertSessionHas('success');
+
+            $reg->refresh();
+            $docs = $reg->form_data['documents'] ?? [];
+            $this->assertArrayNotHasKey('kk', $docs);
+            $this->assertArrayNotHasKey('akta', $docs);
+            $this->assertArrayNotHasKey('nisn', $docs);
+            $this->assertArrayNotHasKey('foto', $docs);
+
+            // Bukti pembayaran dan status harus tetap utuh!
+            $this->assertEquals('uploads/ppdb_payments/proof_keep.jpg', $reg->payment_proof_path);
+            $this->assertEquals('paid', $reg->payment_status);
+            $this->assertEquals('pending', $reg->sync_status);
         } finally {
             $reg->forceDelete();
             $account->forceDelete();

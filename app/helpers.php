@@ -77,6 +77,59 @@ if (!function_exists('ppdb_doc_url')) {
     }
 }
 
+if (!function_exists('ppdb_file_physically_exists')) {
+    /**
+     * Memeriksa apakah berkas dokumen atau bukti pembayaran benar-benar ada secara fisik di server.
+     * Berguna mendeteksi berkas yang tautannya ada di database tetapi filenya terhapus di cPanel.
+     *
+     * @param string|null $path
+     * @return bool
+     */
+    function ppdb_file_physically_exists(?string $path): bool
+    {
+        if (empty($path)) {
+            return false;
+        }
+
+        // Jika URL eksternal absolut
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return true;
+        }
+
+        $cleanPath = ltrim($path, '/');
+
+        // 1. Cek di direktori public Laravel lokal
+        if (file_exists(public_path($cleanPath))) {
+            return true;
+        }
+
+        // 2. Cek di Document Root cPanel jika berbeda
+        if (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . $cleanPath)) {
+            return true;
+        }
+
+        // 3. Cek di direktori upload berkas & bukti bayar berdasarkan nama file
+        $filename = basename($cleanPath);
+        if (!empty($filename)) {
+            if (file_exists(public_path('uploads/ppdb_documents/' . $filename)) ||
+                (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/uploads/ppdb_documents/' . $filename))) {
+                return true;
+            }
+            if (file_exists(public_path('uploads/ppdb_payments/' . $filename)) ||
+                (!empty($_SERVER['DOCUMENT_ROOT']) && file_exists(rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/uploads/ppdb_payments/' . $filename))) {
+                return true;
+            }
+        }
+
+        // 4. Cek di storage/app/public/
+        if (file_exists(storage_path('app/public/' . $cleanPath))) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('ppdb_get_student_documents')) {
     /**
      * Helper terpadu untuk mengambil data dan status berkas dokumen persyaratan calon siswa.
@@ -113,6 +166,8 @@ if (!function_exists('ppdb_get_student_documents')) {
                 'path' => $kk,
                 'url' => ppdb_doc_url($kk, $backendUrl),
                 'has_file' => !empty($kk),
+                'physically_exists' => !empty($kk) && ppdb_file_physically_exists($kk),
+                'is_missing' => !empty($kk) && !ppdb_file_physically_exists($kk),
                 'ext' => $extKk,
                 'is_image' => in_array($extKk, ['jpg', 'jpeg', 'png', 'webp']),
             ],
@@ -122,6 +177,8 @@ if (!function_exists('ppdb_get_student_documents')) {
                 'path' => $akta,
                 'url' => ppdb_doc_url($akta, $backendUrl),
                 'has_file' => !empty($akta),
+                'physically_exists' => !empty($akta) && ppdb_file_physically_exists($akta),
+                'is_missing' => !empty($akta) && !ppdb_file_physically_exists($akta),
                 'ext' => $extAkta,
                 'is_image' => in_array($extAkta, ['jpg', 'jpeg', 'png', 'webp']),
             ],
@@ -131,6 +188,8 @@ if (!function_exists('ppdb_get_student_documents')) {
                 'path' => $nisn,
                 'url' => ppdb_doc_url($nisn, $backendUrl),
                 'has_file' => !empty($nisn),
+                'physically_exists' => !empty($nisn) && ppdb_file_physically_exists($nisn),
+                'is_missing' => !empty($nisn) && !ppdb_file_physically_exists($nisn),
                 'ext' => $extNisn,
                 'is_image' => in_array($extNisn, ['jpg', 'jpeg', 'png', 'webp']),
             ],
@@ -140,6 +199,8 @@ if (!function_exists('ppdb_get_student_documents')) {
                 'path' => $foto,
                 'url' => ppdb_doc_url($foto, $backendUrl),
                 'has_file' => !empty($foto),
+                'physically_exists' => !empty($foto) && ppdb_file_physically_exists($foto),
+                'is_missing' => !empty($foto) && !ppdb_file_physically_exists($foto),
                 'ext' => $extFoto,
                 'is_image' => in_array($extFoto, ['jpg', 'jpeg', 'png', 'webp']),
             ],
@@ -149,6 +210,8 @@ if (!function_exists('ppdb_get_student_documents')) {
                 'path' => $paymentProof,
                 'url' => ppdb_proof_url($paymentProof, $backendUrl),
                 'has_file' => !empty($paymentProof),
+                'physically_exists' => !empty($paymentProof) && ppdb_file_physically_exists($paymentProof),
+                'is_missing' => !empty($paymentProof) && !ppdb_file_physically_exists($paymentProof),
                 'ext' => $extProof,
                 'is_image' => in_array($extProof, ['jpg', 'jpeg', 'png', 'webp']),
                 'payment_method' => $payMethod,

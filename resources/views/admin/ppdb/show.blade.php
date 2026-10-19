@@ -337,13 +337,15 @@
                         @php $dItem = $docItems[$dKey]; @endphp
                         <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center gap-2 overflow-hidden">
-                                <span class="material-symbols-outlined {{ $dItem['has_file'] ? 'text-success' : 'text-muted' }}" style="font-size: 18px;">
-                                    {{ $dItem['has_file'] ? 'task_alt' : 'radio_button_unchecked' }}
+                                <span class="material-symbols-outlined {{ !empty($dItem['is_missing']) ? 'text-danger' : ($dItem['has_file'] ? 'text-success' : 'text-muted') }}" style="font-size: 18px;">
+                                    {{ !empty($dItem['is_missing']) ? 'error' : ($dItem['has_file'] ? 'task_alt' : 'radio_button_unchecked') }}
                                 </span>
                                 <div>
                                     <div class="fw-semibold text-dark text-truncate" style="font-size: 12.5px;">{{ $dItem['label'] }}</div>
                                     <div class="text-muted" style="font-size: 11px;">
-                                        @if($dItem['has_file'])
+                                        @if(!empty($dItem['is_missing']))
+                                            <span class="text-danger fw-semibold">File Hilang (404)</span>
+                                        @elseif($dItem['has_file'])
                                             <span class="text-success fw-medium">{{ strtoupper($dItem['ext']) }} Terunggah</span>
                                         @else
                                             <span class="text-muted">Belum ada file</span>
@@ -351,7 +353,9 @@
                                     </div>
                                 </div>
                             </div>
-                            @if($dItem['has_file'])
+                            @if(!empty($dItem['is_missing']))
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 10px;">Hilang</span>
+                            @elseif($dItem['has_file'])
                                 <a href="{{ $dItem['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill d-inline-flex align-items-center gap-1" style="font-size: 11px;">
                                     <span class="material-symbols-outlined" style="font-size: 13px;">open_in_new</span>
                                     <span>Buka</span>
@@ -977,20 +981,66 @@
                                     </div>
                                 </div>
                             @endif
-                        </div>
-
-                        <!-- ========================================== -->
+                        </div>                        <!-- ========================================== -->
                         <!-- TAB: BERKAS LAMPIRAN SISWA                 -->
                         <!-- ========================================== -->
                         <div class="tab-pane fade {{ !$hasForm ? 'show active' : '' }}" id="tab-dokumen" role="tabpanel">
+                            @php
+                                $studentWa = $formData['contact']['whatsapp_number'] ?? ($formData['contact']['mobile_number'] ?? ($account->phone ?? ''));
+                                $cleanWa = preg_replace('/[^0-9]/', '', (string)$studentWa);
+                                if (str_starts_with($cleanWa, '0')) {
+                                    $cleanWa = '62' . substr($cleanWa, 1);
+                                }
+
+                                $missingDocsNames = [];
+                                foreach(['kk', 'akta', 'nisn', 'foto'] as $chkKey) {
+                                    if (!empty($docItems[$chkKey]['is_missing']) || empty($docItems[$chkKey]['has_file'])) {
+                                        $missingDocsNames[] = '• ' . $docItems[$chkKey]['label'];
+                                    }
+                                }
+                                $missingDocsStr = !empty($missingDocsNames) ? implode("\n", $missingDocsNames) : "• Berkas Persyaratan PPDB";
+
+                                $politeWaText = "Assalamu'alaikum Wr. Wb. / Salam Sejahtera Bapak/Ibu,\n\n"
+                                    . "Semoga Ayah/Bunda dan ananda *" . ($name ?? 'Calon Siswa') . "* senantiasa dalam keadaan sehat walafiat.\n\n"
+                                    . "Sehubungan dengan proses validasi dan peningkatan kualitas arsip digital dokumen PPDB, kami memohon bantuan dan kesediaan Ayah/Bunda untuk dapat melakukan unggah/pembaruan berkas berikut:\n"
+                                    . $missingDocsStr . "\n\n"
+                                    . "Melalui dashboard pendaftaran masing-masing:\n"
+                                    . route('login') . "\n\n"
+                                    . "(Catatan: Isian data biodata formulir dan bukti pembayaran Anda telah tersimpan dengan sangat baik di sistem kami).\n\n"
+                                    . "Apabila Ayah/Bunda membutuhkan bantuan atau mengalami kendala, panitia PPDB siap melayani. Mohon maaf sebesar-besarnya atas ketidaknyamanan ini dan terima kasih banyak atas kerja sama serta kesabaran Ayah/Bunda.\n\n"
+                                    . "Salam hormat,\n*Panitia PPDB*";
+                            @endphp
+
                             <div class="mb-4">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom pb-2 mb-3">
-                                    <h6 class="fw-bold text-dark mb-0" style="font-size: 14px;">
-                                        Berkas Dokumen Persyaratan Calon Siswa
-                                    </h6>
-                                    <span class="badge {{ $uploadedDocsCount >= 4 ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' }} fw-semibold px-2 py-1">
-                                        {{ $uploadedDocsCount }} dari 4 Berkas Persyaratan Terunggah
-                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h6 class="fw-bold text-dark mb-0" style="font-size: 14px;">
+                                            Berkas Dokumen Persyaratan Calon Siswa
+                                        </h6>
+                                        <span class="badge {{ $uploadedDocsCount >= 4 ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning' }} fw-semibold px-2 py-1">
+                                            {{ $uploadedDocsCount }} dari 4 Berkas Persyaratan Terunggah
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        @if($uploadedDocsCount > 0)
+                                            <form action="{{ route('admin.ppdb.documents.delete', ['id' => $registration['id'], 'documentType' => 'all']) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin MENGHAPUS SEMUA 4 BERKAS PERSYARATAN (KK, Akta, NISN, Pas Foto) untuk {{ addslashes($name) }}?\n\nPerhatian:\n- Bukti transfer pembayaran dan data formulir tetap AMAN tersimpan.\n- Seluruh 4 berkas persyaratan akan dikosongkan agar siswa dapat mengunggah ulang.')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" title="Hapus seluruh 4 berkas persyaratan siswa ini sekaligus">
+                                                    <span class="material-symbols-outlined" style="font-size: 16px;">delete_sweep</span>
+                                                    <span>Hapus Semua 4 Berkas</span>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        @if(!empty($cleanWa))
+                                            <a href="https://wa.me/{{ $cleanWa }}?text={{ rawurlencode($politeWaText) }}" target="_blank" class="btn btn-sm btn-success fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" title="Kirim Pesan Santun ke WhatsApp Orang Tua/Siswa">
+                                                <span class="material-symbols-outlined" style="font-size: 16px;">chat</span>
+                                                <span>Kirim WA Sopan</span>
+                                            </a>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <div class="row g-3">
@@ -1006,48 +1056,65 @@
                                                             </span>
                                                             <span>{{ $d['label'] }}</span>
                                                         </div>
-                                                        <span class="badge {{ $d['has_file'] ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }}">
-                                                            {{ $d['has_file'] ? '✓ Tersedia' : 'Belum Ada' }}
+                                                        <span class="badge {{ !empty($d['is_missing']) ? 'bg-danger-subtle text-danger border border-danger-subtle' : ($d['has_file'] ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary') }}">
+                                                            @if(!empty($d['is_missing']))
+                                                                ⚠️ File Fisik Hilang / 404
+                                                            @elseif($d['has_file'])
+                                                                ✓ File Tersedia
+                                                            @else
+                                                                Belum Ada
+                                                            @endif
                                                         </span>
                                                     </div>
 
-                                                    @if($d['has_file'])
-                                                        @if($d['is_image'])
-                                                            <div class="text-center my-2 p-2 bg-white rounded border">
-                                                                <a href="{{ $d['url'] }}" target="_blank" class="d-inline-block" data-bs-toggle="modal" data-bs-target="#previewModal_{{ $dKey }}">
-                                                                    <img src="{{ $d['url'] }}" alt="{{ $d['label'] }}" style="max-height: 150px; max-width: 100%; object-fit: contain;" class="rounded">
-                                                                </a>
-                                                                <div class="mt-1">
-                                                                    <button type="button" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#previewModal_{{ $dKey }}">
-                                                                        Perbesar Pratinjau &rarr;
-                                                                    </button>
-                                                                </div>
+                                                    @if(!empty($d['is_missing']))
+                                                        <div class="alert alert-danger py-2 px-3 small mb-2 d-flex align-items-center gap-2 rounded-2">
+                                                            <span class="material-symbols-outlined text-danger" style="font-size: 18px;">error</span>
+                                                            <div style="font-size: 11.5px; line-height: 1.35;">
+                                                                Tautan berkas tersimpan di database, tetapi file fisiknya <strong>tidak ditemukan di server hosting</strong>. Silakan klik tombol <em>Hapus Berkas</em> agar siswa dapat mengunggah ulang.
                                                             </div>
+                                                        </div>
+                                                    @endif
 
-                                                            <!-- Modal Zoom Berkas -->
-                                                            <div class="modal fade" id="previewModal_{{ $dKey }}" tabindex="-1" aria-hidden="true">
-                                                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                                                    <div class="modal-content border-0 shadow rounded-3">
-                                                                        <div class="modal-header border-bottom py-3">
-                                                                            <h6 class="modal-title fw-bold text-dark">{{ $d['label'] }} — {{ $name }}</h6>
-                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                                                                        </div>
-                                                                        <div class="modal-body text-center bg-light p-3">
-                                                                            <img src="{{ $d['url'] }}" alt="{{ $d['label'] }}" class="img-fluid rounded shadow-sm" style="max-height: 75vh;">
-                                                                        </div>
-                                                                        <div class="modal-footer border-top py-2">
-                                                                            <a href="{{ $d['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary">Buka di Tab Baru</a>
-                                                                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                    @if($d['has_file'])
+                                                        @if(empty($d['is_missing']))
+                                                            @if($d['is_image'])
+                                                                <div class="text-center my-2 p-2 bg-white rounded border">
+                                                                    <a href="{{ $d['url'] }}" target="_blank" class="d-inline-block" data-bs-toggle="modal" data-bs-target="#previewModal_{{ $dKey }}">
+                                                                        <img src="{{ $d['url'] }}" alt="{{ $d['label'] }}" style="max-height: 150px; max-width: 100%; object-fit: contain;" class="rounded">
+                                                                    </a>
+                                                                    <div class="mt-1">
+                                                                        <button type="button" class="btn btn-link btn-sm text-primary text-decoration-none p-0 fw-semibold" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#previewModal_{{ $dKey }}">
+                                                                            Perbesar Pratinjau &rarr;
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Modal Zoom Berkas -->
+                                                                <div class="modal fade" id="previewModal_{{ $dKey }}" tabindex="-1" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                                                        <div class="modal-content border-0 shadow rounded-3">
+                                                                            <div class="modal-header border-bottom py-3">
+                                                                                <h6 class="modal-title fw-bold text-dark">{{ $d['label'] }} — {{ $name }}</h6>
+                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                                                            </div>
+                                                                            <div class="modal-body text-center bg-light p-3">
+                                                                                <img src="{{ $d['url'] }}" alt="{{ $d['label'] }}" class="img-fluid rounded shadow-sm" style="max-height: 75vh;">
+                                                                            </div>
+                                                                            <div class="modal-footer border-top py-2">
+                                                                                <a href="{{ $d['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary">Buka di Tab Baru</a>
+                                                                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        @else
-                                                            <div class="py-4 text-center text-primary bg-white rounded border my-2">
-                                                                <span class="material-symbols-outlined d-block text-danger" style="font-size: 38px;">picture_as_pdf</span>
-                                                                <div class="small fw-semibold mt-1">Dokumen PDF Terlampir</div>
-                                                                <div class="text-muted" style="font-size: 11px;">Format dokumen resmi (.pdf)</div>
-                                                            </div>
+                                                            @else
+                                                                <div class="py-4 text-center text-primary bg-white rounded border my-2">
+                                                                    <span class="material-symbols-outlined d-block text-danger" style="font-size: 38px;">picture_as_pdf</span>
+                                                                    <div class="small fw-semibold mt-1">Dokumen PDF Terlampir</div>
+                                                                    <div class="text-muted" style="font-size: 11px;">Format dokumen resmi (.pdf)</div>
+                                                                </div>
+                                                            @endif
                                                         @endif
                                                     @else
                                                         <div class="text-muted small py-4 text-center bg-white rounded border my-2">
@@ -1058,14 +1125,27 @@
                                                 </div>
 
                                                 @if($d['has_file'])
-                                                    <div class="d-flex gap-2 mt-2">
-                                                        <a href="{{ $d['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 d-inline-flex align-items-center justify-content-center gap-1" style="font-size: 12px;">
-                                                            <span class="material-symbols-outlined" style="font-size: 15px;">open_in_new</span>
-                                                            <span>Buka Ukuran Penuh</span>
-                                                        </a>
-                                                        <a href="{{ $d['url'] }}" download class="btn btn-sm btn-light border text-secondary px-2" title="Unduh Berkas">
-                                                            <span class="material-symbols-outlined" style="font-size: 15px;">download</span>
-                                                        </a>
+                                                    <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top justify-content-between align-items-center">
+                                                        @if(empty($d['is_missing']))
+                                                            <a href="{{ $d['url'] }}" target="_blank" class="btn btn-sm btn-outline-primary flex-grow-1 d-inline-flex align-items-center justify-content-center gap-1" style="font-size: 12px;">
+                                                                <span class="material-symbols-outlined" style="font-size: 15px;">open_in_new</span>
+                                                                <span>Buka Ukuran Penuh</span>
+                                                            </a>
+                                                            <a href="{{ $d['url'] }}" download class="btn btn-sm btn-light border text-secondary px-2" title="Unduh Berkas">
+                                                                <span class="material-symbols-outlined" style="font-size: 15px;">download</span>
+                                                            </a>
+                                                        @endif
+
+                                                        @if($dKey !== 'bukti_bayar')
+                                                            <form action="{{ route('admin.ppdb.documents.delete', ['id' => $registration['id'], 'documentType' => $dKey]) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus berkas {{ $d['label'] }} untuk {{ addslashes($name) }}? Berkas ini akan dikosongkan agar siswa dapat mengunggah ulang.')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 11.5px;" title="Hapus berkas ini agar siswa bisa upload ulang">
+                                                                    <span class="material-symbols-outlined" style="font-size: 15px;">delete</span>
+                                                                    <span>Hapus Berkas</span>
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 @endif
                                             </div>

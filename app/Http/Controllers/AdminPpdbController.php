@@ -262,7 +262,7 @@ class AdminPpdbController extends Controller
                 'last_synced_at' => SyncLog::latest('executed_at')->value('executed_at'),
             ];
 
-            // Statistik per jurusan
+            // Statistik per jurusan & jenis kelamin (Laki-laki vs Perempuan)
             $majorCounts = [
                 'reguler' => 0,
                 'bahasa' => 0,
@@ -270,14 +270,83 @@ class AdminPpdbController extends Controller
                 'ict' => 0,
                 'belum_pilih' => 0,
             ];
+            $genderCounts = [
+                'laki_laki' => 0,
+                'perempuan' => 0,
+                'belum_diisi' => 0,
+            ];
+
             foreach ($allRegistrations as $r) {
-                $major = strtolower($r['form_data']['major'] ?? ($r['student']['major'] ?? ''));
+                $formData = is_array($r['form_data'] ?? null)
+                    ? $r['form_data']
+                    : (is_string($r['form_data'] ?? null) ? json_decode($r['form_data'], true) : []);
+
+                // Jurusan
+                $major = strtolower(trim((string)($formData['major'] ?? ($r['student']['major'] ?? ''))));
                 if (isset($majorCounts[$major])) {
                     $majorCounts[$major]++;
                 } else {
                     $majorCounts['belum_pilih']++;
                 }
+
+                // Jenis Kelamin
+                $genderRaw = $formData['identity']['gender'] ?? ($formData['gender'] ?? ($r['student']['gender'] ?? ($r['student']['identity']['gender'] ?? '')));
+                $g = strtolower(trim((string)$genderRaw));
+                if (in_array($g, ['laki-laki', 'l', 'pria', 'male'])) {
+                    $genderCounts['laki_laki']++;
+                } elseif (in_array($g, ['perempuan', 'p', 'wanita', 'female'])) {
+                    $genderCounts['perempuan']++;
+                } else {
+                    $genderCounts['belum_diisi']++;
+                }
             }
+
+            // Statistik Asal Sekolah Calon Pendaftar
+            $schoolCounts = [];
+            $unfilledSchoolCount = 0;
+            $filledSchoolCount = 0;
+
+            foreach ($allRegistrations as $r) {
+                $formData = is_array($r['form_data'] ?? null)
+                    ? $r['form_data']
+                    : (is_string($r['form_data'] ?? null) ? json_decode($r['form_data'], true) : []);
+
+                $rawSchool = trim($formData['school_origin'] ?? ($r['student']['school_origin'] ?? ''));
+
+                if ($rawSchool === '' || $rawSchool === '-') {
+                    $unfilledSchoolCount++;
+                    continue;
+                }
+
+                $filledSchoolCount++;
+
+                // Normalisasi spasi berlebih dan kapitalisasi judul (mendukung kata berpenghubung seperti Al-Muhajirin)
+                $cleanSchool = preg_replace('/\s+/', ' ', $rawSchool);
+                $normalized = ucwords(mb_strtolower($cleanSchool), " \t\r\n\f\v-");
+                // Pertahankan kapitalisasi standar untuk akronim jenjang sekolah di Indonesia
+                $normalized = preg_replace_callback('/\b(sdn|sds|sd|min|mis|mi|smpn|smp|mts|sdit|miit|smpit)\b/i', function ($matches) {
+                    $upper = strtoupper($matches[0]);
+                    return $upper === 'MTS' ? 'MTs' : $upper;
+                }, $normalized);
+
+                $schoolCounts[$normalized] = ($schoolCounts[$normalized] ?? 0) + 1;
+            }
+
+            arsort($schoolCounts);
+
+            $topSchools = array_slice($schoolCounts, 0, 10, true);
+            $otherSchoolsCount = array_sum(array_slice($schoolCounts, 10));
+
+            $schoolStats = [
+                'total_unique' => count($schoolCounts),
+                'total_filled' => $filledSchoolCount,
+                'total_unfilled' => $unfilledSchoolCount,
+                'top' => $topSchools,
+                'all' => $schoolCounts,
+                'other_count' => $otherSchoolsCount,
+                'top_school_name' => !empty($schoolCounts) ? array_key_first($schoolCounts) : null,
+                'top_school_count' => !empty($schoolCounts) ? reset($schoolCounts) : 0,
+            ];
 
             // Antrean verifikasi pembayaran tercepat
             $pendingVerifications = array_values(array_filter(
@@ -297,6 +366,8 @@ class AdminPpdbController extends Controller
                 'stats' => $stats,
                 'syncStats' => $syncStats,
                 'majorCounts' => $majorCounts,
+                'genderCounts' => $genderCounts,
+                'schoolStats' => $schoolStats,
                 'pendingVerifications' => $pendingVerifications,
                 'recentRegistrations' => $recentRegistrations,
                 'backendUrl' => $this->backendUrl(),
@@ -309,6 +380,17 @@ class AdminPpdbController extends Controller
                 'stats' => ['total' => 0, 'pending_payment' => 0, 'paid' => 0, 'accepted' => 0, 'with_form' => 0, 'total_amount' => 0],
                 'syncStats' => ['pending' => 0, 'failed' => 0, 'synced' => 0, 'last_synced_at' => null],
                 'majorCounts' => ['reguler' => 0, 'bahasa' => 0, 'tahfidz' => 0, 'ict' => 0, 'belum_pilih' => 0],
+                'genderCounts' => ['laki_laki' => 0, 'perempuan' => 0, 'belum_diisi' => 0],
+                'schoolStats' => [
+                    'total_unique' => 0,
+                    'total_filled' => 0,
+                    'total_unfilled' => 0,
+                    'top' => [],
+                    'all' => [],
+                    'other_count' => 0,
+                    'top_school_name' => null,
+                    'top_school_count' => 0,
+                ],
                 'pendingVerifications' => [],
                 'recentRegistrations' => [],
                 'error' => 'Gagal memuat data dashboard PPDB. Silakan muat ulang halaman atau hubungi administrator.',
@@ -976,6 +1058,109 @@ class AdminPpdbController extends Controller
         } catch (\Exception $e) {
             Log::error('Admin PPDB Documents Error: ' . $e->getMessage(), ['exception' => $e]);
             return redirect()->route('admin.ppdb.index')->with('error', 'Gagal memuat Data Berkas. Silakan coba beberapa saat lagi.');
+        }
+    }
+
+    /**
+     * Hapus berkas persyaratan siswa tertentu (KK, Akta, NISN, Foto) secara individual atau sekaligus ('all').
+     * Mengosongkan path di database agar pendaftar dapat mengunggah ulang dokumen tersebut,
+     * dan menghapus file fisik di server jika masih ada (tanpa menyentuh bukti pembayaran / biodata).
+     */
+    public function deleteDocument(Request $request, $id, $documentType)
+    {
+        $allowedDocTypes = [
+            'kk' => 'Kartu Keluarga (KK)',
+            'akta' => 'Akta Kelahiran',
+            'nisn' => 'Kartu / Bukti NISN',
+            'foto' => 'Pas Foto 3x4',
+            'all' => 'Semua Berkas Persyaratan (KK, Akta, NISN, Pas Foto)',
+        ];
+
+        if (!array_key_exists($documentType, $allowedDocTypes)) {
+            return back()->with('error', 'Jenis dokumen yang dipilih tidak valid.');
+        }
+
+        try {
+            $registration = PpdbRegistration::with('account')->find($id);
+
+            if (!$registration) {
+                $registration = PpdbRegistration::with('account')
+                    ->where('remote_id', $id)
+                    ->orWhere('account_id', $id)
+                    ->first();
+            }
+
+            if (!$registration) {
+                return back()->with('error', 'Data pendaftaran siswa tidak ditemukan.');
+            }
+
+            $formData = is_array($registration->form_data) 
+                ? $registration->form_data 
+                : (json_decode($registration->form_data ?? '', true) ?: []);
+
+            $existingDocs = $formData['documents'] ?? [];
+
+            // Berkas yang akan dihapus: ke-4 berkas jika 'all', atau berkas spesifik
+            $typesToDelete = ($documentType === 'all')
+                ? ['kk', 'akta', 'nisn', 'foto']
+                : [$documentType];
+
+            $realUploadDir = realpath(public_path('uploads/ppdb_documents'));
+
+            foreach ($typesToDelete as $type) {
+                $filePath = $existingDocs[$type] ?? match($type) {
+                    'kk' => ($formData['kk_path'] ?? null),
+                    'akta' => ($formData['birth_cert_path'] ?? null),
+                    'nisn' => ($formData['nisn_path'] ?? null),
+                    'foto' => ($formData['photo_path'] ?? null),
+                    default => null,
+                };
+
+                // Hapus file fisik jika masih ada di server
+                if (!empty($filePath)) {
+                    $cleanPath = ltrim($filePath, '/');
+                    $fullPath = public_path($cleanPath);
+                    $realFilePath = realpath($fullPath);
+
+                    if ($realFilePath && $realUploadDir && str_starts_with($realFilePath, $realUploadDir) && file_exists($realFilePath)) {
+                        @unlink($realFilePath);
+                    }
+
+                    // Cek document root cPanel
+                    if (!empty($_SERVER['DOCUMENT_ROOT'])) {
+                        $docRootFile = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . $cleanPath;
+                        if (file_exists($docRootFile)) {
+                            @unlink($docRootFile);
+                        }
+                    }
+                }
+
+                // Kosongkan dari form_data documents dan legacy paths
+                unset($existingDocs[$type]);
+                if ($type === 'kk') unset($formData['kk_path']);
+                if ($type === 'akta') unset($formData['birth_cert_path']);
+                if ($type === 'nisn') unset($formData['nisn_path']);
+                if ($type === 'foto') unset($formData['photo_path']);
+            }
+
+            $formData['documents'] = $existingDocs;
+
+            $registration->form_data = $formData;
+            $registration->sync_status = 'pending';
+            $registration->save();
+
+            $studentName = $registration->account->full_name ?? ($formData['full_name'] ?? 'Calon Siswa');
+
+            if ($documentType === 'all') {
+                return back()->with('success', "Semua berkas persyaratan (4 berkas: KK, Akta Kelahiran, NISN, Pas Foto) untuk {$studentName} berhasil dihapus/direset. Siswa kini dapat mengunggah ulang seluruh berkas tersebut.");
+            }
+
+            $docLabel = $allowedDocTypes[$documentType];
+            return back()->with('success', "Berkas {$docLabel} untuk {$studentName} berhasil dihapus/direset. Siswa kini dapat mengunggah ulang berkas tersebut.");
+
+        } catch (\Throwable $e) {
+            Log::error('Admin Delete Document Error: ' . $e->getMessage(), ['exception' => $e]);
+            return back()->with('error', 'Terjadi kesalahan saat menghapus berkas: ' . $e->getMessage());
         }
     }
 
@@ -1659,6 +1844,74 @@ class AdminPpdbController extends Controller
         } catch (\Exception $e) {
             Log::error('SyncAllToApi Error: ' . $e->getMessage(), ['exception' => $e]);
             return back()->with('error', 'Gagal memproses sinkronisasi ke Master API. Silakan coba beberapa saat lagi.');
+        }
+    }
+
+    /**
+     * Halaman Manajemen Pencadangan Google Drive 4 TB.
+     */
+    public function backup(Request $request, \App\Services\GoogleDriveBackupService $driveService)
+    {
+        $isConnected = $driveService->isConnected();
+        $authUrl = $driveService->getAuthUrl('http://127.0.0.1:8989');
+        $folderId = config('services.google_drive.folder_id');
+        $backups = $isConnected ? $driveService->listBackups() : [];
+
+        return view('admin.ppdb.backup', [
+            'isConnected' => $isConnected,
+            'authUrl' => $authUrl,
+            'folderId' => $folderId,
+            'backups' => $backups,
+            'backendUrl' => $this->backendUrl(),
+        ]);
+    }
+
+    /**
+     * Jalankan proses pencadangan manual ke Google Drive 4 TB.
+     */
+    public function runBackup(Request $request, \App\Services\GoogleDriveBackupService $driveService)
+    {
+        @ini_set('max_execution_time', '600');
+        @set_time_limit(600);
+
+        try {
+            if (!$driveService->isConnected()) {
+                return back()->with('error', 'Google Drive belum terhubung. Harap lakukan otorisasi akun terlebih dahulu.');
+            }
+
+            $archive = $driveService->createBackupArchive();
+            $driveResult = $driveService->uploadToGoogleDrive($archive['path'], $archive['filename']);
+            
+            // Hapus file sementara lokal
+            @\Illuminate\Support\Facades\File::delete($archive['path']);
+
+            $fileSizeMB = round($archive['size'] / (1024 * 1024), 2);
+            $fileName = $archive['filename'];
+
+            return back()->with('success', "Pencadangan berhasil! File arsip {$fileName} ({$fileSizeMB} MB) telah berhasil disimpan ke Google Drive 4 TB Anda.");
+
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Run Backup Error: ' . $e->getMessage(), ['exception' => $e]);
+            return back()->with('error', 'Gagal melakukan pencadangan ke Google Drive: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Simpan kode otorisasi dari Google OAuth callback ke .env.
+     */
+    public function saveBackupAuthCode(Request $request, \App\Services\GoogleDriveBackupService $driveService)
+    {
+        $request->validate([
+            'code' => ['required', 'string'],
+        ], [
+            'code.required' => 'Kode otorisasi Google wajib diisi.',
+        ]);
+
+        try {
+            $driveService->exchangeCode($request->code, 'http://127.0.0.1:8989');
+            return back()->with('success', 'Google Drive 4 TB berhasil dihubungkan! Anda sekarang dapat melakukan pencadangan.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menghubungkan Google Drive: ' . $e->getMessage());
         }
     }
 }

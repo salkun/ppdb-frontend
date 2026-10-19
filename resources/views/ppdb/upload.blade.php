@@ -87,6 +87,28 @@
         </div>
     </div>
 
+    {{-- Himbauan Santun Pembaruan Berkas --}}
+    @if($uploadedCount < 4)
+        <div style="background: linear-gradient(135deg, rgba(238,242,255,0.95), rgba(243,232,255,0.75)); border: 1px solid rgba(99,102,241,0.25); border-radius: 14px; padding: 1.15rem 1.35rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 14px; box-shadow: 0 2px 10px rgba(99,102,241,0.06);">
+            <span class="material-symbols-outlined" style="font-size: 26px; color: #4f46e5; flex-shrink: 0; margin-top: 2px;">info</span>
+            <div style="font-size: 13px; color: #1e1b4b; line-height: 1.6;">
+                <div style="font-weight: 700; font-size: 14px; color: #312e81; margin-bottom: 4px;">
+                    Pemberitahuan Verifikasi &amp; Pembaruan Dokumen
+                </div>
+                <div>
+                    <em>Assalamu’alaikum Wr. Wb. / Salam Sejahtera bagi Bapak/Ibu dan Calon Siswa Baru.</em><br>
+                    Dalam rangka peningkatan mutu verifikasi data serta optimalisasi pengarsipan digital dokumen PPDB, kami memohon bantuan dan kebaikan hati Ayah/Bunda/Calon Siswa untuk memeriksa kembali kelengkapan dokumen persyaratan di bawah ini.
+                    <br>
+                    Apabila ada dokumen yang berstatus <strong>"Belum Ada Berkas"</strong>, mohon kesediaannya untuk mengunggah berkas tersebut dengan foto atau scan dokumen yang jelas.
+                    <div style="margin-top: 6px; font-size: 12px; color: #4338ca; display: flex; align-items: center; gap: 4px;">
+                        <span class="material-symbols-outlined" style="font-size: 16px;">verified</span> 
+                        <span><strong>Catatan:</strong> Bagi Anda yang telah menyelesaikan pembayaran formulir, bukti pembayaran Anda telah tersimpan aman dan terverifikasi di sistem kami.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Formulir Upload Berkas Dokumen --}}
     <form action="{{ route('ppdb.upload.submit') }}" method="POST" enctype="multipart/form-data" id="formUploadDocs">
         @csrf

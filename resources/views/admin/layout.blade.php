@@ -110,6 +110,12 @@
                         </a>
                     </li>
                     <li>
+                        <a class="admin-nav-link {{ request()->routeIs('admin.ppdb.backup*') ? 'active' : '' }}" href="{{ route('admin.ppdb.backup') }}">
+                            <span class="material-symbols-outlined text-primary">cloud_sync</span>
+                            <span>Backup Google Drive</span>
+                        </a>
+                    </li>
+                    <li>
                         <a class="admin-nav-link" href="{{ route('home') }}" target="_blank">
                             <span class="material-symbols-outlined">open_in_new</span>
                             <span>Lihat Web Publik</span>

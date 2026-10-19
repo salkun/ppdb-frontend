@@ -94,6 +94,7 @@ Route::prefix('admin')->group(function () {
         
         // Modul Data Berkas
         Route::get('/ppdb/documents', [AdminPpdbController::class, 'documents'])->name('admin.ppdb.documents');
+        Route::delete('/ppdb/registrations/{id}/documents/{documentType}', [AdminPpdbController::class, 'deleteDocument'])->name('admin.ppdb.documents.delete');
         
         // Modul Verifikasi Pembayaran
         Route::get('/ppdb/payments', [AdminPpdbController::class, 'payments'])->name('admin.ppdb.payments');
@@ -126,6 +127,11 @@ Route::prefix('admin')->group(function () {
         
         // Satu-Klik Sinkronisasi ke Master Data API (One-Click Bulk Sync)
         Route::post('/ppdb/sync', [AdminPpdbController::class, 'syncAllToApi'])->name('admin.ppdb.sync');
+
+        // Modul Pencadangan Cloud (Google Drive 4 TB)
+        Route::get('/ppdb/backup', [AdminPpdbController::class, 'backup'])->name('admin.ppdb.backup');
+        Route::post('/ppdb/backup/run', [AdminPpdbController::class, 'runBackup'])->name('admin.ppdb.backup.run');
+        Route::post('/ppdb/backup/save-code', [AdminPpdbController::class, 'saveBackupAuthCode'])->name('admin.ppdb.backup.save-code');
     });
 });
 

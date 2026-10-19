@@ -36,4 +36,11 @@ return [
         'panitia_chat_id' => env('TELEGRAM_PANITIA_CHAT_ID'),
     ],
 
+    'google_drive' => [
+        'client_id' => env('GOOGLE_DRIVE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+        'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID'),
+        'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+    ],
+
 ];
