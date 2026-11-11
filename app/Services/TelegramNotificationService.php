@@ -47,6 +47,7 @@ class TelegramNotificationService
             $fullName = htmlspecialchars($studentData['full_name'] ?? 'Calon Siswa', ENT_QUOTES, 'UTF-8');
             $nik = htmlspecialchars($studentData['nik'] ?? '-', ENT_QUOTES, 'UTF-8');
             $email = htmlspecialchars($studentData['email'] ?? '-', ENT_QUOTES, 'UTF-8');
+            $phone = htmlspecialchars($studentData['phone'] ?? '-', ENT_QUOTES, 'UTF-8');
             $uploadTime = now()->setTimezone('Asia/Jakarta')->translatedFormat('d M Y, H:i') . ' WIB';
             $nominal = 'Rp 400.000';
             $methodLabel = ($paymentMethod === 'cash') ? 'Tunai (Cash di Loket)' : 'Transfer Bank (TF)';
@@ -74,6 +75,7 @@ class TelegramNotificationService
                 . "Telah diterima unggahan bukti pembayaran pendaftaran:\n"
                 . "• <b>Nama Siswa:</b> {$fullName}\n"
                 . $nikLine
+                . "• <b>Nomor HP:</b> {$phone}\n"
                 . "• <b>Email:</b> {$email}\n"
                 . "• <b>Metode:</b> <b>{$methodLabel}</b>\n"
                 . $senderLine
@@ -228,6 +230,11 @@ class TelegramNotificationService
 
         $isPaid = ($targetStatus === 'paid');
         $safeStudentName = htmlspecialchars($studentName, ENT_QUOTES, 'UTF-8');
+        $studentPhone = htmlspecialchars(
+            $reg->form_data['contact']['mobile_number'] ?? $reg->account?->phone ?? '-',
+            ENT_QUOTES,
+            'UTF-8'
+        );
         $safeAdminDisplay = htmlspecialchars($adminDisplay, ENT_QUOTES, 'UTF-8');
         $adminUrl = url('/admin/ppdb/registrations/' . $reg->id);
         $statusBadge = $isPaid ? "✅ <b>STATUS: DIVERIFIKASI LUNAS</b>" : "❌ <b>STATUS: BUKTI PEMBAYARAN DITOLAK</b>";
@@ -235,6 +242,7 @@ class TelegramNotificationService
 
         $newCaption = "📢 <b>BUKTI PEMBAYARAN PPDB — {$statusText}</b>\n\n"
             . "• <b>Nama Siswa:</b> {$safeStudentName}\n"
+            . "• <b>Nomor HP:</b> {$studentPhone}\n"
             . "• <b>Nominal:</b> <b>Rp 400.000</b>\n"
             . "═══════════════════════════\n"
             . "{$statusBadge}\n"
@@ -453,6 +461,11 @@ class TelegramNotificationService
         }
 
         $studentName = $reg->account?->full_name ?? ($reg->form_data['full_name'] ?? 'Calon Siswa');
+        $studentPhone = htmlspecialchars(
+            $reg->form_data['contact']['mobile_number'] ?? $reg->account?->phone ?? '-',
+            ENT_QUOTES,
+            'UTF-8'
+        );
         $isPaid = ($targetStatus === 'paid');
 
         $reg->payment_status = $targetStatus;
@@ -473,6 +486,7 @@ class TelegramNotificationService
         $badge = $isPaid ? 'LUNAS (PAID) ✅' : 'DITOLAK ❌';
         $reply = "✓ <b>STATUS PEMBAYARAN DIPERBARUI</b>\n\n"
             . "• <b>Siswa:</b> {$studentName}\n"
+            . "• <b>Nomor HP:</b> {$studentPhone}\n"
             . "• <b>NIK:</b> <code>" . ($reg->account?->nik ?? '-') . "</code>\n"
             . "• <b>Status:</b> <b>{$badge}</b>\n"
             . "• <b>Admin:</b> {$adminDisplay}\n"

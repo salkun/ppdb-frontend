@@ -3,89 +3,47 @@
 @section('title', 'Dashboard Admin SPMB')
 @section('header_title', 'Dashboard Monitoring SPMB Online')
 
+@push('styles')
+<style>
+    .school-progress {
+        display: block;
+        width: 100%;
+        height: 5px;
+        overflow: hidden;
+        border: 0;
+        border-radius: 999px;
+        background: #e2e8f0;
+        appearance: none;
+    }
+    .school-progress::-webkit-progress-bar { border-radius: 999px; background: #e2e8f0; }
+    .school-progress::-webkit-progress-value { border-radius: 999px; background: #0d6efd; }
+    .school-progress::-moz-progress-bar { border-radius: 999px; background: #0d6efd; }
+</style>
+@endpush
+
 @section('content')
-<!-- 1. Header Banner -->
-<div class="card border-0 rounded-4 shadow-sm mb-4 text-white" style="background: linear-gradient(135deg, #005ab4 0%, #003770 100%);">
-    <div class="card-body p-4 p-lg-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-            <div>
-                <div class="badge bg-white text-primary mb-2 px-3 py-2 fw-semibold rounded-pill" style="font-size: 11.5px;">
-                    <span class="material-symbols-outlined align-middle" style="font-size:16px;">school</span>
-                    Tahun Ajaran 2027/2028
-                </div>
-                <h4 class="fw-bold mb-1">Selamat Datang, {{ session('admin_user.username', 'Administrator') }}!</h4>
-                <p class="text-white-50 mb-0 small" style="max-width: 620px;">
-                    Pantau alur pendaftaran calon peserta didik baru SMP Al-Muhajirin Purwakarta, kelengkapan berkas, serta verifikasi bukti pembayaran secara real-time.
-                </p>
-            </div>
-            <div class="d-flex flex-wrap gap-2 align-items-center">
-                <!-- One-Click Master Sync Button -->
-                <form action="{{ route('admin.ppdb.sync') }}" method="POST" class="d-inline mb-0">
-                    @csrf
-                    <button type="submit" class="btn btn-success text-white fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3" onclick="return confirm('Kirim seluruh data lokal yang belum tersinkron ke Master Data API?')">
-                        <span class="material-symbols-outlined" style="font-size:18px;">sync</span>
-                        <span>Sinkron ke Master API</span>
-                        @if(($syncStats['pending'] ?? 0) > 0)
-                            <span class="badge bg-white text-success rounded-pill ms-1" style="font-size: 11px;">{{ $syncStats['pending'] }}</span>
-                        @endif
-                    </button>
-                </form>
-                <a href="{{ route('admin.ppdb.users') }}" class="btn btn-outline-light text-white fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3">
-                    <span class="material-symbols-outlined" style="font-size:18px;">group_add</span>
-                    <span>Kelola & Import User</span>
-                </a>
-                <a href="{{ route('admin.ppdb.payments') }}" class="btn btn-warning text-dark fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3">
-                    <span class="material-symbols-outlined" style="font-size:18px;">payments</span>
-                    <span>Verifikasi ({{ $stats['pending_payment'] ?? 0 }})</span>
-                </a>
-                <a href="{{ route('admin.ppdb.export', ['format' => 'xlsx']) }}" class="btn btn-light text-primary fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3">
-                    <span class="material-symbols-outlined" style="font-size:18px;">download</span>
-                    <span>Export Excel</span>
-                </a>
-            </div>
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <h2 class="h4 fw-bold text-dark mb-0">Ringkasan PPDB</h2>
+            <span class="badge bg-light text-secondary border rounded-pill fw-semibold">Tahun Ajaran 2027/2028</span>
         </div>
+        <p class="text-muted mb-0 small">
+            Selamat datang, {{ session('admin_user.username', 'Administrator') }}. Pantau pendaftaran, pembayaran, dan aktivitas calon siswa dari sini.
+        </p>
     </div>
-</div>
-
-<!-- Sync Status Widget (Local-First + Master API Status) -->
-<div class="card border-0 shadow-sm rounded-3 bg-white mb-4 p-3 border-start border-4 {{ ($syncStats['failed'] ?? 0) > 0 ? 'border-danger' : (($syncStats['pending'] ?? 0) > 0 ? 'border-warning' : 'border-success') }}">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px; background-color: {{ ($syncStats['failed'] ?? 0) > 0 ? '#fee2e2' : (($syncStats['pending'] ?? 0) > 0 ? '#fef3c7' : '#dcfce7') }};">
-                <span class="material-symbols-outlined {{ ($syncStats['failed'] ?? 0) > 0 ? 'text-danger' : (($syncStats['pending'] ?? 0) > 0 ? 'text-warning' : 'text-success') }}" style="font-size: 24px;">
-                    {{ ($syncStats['failed'] ?? 0) > 0 ? 'sync_problem' : (($syncStats['pending'] ?? 0) > 0 ? 'sync' : 'cloud_done') }}
-                </span>
-            </div>
-            <div>
-                <div class="d-flex align-items-center gap-2">
-                    <h6 class="fw-bold mb-0 text-dark">Status Sinkronisasi Master API</h6>
-                    @if(($syncStats['pending'] ?? 0) > 0)
-                        <span class="badge bg-warning text-dark fw-semibold" style="font-size: 11px;">{{ $syncStats['pending'] }} data menunggu kirim</span>
-                    @elseif(($syncStats['failed'] ?? 0) > 0)
-                        <span class="badge bg-danger text-white fw-semibold" style="font-size: 11px;">{{ $syncStats['failed'] }} data perlu dicek</span>
-                    @else
-                        <span class="badge bg-success text-white fw-semibold" style="font-size: 11px;">Semua data tersinkron</span>
-                    @endif
-                </div>
-                <div class="text-muted small mt-1">
-                    <span>Target Server: <code class="text-primary">{{ config('ppdb.api_url', 'http://127.0.0.1:8001') }}</code></span>
-                    <span class="mx-2">•</span>
-                    <span>Database Lokal: <strong class="text-success">MySQL (Source of Truth)</strong></span>
-                    <span class="mx-2">•</span>
-                    <span>Terakhir Sinkron: <strong>{{ !empty($syncStats['last_synced_at']) ? \Carbon\Carbon::parse($syncStats['last_synced_at'])->diffForHumans() : 'Belum pernah' }}</strong></span>
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <form action="{{ route('admin.ppdb.sync') }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-outline-success fw-semibold d-inline-flex align-items-center gap-1 shadow-sm px-3" onclick="return confirm('Kirim seluruh data lokal yang belum tersinkron ke Master Data API?')">
-                    <span class="material-symbols-outlined" style="font-size: 18px;">send</span>
-                    <span>Kirim ke Master Sekarang</span>
-                </button>
-            </form>
-        </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ route('admin.ppdb.payments') }}" class="btn btn-primary fw-semibold d-inline-flex align-items-center justify-content-center gap-2 px-3">
+            <span class="material-symbols-outlined" style="font-size:19px;">payments</span>
+            <span>Verifikasi Pembayaran</span>
+            @if(($stats['pending_payment'] ?? 0) > 0)
+                <span class="badge bg-white text-primary rounded-pill">{{ $stats['pending_payment'] }}</span>
+            @endif
+        </a>
+        <a href="{{ route('admin.ppdb.export', ['format' => 'xlsx']) }}" class="btn btn-outline-secondary fw-semibold d-inline-flex align-items-center justify-content-center gap-2 px-3">
+            <span class="material-symbols-outlined" style="font-size:19px;">download</span>
+            <span>Export Excel</span>
+        </a>
     </div>
 </div>
 
@@ -611,17 +569,17 @@
                         @foreach($schoolStats['top'] as $schoolName => $count)
                             @php
                                 $pct = round(($count / $totalFilled) * 100, 1);
-                                $rankBadgeColor = match($rankIndex) {
-                                    1 => 'background: linear-gradient(135deg, #f59e0b, #d97706); color: white;',
-                                    2 => 'background: linear-gradient(135deg, #94a3b8, #64748b); color: white;',
-                                    3 => 'background: linear-gradient(135deg, #b45309, #78350f); color: white;',
-                                    default => 'background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;',
+                                $rankBadgeClass = match($rankIndex) {
+                                    1 => 'bg-warning text-dark',
+                                    2 => 'bg-secondary text-white',
+                                    3 => 'bg-warning-subtle text-warning-emphasis border',
+                                    default => 'bg-light text-secondary border',
                                 };
                             @endphp
                             <div class="p-2 border rounded-3 hover-shadow-sm transition-all" style="background: #ffffff;">
                                 <div class="d-flex align-items-center justify-content-between mb-1 gap-2">
                                     <div class="d-flex align-items-center gap-2 overflow-hidden flex-grow-1">
-                                        <span class="badge rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold" style="width: 24px; height: 24px; font-size: 11px; {{ $rankBadgeColor }}">
+                                        <span class="badge rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold {{ $rankBadgeClass }}" style="width: 24px; height: 24px; font-size: 11px;">
                                             {{ $rankIndex }}
                                         </span>
                                         <span class="fw-semibold text-dark text-truncate small" title="{{ $schoolName }}">
@@ -637,9 +595,7 @@
                                         </a>
                                     </div>
                                 </div>
-                                <div class="progress" style="height: 5px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $pct }}%;" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
+                                <progress class="school-progress" value="{{ $pct }}" max="100" aria-label="Porsi pendaftar dari {{ $schoolName }}">{{ $pct }}%</progress>
                                 <div class="d-flex justify-content-between text-muted" style="font-size: 10.5px; margin-top: 2px;">
                                     <span>Porsi Pendaftar</span>
                                     <span class="fw-medium">{{ $pct }}%</span>
@@ -829,6 +785,12 @@
 @endsection
 
 @push('scripts')
+<div id="dashboardChartData" hidden
+     data-students-url="{{ route('admin.ppdb.students') }}"
+     data-major-counts="{{ json_encode($majorCounts ?? []) }}"
+     data-gender-counts="{{ json_encode($genderCounts ?? []) }}"
+     data-schools="{{ json_encode($schoolStats['all'] ?? []) }}"
+     data-schools-total="{{ (int)($schoolStats['total_filled'] ?? 0) }}"></div>
 <script src="{{ asset('js/chart.umd.min.js') }}"></script>
 <script>
     if (typeof Chart === 'undefined') {
@@ -837,14 +799,16 @@
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const studentsBaseUrl = @json(route('admin.ppdb.students'));
+    const chartDataElement = document.getElementById('dashboardChartData');
+    const chartData = chartDataElement ? chartDataElement.dataset : {};
+    const studentsBaseUrl = chartData.studentsUrl || '';
 
     // ==========================================
     // 1. Grafik Peminatan Jurusan
     // ==========================================
     const majorCanvas = document.getElementById('majorChart');
     if (majorCanvas) {
-        const majorData = @json($majorCounts ?? []);
+        const majorData = JSON.parse(chartData.majorCounts || '{}');
         const rawLabels = ['Reguler', 'Program Bahasa', 'Tahfidz Al-Qur\'an', 'ICT & Digital IT'];
         const majorKeys = ['reguler', 'bahasa', 'tahfidz', 'ict'];
         const majorColors = ['#005ab4', '#0284c7', '#10b981', '#f59e0b'];
@@ -963,7 +927,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==========================================
     const genderCanvas = document.getElementById('genderChart');
     if (genderCanvas) {
-        const genderData = @json($genderCounts ?? []);
+        const genderData = JSON.parse(chartData.genderCounts || '{}');
         let gLabels = ['Laki-laki', 'Perempuan'];
         let gValues = [genderData.laki_laki || 0, genderData.perempuan || 0];
         let gColors = ['#0284c7', '#ec4899'];
@@ -1070,8 +1034,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==========================================
     const canvas = document.getElementById('schoolOriginChart');
     if (canvas) {
-        const rawAllSchools = @json($schoolStats['all'] ?? []);
-        const totalFilled = {{ (int)($schoolStats['total_filled'] ?? 0) }};
+        const rawAllSchools = JSON.parse(chartData.schools || '{}');
+        const totalFilled = Number(chartData.schoolsTotal || 0);
 
         // Palette warna tema yang harmonis
         const palette = [

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\ApiSyncService;
 use App\Services\PpdbExportService;
 use App\Services\PpdbImportService;
+use App\Support\AnnouncementSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -115,6 +116,33 @@ class AdminPpdbController extends Controller
         $request->session()->forget(['admin_api_token', 'admin_user', 'is_admin']);
 
         return redirect()->route('admin.login')->with('info', 'Sesi admin telah berhasil ditutup.');
+    }
+
+    public function announcement()
+    {
+        return view('admin.ppdb.announcement', [
+            'announcement' => AnnouncementSetting::get(),
+        ]);
+    }
+
+    public function saveAnnouncement(Request $request)
+    {
+        $data = $request->validate([
+            'enabled' => ['required', 'boolean'],
+            'title' => ['required_if:enabled,1', 'nullable', 'string', 'max:150'],
+            'message' => ['required_if:enabled,1', 'nullable', 'string', 'max:5000'],
+        ], [
+            'title.required_if' => 'Judul wajib diisi saat pengumuman diaktifkan.',
+            'message.required_if' => 'Isi pengumuman wajib diisi saat pengumuman diaktifkan.',
+        ]);
+
+        AnnouncementSetting::save([
+            'enabled' => $request->boolean('enabled'),
+            'title' => trim($data['title'] ?? ''),
+            'message' => trim($data['message'] ?? ''),
+        ]);
+
+        return redirect()->route('admin.ppdb.announcement')->with('success', 'Pengumuman berhasil diperbarui.');
     }
 
     /**
@@ -590,6 +618,15 @@ class AdminPpdbController extends Controller
                 ->first();
 
             $cleanNik = !empty($request->nik) ? preg_replace('/[^0-9]/', '', $request->nik) : ($reg?->account?->nik);
+            $currentAmount = $reg && $reg->payment_amount !== null ? (float) $reg->payment_amount : null;
+            $paymentAmount = ($request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '')
+                ? (float) $request->payment_amount
+                : ($request->payment_status === 'paid' ? ($currentAmount ?? 400000.0) : 400000.0);
+            $paymentStatus = $request->payment_status;
+            if ($paymentAmount == 0.0 && $request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '') {
+                $paymentStatus = 'paid';
+            }
+            $formData = is_array($reg?->form_data) ? $reg->form_data : [];
 
             if ($reg) {
                 // 1. Update Akun Lokal
@@ -609,7 +646,6 @@ class AdminPpdbController extends Controller
                 }
 
                 // 2. Update Registrasi & Form Data Lokal
-                $formData = is_array($reg->form_data) ? $reg->form_data : [];
                 $formData['full_name'] = $request->full_name;
                 if (!empty($cleanNik)) {
                     $formData['nik'] = $cleanNik;
@@ -621,16 +657,6 @@ class AdminPpdbController extends Controller
                 if ($request->filled('phone')) {
                     $formData['contact']['whatsapp_number'] = $request->phone;
                     $formData['contact']['mobile_number'] = $request->phone;
-                }
-
-                $isPaid = $request->payment_status === 'paid';
-                $currentAmount = isset($reg->payment_amount) ? (float)$reg->payment_amount : null;
-                $paymentAmount = ($request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '')
-                    ? (float) $request->payment_amount
-                    : ($request->payment_status === 'paid' ? ($currentAmount !== null ? $currentAmount : 400000.0) : 400000.0);
-                $paymentStatus = $request->payment_status;
-                if ($paymentAmount == 0.0 && $request->has('payment_amount') && $request->payment_amount !== null && $request->payment_amount !== '') {
-                    $paymentStatus = 'paid';
                 }
 
                 $reg->update([
@@ -651,10 +677,10 @@ class AdminPpdbController extends Controller
                     'full_name' => $request->full_name,
                     'email' => $request->email,
                     'nik' => $cleanNik ?: '',
-                    'payment_status' => $paymentStatus ?? $request->payment_status,
+                    'payment_status' => $paymentStatus,
                     'payment_amount' => $paymentAmount,
                     'registration_status' => $reg?->registration_status ?? 'pending',
-                    'form_data' => $formData ?? [],
+                    'form_data' => $formData,
                 ];
                 if ($request->filled('password')) {
                     $payload['password'] = $request->password;
@@ -1066,7 +1092,7 @@ class AdminPpdbController extends Controller
      * Mengosongkan path di database agar pendaftar dapat mengunggah ulang dokumen tersebut,
      * dan menghapus file fisik di server jika masih ada (tanpa menyentuh bukti pembayaran / biodata).
      */
-    public function deleteDocument(Request $request, $id, $documentType)
+    public function deleteDocument(Request $request, string $id, string $documentType)
     {
         $allowedDocTypes = [
             'kk' => 'Kartu Keluarga (KK)',

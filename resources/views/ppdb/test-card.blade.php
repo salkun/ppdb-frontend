@@ -142,6 +142,11 @@
                             <td class="tc-sep">:</td>
                             <td class="tc-val">{{ $formData['school_origin'] ?? '-' }}</td>
                         </tr>
+                        <tr>
+                            <td class="tc-lbl">Email</td>
+                            <td class="tc-sep">:</td>
+                            <td class="tc-val">{{ $user['email'] ?? $formData['contact']['email'] ?? '-' }}</td>
+                        </tr>
                     </table>
                 </div>
             </div>

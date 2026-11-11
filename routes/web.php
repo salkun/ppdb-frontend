@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PpdbController;
 use App\Http\Controllers\AdminPpdbController;
+use App\Http\Controllers\ExamController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +38,7 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 // Rute Terproteksi Calon Siswa (check.api.token)
-Route::middleware(['check.api.token'])->group(function () {
+Route::middleware(['check.api.token', 'exam.mode'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/ppdb/payment-status', function () {
@@ -63,6 +64,13 @@ Route::middleware(['check.api.token'])->group(function () {
     Route::get('/ppdb/test-card', [PpdbController::class, 'showTestCard'])->name('ppdb.test-card');
     Route::get('/ppdb/upload-berkas', [PpdbController::class, 'showUpload'])->name('ppdb.upload');
     Route::post('/ppdb/upload-berkas', [PpdbController::class, 'submitUpload'])->name('ppdb.upload.submit');
+    Route::get('/exams', [ExamController::class, 'studentIndex'])->name('exams.index');
+    Route::post('/exams/{exam}/start', [ExamController::class, 'start'])->name('exams.start');
+    Route::get('/exams/{exam}', [ExamController::class, 'take'])->name('exams.take');
+    Route::post('/exams/{exam}/answers', [ExamController::class, 'saveAnswer'])->name('exams.answers');
+    Route::post('/exams/{exam}/violation', [ExamController::class, 'violation'])->name('exams.violation');
+    Route::post('/exams/{exam}/resume', [ExamController::class, 'resume'])->name('exams.resume');
+    Route::post('/exams/{exam}/submit', [ExamController::class, 'submit'])->name('exams.submit');
 });
 
 // ==========================================
@@ -98,6 +106,15 @@ Route::prefix('admin')->group(function () {
         
         // Modul Verifikasi Pembayaran
         Route::get('/ppdb/payments', [AdminPpdbController::class, 'payments'])->name('admin.ppdb.payments');
+        Route::get('/ppdb/announcement', [AdminPpdbController::class, 'announcement'])->name('admin.ppdb.announcement');
+        Route::put('/ppdb/announcement', [AdminPpdbController::class, 'saveAnnouncement'])->name('admin.ppdb.announcement.save');
+        Route::get('/ppdb/exams', [ExamController::class, 'adminIndex'])->name('admin.ppdb.exams');
+        Route::post('/ppdb/exams', [ExamController::class, 'saveExam'])->name('admin.ppdb.exams.save');
+        Route::get('/ppdb/exams/template', [ExamController::class, 'questionTemplate'])->name('admin.ppdb.exams.template');
+        Route::get('/ppdb/exams/{exam}/results/export', [ExamController::class, 'exportResults'])->name('admin.ppdb.exams.results.export');
+        Route::post('/ppdb/exams/{exam}/questions/preview', [ExamController::class, 'previewImport'])->name('admin.ppdb.exams.preview');
+        Route::post('/ppdb/exams/{exam}/questions/import', [ExamController::class, 'confirmImport'])->name('admin.ppdb.exams.import');
+        Route::post('/ppdb/exams/attempts/{attempt}/reopen', [ExamController::class, 'reopenAttempt'])->name('admin.ppdb.exams.attempts.reopen');
         Route::post('/ppdb/bank-setting', function (\Illuminate\Http\Request $request) {
             $data = $request->validate([
                 'bank_name' => 'required|string|max:100',
@@ -418,4 +435,3 @@ Route::get('/sync-uploads', function () {
         </div>
     </div>");
 });
-

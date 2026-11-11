@@ -98,6 +98,18 @@
                             <span>Verifikasi Bayar</span>
                         </a>
                     </li>
+                    <li>
+                        <a class="admin-nav-link {{ request()->routeIs('admin.ppdb.announcement') ? 'active' : '' }}" href="{{ route('admin.ppdb.announcement') }}">
+                            <span class="material-symbols-outlined">campaign</span>
+                            <span>Pengumuman Siswa</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="admin-nav-link {{ request()->routeIs('admin.ppdb.exams*') ? 'active' : '' }}" href="{{ route('admin.ppdb.exams') }}">
+                            <span class="material-symbols-outlined">quiz</span>
+                            <span>Pengelolaan Ujian</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Navigation Group: Laporan & Alat -->
@@ -196,6 +208,18 @@
                             <a class="admin-nav-link {{ request()->routeIs('admin.ppdb.payments') ? 'active' : '' }}" href="{{ route('admin.ppdb.payments') }}">
                                 <span class="material-symbols-outlined">payments</span>
                                 <span>Verifikasi Bayar</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="admin-nav-link {{ request()->routeIs('admin.ppdb.announcement') ? 'active' : '' }}" href="{{ route('admin.ppdb.announcement') }}">
+                                <span class="material-symbols-outlined">campaign</span>
+                                <span>Pengumuman Siswa</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="admin-nav-link {{ request()->routeIs('admin.ppdb.exams*') ? 'active' : '' }}" href="{{ route('admin.ppdb.exams') }}">
+                                <span class="material-symbols-outlined">quiz</span>
+                                <span>Pengelolaan Ujian</span>
                             </a>
                         </li>
                     </ul>

@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\PpdbAccount;
 use App\Models\PpdbRegistration;
+use App\Support\AnnouncementSetting;
+use Illuminate\Support\Facades\File;
 
 class AdminPpdbTest extends TestCase
 {
@@ -31,6 +33,52 @@ class AdminPpdbTest extends TestCase
         $response = $this->get('/admin/ppdb');
         $response->assertRedirect('/admin/login');
         $response->assertSessionHas('warning');
+    }
+
+    public function test_admin_can_save_student_announcement(): void
+    {
+        $path = storage_path('app/announcement_setting.json');
+        $hadSetting = File::exists($path);
+        $previousSetting = $hadSetting ? File::get($path) : null;
+
+        try {
+            $session = [
+                'admin_api_token' => 'admin-jwt-token-12345',
+                'is_admin' => true,
+            ];
+
+            $this->withSession($session)
+                ->get('/admin/ppdb/announcement')
+                ->assertOk()
+                ->assertSee('Pengumuman Dashboard Siswa');
+
+            $this->withSession($session)
+                ->put('/admin/ppdb/announcement', [
+                    'enabled' => '1',
+                    'title' => 'Jadwal Seleksi',
+                    'message' => 'Seleksi dimulai hari Senin.',
+                ])
+                ->assertRedirect('/admin/ppdb/announcement')
+                ->assertSessionHas('success');
+
+            $this->assertSame([
+                'enabled' => true,
+                'title' => 'Jadwal Seleksi',
+                'message' => 'Seleksi dimulai hari Senin.',
+            ], AnnouncementSetting::get());
+
+            $this->withSession($session)
+                ->put('/admin/ppdb/announcement', ['enabled' => '0'])
+                ->assertRedirect('/admin/ppdb/announcement');
+
+            $this->assertFalse(AnnouncementSetting::get()['enabled']);
+        } finally {
+            if ($hadSetting) {
+                File::put($path, $previousSetting);
+            } else {
+                File::delete($path);
+            }
+        }
     }
 
     /**

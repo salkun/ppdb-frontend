@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\InteractsWithFastApi;
 use App\Models\PpdbAccount;
 use App\Models\PpdbRegistration;
+use App\Support\AnnouncementSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -18,6 +19,8 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
+        $announcement = AnnouncementSetting::get();
+
         try {
             // Khusus dalam mode testing (PHPUnit/Pest), utamakan respons dari mocked API jika ada
             if (app()->environment('testing') && session()->has('api_token') && !str_starts_with(session('api_token'), 'local_auth_')) {
@@ -32,6 +35,7 @@ class DashboardController extends Controller
                                 'email' => session('email'),
                             ],
                             'backendUrl' => $this->backendUrl(),
+                            'announcement' => $announcement,
                         ]);
                     }
                 } catch (\Throwable $e) {
@@ -80,6 +84,7 @@ class DashboardController extends Controller
                         'email' => $localAccount->email,
                     ],
                     'backendUrl' => $this->backendUrl(),
+                    'announcement' => $announcement,
                 ]);
             }
 
@@ -104,6 +109,7 @@ class DashboardController extends Controller
                                 'email' => session('email'),
                             ],
                             'backendUrl' => $this->backendUrl(),
+                            'announcement' => $announcement,
                         ]);
                     }
                 } catch (\Throwable $e) {
@@ -120,6 +126,7 @@ class DashboardController extends Controller
                     'email' => session('email'),
                 ],
                 'backendUrl' => $this->backendUrl(),
+                'announcement' => $announcement,
             ]);
 
         } catch (\Exception $e) {
@@ -133,6 +140,7 @@ class DashboardController extends Controller
                     'email' => session('email'),
                 ],
                 'backendUrl' => $this->backendUrl(),
+                'announcement' => $announcement,
             ]);
         }
     }

@@ -221,6 +221,8 @@ class PpdbController extends Controller
                 $studentData = [
                     'full_name' => session('full_name', $registration?->account?->full_name ?? 'Calon Siswa'),
                     'email' => session('email', $registration?->account?->email ?? '-'),
+                    'nik' => $registration?->account?->nik ?? ($registration?->form_data['nik'] ?? '-'),
+                    'phone' => $registration?->form_data['contact']['mobile_number'] ?? $registration?->account?->phone ?? '-',
                     'sender_bank_name' => $senderBank,
                     'sender_name' => $senderName,
                 ];
@@ -289,6 +291,9 @@ class PpdbController extends Controller
             if (empty($formData['contact']['email'])) {
                 $formData['contact']['email'] = session('email', $registrationModel->account?->email);
             }
+            if (empty($formData['contact']['mobile_number'])) {
+                $formData['contact']['mobile_number'] = $registrationModel->account?->phone;
+            }
 
             $isLocked = ($registrationStatus === 'accepted');
 
@@ -319,13 +324,11 @@ class PpdbController extends Controller
     public function submitForm(Request $request)
     {
         // Status Keberadaan Orang Tua di KK
-        $fatherStatus = $request->input('father_status', 'ada');
+        $fatherStatus = $request->input('father_status');
         $isFatherRequired = ($fatherStatus === 'ada');
 
-        $motherStatus = $request->input('mother_status', 'ada');
+        $motherStatus = $request->input('mother_status');
         $isMotherRequired = ($motherStatus === 'ada');
-
-        $bothParentsAbsent = (!$isFatherRequired && !$isMotherRequired);
 
         // 1. Validasi Input Form
         $validated = $request->validate([
@@ -365,48 +368,40 @@ class PpdbController extends Controller
             'email' => ['required', 'email', 'max:150'],
 
             // Tahap 5: Data Ayah Kandung
-            'father_status' => ['nullable', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
-            'father_nik' => array_values(array_filter([
-                $isFatherRequired ? 'required' : 'nullable',
-                'string',
-                ($isFatherRequired || $request->filled('father_nik')) ? 'digits:16' : null,
-            ])),
+            'father_status' => ['required', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
+            'father_nik' => [$isFatherRequired ? 'required' : 'nullable', 'string', 'digits:16'],
             'father_name' => [$isFatherRequired ? 'required' : 'nullable', 'string', 'max:150'],
             'father_birth_year' => [$isFatherRequired ? 'required' : 'nullable', 'digits:4'],
             'father_education' => [$isFatherRequired ? 'required' : 'nullable', 'string'],
             'father_occupation' => [$isFatherRequired ? 'required' : 'nullable', 'string'],
             'father_income' => [$isFatherRequired ? 'required' : 'nullable', 'string'],
-            'father_phone' => ['nullable', 'string', 'max:20'],
-            'father_whatsapp' => ['nullable', 'string', 'max:20'],
-            'father_email' => ['nullable', 'email', 'max:150'],
+            'father_phone' => [$isFatherRequired ? 'required' : 'nullable', 'string', 'max:20'],
+            'father_whatsapp' => [$isFatherRequired ? 'required' : 'nullable', 'string', 'max:20'],
+            'father_email' => [$isFatherRequired ? 'required' : 'nullable', 'email', 'max:150'],
 
             // Data Ibu Kandung
-            'mother_status' => ['nullable', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
-            'mother_nik' => array_values(array_filter([
-                $isMotherRequired ? 'required' : 'nullable',
-                'string',
-                ($isMotherRequired || $request->filled('mother_nik')) ? 'digits:16' : null,
-            ])),
+            'mother_status' => ['required', 'string', 'in:ada,meninggal,cerai,tidak_diketahui'],
+            'mother_nik' => [$isMotherRequired ? 'required' : 'nullable', 'string', 'digits:16'],
             'mother_name' => [$isMotherRequired ? 'required' : 'nullable', 'string', 'max:150'],
             'mother_birth_year' => [$isMotherRequired ? 'required' : 'nullable', 'digits:4'],
             'mother_education' => [$isMotherRequired ? 'required' : 'nullable', 'string'],
             'mother_occupation' => [$isMotherRequired ? 'required' : 'nullable', 'string'],
             'mother_income' => [$isMotherRequired ? 'required' : 'nullable', 'string'],
-            'mother_phone' => ['nullable', 'string', 'max:20'],
-            'mother_whatsapp' => ['nullable', 'string', 'max:20'],
-            'mother_email' => ['nullable', 'email', 'max:150'],
+            'mother_phone' => [$isMotherRequired ? 'required' : 'nullable', 'string', 'max:20'],
+            'mother_whatsapp' => [$isMotherRequired ? 'required' : 'nullable', 'string', 'max:20'],
+            'mother_email' => [$isMotherRequired ? 'required' : 'nullable', 'email', 'max:150'],
 
-            // Data Wali (Wajib jika kedua orang tua tidak tercantum di KK)
-            'has_guardian' => [$bothParentsAbsent ? 'required' : 'nullable'],
-            'guardian_nik' => ['nullable', 'required_if:has_guardian,1', 'string', 'digits:16'],
-            'guardian_name' => ['nullable', 'required_if:has_guardian,1', 'string', 'max:150'],
-            'guardian_birth_year' => ['nullable', 'required_if:has_guardian,1', 'digits:4'],
-            'guardian_education' => ['nullable', 'required_if:has_guardian,1', 'string'],
-            'guardian_occupation' => ['nullable', 'required_if:has_guardian,1', 'string'],
-            'guardian_income' => ['nullable', 'required_if:has_guardian,1', 'string'],
-            'guardian_phone' => ['nullable', 'string', 'max:20'],
-            'guardian_whatsapp' => ['nullable', 'string', 'max:20'],
-            'guardian_email' => ['nullable', 'email', 'max:150'],
+            // Data Wali (opsional; seluruh rinciannya wajib jika dipilih)
+            'has_guardian' => ['nullable', 'boolean'],
+            'guardian_nik' => ['required_if:has_guardian,1', 'nullable', 'string', 'digits:16'],
+            'guardian_name' => ['required_if:has_guardian,1', 'nullable', 'string', 'max:150'],
+            'guardian_birth_year' => ['required_if:has_guardian,1', 'nullable', 'digits:4'],
+            'guardian_education' => ['required_if:has_guardian,1', 'nullable', 'string'],
+            'guardian_occupation' => ['required_if:has_guardian,1', 'nullable', 'string'],
+            'guardian_income' => ['required_if:has_guardian,1', 'nullable', 'string'],
+            'guardian_phone' => ['required_if:has_guardian,1', 'nullable', 'string', 'max:20'],
+            'guardian_whatsapp' => ['required_if:has_guardian,1', 'nullable', 'string', 'max:20'],
+            'guardian_email' => ['required_if:has_guardian,1', 'nullable', 'email', 'max:150'],
         ], [
             'major.required' => 'Silakan pilih jurusan yang diminati.',
             'school_origin.required' => 'Nama asal sekolah wajib diisi.',
@@ -415,14 +410,13 @@ class PpdbController extends Controller
             'nisn.digits' => 'NISN harus 10 digit angka.',
             'family_card_number.digits' => 'Nomor Kartu Keluarga (KK) harus 16 digit.',
             'birth_order.required' => 'Urutan anak ke-berapa wajib diisi.',
-            'father_name.required' => 'Nama lengkap Ayah wajib diisi jika status tercantum di KK.',
-            'father_nik.required' => 'NIK Ayah wajib diisi 16 digit jika status tercantum di KK.',
+            'father_name.required' => 'Nama lengkap Ayah wajib diisi.',
+            'father_nik.required' => 'NIK Ayah wajib diisi 16 digit.',
             'father_nik.digits' => 'NIK Ayah harus 16 digit.',
-            'mother_name.required' => 'Nama lengkap Ibu wajib diisi jika status tercantum di KK.',
-            'mother_nik.required' => 'NIK Ibu wajib diisi 16 digit jika status tercantum di KK.',
+            'mother_name.required' => 'Nama lengkap Ibu wajib diisi.',
+            'mother_nik.required' => 'NIK Ibu wajib diisi 16 digit.',
             'mother_nik.digits' => 'NIK Ibu harus 16 digit.',
             'guardian_nik.digits' => 'NIK Wali harus 16 digit.',
-            'has_guardian.required' => 'Karena status Ayah dan Ibu tidak tercantum di KK (Meninggal/Cerai/Pisah), Anda wajib mencentang dan mengisi data Wali calon siswa.',
         ]);
 
         // 2. Merakit student_parents
@@ -567,6 +561,7 @@ class PpdbController extends Controller
                     $registration->account->update([
                         'nik' => $request->nik,
                         'full_name' => $request->full_name,
+                        'phone' => $request->mobile_number,
                         'sync_status' => 'pending',
                     ]);
                 }

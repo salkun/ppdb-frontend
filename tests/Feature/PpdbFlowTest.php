@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
+use App\Support\AnnouncementSetting;
 use Illuminate\Http\UploadedFile;
 
 class PpdbFlowTest extends TestCase
@@ -41,27 +43,40 @@ class PpdbFlowTest extends TestCase
     }
 
     /**
-     * Test register sends email, full_name, and password without NIK.
+     * Test register saves the student phone number and sends it to the backend.
      */
     public function test_register_creates_account_and_redirects_to_login(): void
     {
+        $email = 'ahmad.' . uniqid() . '@example.com';
+
         Http::fake([
             '*/api/ppdb/register-account' => Http::response([
                 'id' => 'mock-uuid-1234',
-                'email' => 'ahmad@example.com',
+                'email' => $email,
                 'full_name' => 'Ahmad Fauzi',
             ], 201),
         ]);
 
         $response = $this->post('/register', [
-            'email' => 'ahmad@example.com',
+            'email' => $email,
             'full_name' => 'Ahmad Fauzi',
+            'phone' => '081234567890',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
         ]);
 
         $response->assertRedirect('/login');
         $response->assertSessionHas('success');
+
+        $account = \App\Models\PpdbAccount::where('email', $email)->firstOrFail();
+        $this->assertSame('081234567890', $account->phone);
+        $this->assertSame('081234567890', $account->registration->form_data['contact']['mobile_number']);
+
+        Http::assertSent(function ($request) use ($email) {
+            return $request->url() === config('ppdb.api_url') . '/api/ppdb/register-account'
+                && $request->data()['email'] === $email
+                && $request->data()['phone'] === '081234567890';
+        });
     }
 
     /**
@@ -85,6 +100,7 @@ class PpdbFlowTest extends TestCase
         ]);
 
         $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('show_announcement_popup', true);
         $this->assertEquals('mocked-jwt-token-xyz', session('api_token'));
         $this->assertEquals('Ahmad Fauzi', session('full_name'));
         $this->assertEquals('ahmad@example.com', session('email'));
@@ -118,6 +134,47 @@ class PpdbFlowTest extends TestCase
         $response->assertSee('BELUM BAYAR');
         $response->assertSee('Rp 400.000');
         $response->assertSee('ahmad@example.com');
+    }
+
+    public function test_active_announcement_is_shown_on_dashboard_and_after_login(): void
+    {
+        $path = storage_path('app/announcement_setting.json');
+        $hadSetting = File::exists($path);
+        $previousSetting = $hadSetting ? File::get($path) : null;
+
+        try {
+            AnnouncementSetting::save([
+                'enabled' => true,
+                'title' => 'Jadwal Seleksi',
+                'message' => "Seleksi dimulai hari Senin.\nHarap hadir tepat waktu.",
+            ]);
+
+            Http::fake([
+                '*/api/ppdb/my-registration' => Http::response([
+                    'payment_status' => 'unpaid',
+                    'registration_status' => 'pending',
+                    'form_data' => null,
+                ], 200),
+            ]);
+
+            $response = $this->withSession([
+                'api_token' => 'mocked-jwt-token-xyz',
+                'show_announcement_popup' => true,
+            ])->get('/dashboard');
+
+            $response->assertOk();
+            $response->assertSee('Jadwal Seleksi');
+            $response->assertSee('Seleksi dimulai hari Senin.');
+            $response->assertSee('studentAnnouncementModal');
+            $response->assertSee('student-announcement-overlay is-open');
+            $response->assertSee('aria-modal="true"', false);
+        } finally {
+            if ($hadSetting) {
+                File::put($path, $previousSetting);
+            } else {
+                File::delete($path);
+            }
+        }
     }
 
     /**
@@ -255,6 +312,7 @@ class PpdbFlowTest extends TestCase
             'email' => 'ahmad.fauzi@student.sch.id',
 
             // Tahap 5 - Ayah
+            'father_status' => 'ada',
             'father_nik' => '3201011122330001',
             'father_name' => 'Bambang Sudarsono',
             'father_birth_year' => '1978',
@@ -266,6 +324,7 @@ class PpdbFlowTest extends TestCase
             'father_email' => 'bambang.sudarsono@example.com',
 
             // Tahap 5 - Ibu
+            'mother_status' => 'ada',
             'mother_nik' => '3201011122330002',
             'mother_name' => 'Siti Aminah',
             'mother_birth_year' => '1982',
@@ -398,6 +457,7 @@ class PpdbFlowTest extends TestCase
         $response->assertSee('REG-2026-001');
         $response->assertSee('3201012345670001');
         $response->assertSee('Reguler');
+        $response->assertSee('ahmad@example.com');
     }
 
     /**
@@ -655,40 +715,67 @@ class PpdbFlowTest extends TestCase
             'mobile_number' => '081299998888',
             'whatsapp_number' => '081299998888',
             'email' => $email,
+            'father_status' => 'ada',
             'father_nik' => '3201019999990003',
             'father_name' => 'Dedi Mulyadi',
             'father_birth_year' => '1975',
             'father_education' => '06',
             'father_occupation' => 'Wiraswasta Pedagang Toko',
             'father_income' => '03',
+            'father_phone' => '081234567801',
+            'father_whatsapp' => '081234567801',
+            'father_email' => 'dedi@example.com',
+            'mother_status' => 'ada',
             'mother_nik' => '3201019999990004',
             'mother_name' => 'Nurhasanah',
             'mother_birth_year' => '1980',
             'mother_education' => '04',
             'mother_occupation' => 'Ibu Rumah Tangga & Penjahit',
             'mother_income' => '06',
+            'mother_phone' => '081234567802',
+            'mother_whatsapp' => '081234567802',
+            'mother_email' => 'nurhasanah@example.com',
         ];
 
-        $response = $this->withSession([
+        $session = [
             'api_token' => 'local_auth_' . $account->id,
             'account_id' => $account->id,
             'full_name' => $account->full_name,
             'email' => $account->email,
-        ])->post('/ppdb/form', $postData);
+        ];
+
+        $incompletePostData = $postData;
+        unset($incompletePostData['father_phone']);
+        unset($incompletePostData['mother_status']);
+        $this->withSession($session)
+            ->from('/ppdb/form')
+            ->post('/ppdb/form', $incompletePostData)
+            ->assertSessionHasErrors(['father_phone', 'mother_status']);
+
+        $incompleteGuardianData = $postData;
+        $incompleteGuardianData['has_guardian'] = '1';
+        $this->withSession($session)
+            ->from('/ppdb/form')
+            ->post('/ppdb/form', $incompleteGuardianData)
+            ->assertSessionHasErrors(['guardian_nik', 'guardian_email']);
+
+        $response = $this->withSession($session)->post('/ppdb/form', $postData);
 
         $response->assertRedirect('/dashboard');
         $response->assertSessionHas('success');
 
         $reg->refresh();
+        $account->refresh();
         $formData = $reg->form_data;
         $this->assertEquals('Wiraswasta Pedagang Toko', $formData['student_parents'][0]['parent']['occupation_code']);
         $this->assertEquals('Ibu Rumah Tangga & Penjahit', $formData['student_parents'][1]['parent']['occupation_code']);
+        $this->assertSame('081299998888', $account->phone);
     }
 
     /**
-     * Test form submission when father is deceased/divorced and details are omitted.
+     * Parent details are optional when their status says they are not listed in the family card.
      */
-    public function test_submit_form_with_deceased_or_divorced_parent_passes_validation(): void
+    public function test_submit_form_allows_missing_parent_details_when_status_is_not_present_in_family_card(): void
     {
         Http::fake([
             '*/api/ppdb/registration-form' => Http::response(['success' => true], 200),
@@ -737,22 +824,9 @@ class PpdbFlowTest extends TestCase
             'mobile_number' => '081234567890',
             'whatsapp_number' => '081234567890',
             'email' => $account->email,
-            // Status Ayah: Meninggal Dunia, rincian dikosongkan
+            // Rincian orang tua yang tidak tercantum di KK bersifat opsional.
             'father_status' => 'meninggal',
-            'father_nik' => '',
-            'father_name' => '',
-            'father_birth_year' => '',
-            'father_education' => '',
-            'father_occupation' => '',
-            'father_income' => '',
-            // Status Ibu: Ada di KK, rincian lengkap
-            'mother_status' => 'ada',
-            'mother_nik' => '3201019999990011',
-            'mother_name' => 'Siti Nurhaliza',
-            'mother_birth_year' => '1982',
-            'mother_education' => '04',
-            'mother_occupation' => 'Pedagang',
-            'mother_income' => '03',
+            'mother_status' => 'cerai',
         ];
 
         $response = $this->withSession([
@@ -769,6 +843,10 @@ class PpdbFlowTest extends TestCase
         $formData = $reg->form_data;
         $this->assertEquals('meninggal', $formData['student_parents'][0]['parent']['status']);
         $this->assertEquals('Meninggal Dunia', $formData['student_parents'][0]['parent']['status_label']);
-        $this->assertEquals('Siti Nurhaliza', $formData['student_parents'][1]['parent']['full_name']);
+        $this->assertEquals('cerai', $formData['student_parents'][1]['parent']['status']);
+        $this->assertEquals('Cerai / Pisah KK', $formData['student_parents'][1]['parent']['status_label']);
+        $this->assertNull($formData['student_parents'][0]['parent']['nik']);
+        $this->assertNull($formData['student_parents'][1]['parent']['nik']);
+        $this->assertCount(2, $formData['student_parents']);
     }
 }

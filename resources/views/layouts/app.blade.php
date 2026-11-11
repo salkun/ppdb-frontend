@@ -30,7 +30,19 @@
 
     @stack('styles')
 </head>
-<body>
+<body class="{{ session('exam_mode') ? 'exam-mode' : '' }}">
+    @if(session('exam_mode'))
+        <style>
+            .exam-mode .db-sidebar,
+            .exam-mode #sidebarOffcanvas,
+            .exam-mode .db-mobile-tab-bar { display: none !important; }
+            .exam-mode .db-topbar [data-bs-target="#sidebarOffcanvas"],
+            .exam-mode .db-topbar form { display: none !important; }
+            .exam-mode .db-shell { display: block !important; }
+            .exam-mode .db-viewport { width: 100%; min-height: 100vh; margin-left: 0 !important; }
+            .exam-mode .db-viewport > main { width: 100%; }
+        </style>
+    @endif
 
     @if(session()->has('api_token'))
         <!-- ======================================================== -->
@@ -83,6 +95,12 @@
                                 </a>
                             </li>
                             <li>
+                                <a class="db-sidebar-link {{ request()->routeIs('exams.*') ? 'active' : '' }}" href="{{ route('exams.index') }}">
+                                    <span class="material-symbols-outlined">quiz</span>
+                                    <span>Ujian Seleksi</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="db-sidebar-link" href="{{ route('home') }}">
                                     <span class="material-symbols-outlined">info</span>
                                     <span>Informasi & Alur</span>
@@ -129,6 +147,7 @@
                             <li><a class="db-sidebar-link {{ request()->routeIs('ppdb.form') ? 'active' : '' }}" href="{{ route('ppdb.form') }}"><span class="material-symbols-outlined">edit_note</span><span>Formulir Pendaftaran</span></a></li>
                             <li><a class="db-sidebar-link {{ request()->routeIs('ppdb.upload') ? 'active' : '' }}" href="{{ route('ppdb.upload') }}"><span class="material-symbols-outlined">cloud_upload</span><span>Upload Berkas</span></a></li>
                             <li><a class="db-sidebar-link {{ request()->routeIs('ppdb.test-card') ? 'active' : '' }}" href="{{ route('ppdb.test-card') }}"><span class="material-symbols-outlined">badge</span><span>Kartu Tes</span></a></li>
+                            <li><a class="db-sidebar-link {{ request()->routeIs('exams.*') ? 'active' : '' }}" href="{{ route('exams.index') }}"><span class="material-symbols-outlined">quiz</span><span>Ujian Seleksi</span></a></li>
                             <li><a class="db-sidebar-link" href="{{ route('home') }}"><span class="material-symbols-outlined">info</span><span>Informasi & Alur</span></a></li>
                         </ul>
                     </div>
@@ -234,6 +253,10 @@
                     <a href="{{ route('ppdb.test-card') }}" class="db-mobile-tab {{ request()->routeIs('ppdb.test-card') ? 'active' : '' }}">
                         <span class="material-symbols-outlined">badge</span>
                         <span>Kartu Tes</span>
+                    </a>
+                    <a href="{{ route('exams.index') }}" class="db-mobile-tab {{ request()->routeIs('exams.*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined">quiz</span>
+                        <span>Ujian</span>
                     </a>
                     <a href="{{ route('home') }}" class="db-mobile-tab">
                         <span class="material-symbols-outlined">info</span>

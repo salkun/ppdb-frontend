@@ -97,6 +97,7 @@ class ApiSyncService
         $payload = [
             'full_name' => $account->full_name,
             'email' => $account->email,
+            'phone' => $account->phone,
             'password' => 'PpdbPassword' . rand(1000, 9999) . '!', // Fallback password jika akun dibuat lokal tanpa plaintext
         ];
         if (!empty($account->nik)) {

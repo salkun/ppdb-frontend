@@ -2,6 +2,28 @@
 
 @push('styles')
 <style>
+    .student-announcement-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.62);
+    }
+    .student-announcement-overlay.is-open {
+        display: flex;
+    }
+    .student-announcement-dialog {
+        width: min(100%, 520px);
+        max-height: min(80vh, 680px);
+        overflow-y: auto;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        background: #fff;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
+    }
     .pay-method-card {
         border: 2px solid #e2e8f0;
         border-radius: 14px;
@@ -71,11 +93,79 @@
         top: 4px;
         left: 4px;
     }
+    .payment-method-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 700;
+    }
+    .payment-method-badge.transfer {
+        background: rgba(0, 102, 204, 0.12);
+        color: var(--lp-primary);
+        border: 1px solid rgba(0, 102, 204, 0.3);
+    }
+    .payment-method-badge.cash {
+        background: rgba(13, 148, 136, 0.12);
+        color: #0f766e;
+        border: 1px solid rgba(13, 148, 136, 0.3);
+    }
+    .db-payment-bank.cash {
+        background: rgba(13, 148, 136, 0.06);
+        border-color: rgba(13, 148, 136, 0.25);
+    }
+    .db-payment-bank.cash .db-payment-bank-label,
+    .db-payment-bank.cash .db-payment-bank-num {
+        color: #0f766e;
+    }
+    .db-payment-bank.cash .db-payment-bank-num {
+        font-size: 14px;
+    }
+    .payment-instructions {
+        border-radius: 12px;
+        padding: 0.85rem 1.15rem;
+        margin-bottom: 1.25rem;
+        font-size: 13px;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .payment-instructions.transfer {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+    }
+    .payment-instructions.cash {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+    }
+    .payment-sender-fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-bottom: 1.25rem;
+    }
+    .payment-hidden {
+        display: none !important;
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="db-content">
+
+    @if(!empty($announcement['enabled']))
+        <section class="db-announcement-item mb-4" aria-labelledby="studentAnnouncementTitle">
+            <div class="db-announcement-meta">
+                <span class="material-symbols-outlined" style="font-size:14px;">campaign</span>
+                Pengumuman Resmi
+            </div>
+            <h4 id="studentAnnouncementTitle">{{ $announcement['title'] }}</h4>
+            <p style="white-space:pre-line;">{{ $announcement['message'] }}</p>
+        </section>
+    @endif
 
     @if(isset($error) && !empty($error))
         <div style="background:var(--lp-red-light);border:1px solid rgba(220,38,38,0.3);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--lp-red);font-weight:600;">
@@ -290,6 +380,9 @@
     @php
         $payMethod = $registration['payment_method'] ?? 'transfer';
     @endphp
+    <span id="paymentStatusWatcher" hidden
+          data-payment-status="{{ $paymentStatus }}"
+          data-status-url="{{ route('ppdb.payment-status') }}"></span>
     <div class="db-payment-card fade-in-entry" id="payment-section">
         <div class="db-payment-header">
             <div class="db-payment-title">
@@ -304,7 +397,7 @@
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                 @if(!empty($payMethod) && $paymentStatus !== 'unpaid')
-                    <span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:{{ $payMethod === 'cash' ? 'rgba(13,148,136,0.12)' : 'rgba(0,102,204,0.12)' }};color:{{ $payMethod === 'cash' ? '#0f766e' : 'var(--lp-primary)' }};border:1px solid {{ $payMethod === 'cash' ? 'rgba(13,148,136,0.3)' : 'rgba(0,102,204,0.3)' }};">
+                    <span class="payment-method-badge {{ $payMethod === 'cash' ? 'cash' : 'transfer' }}">
                         <span class="material-symbols-outlined" style="font-size:14px;">{{ $payMethod === 'cash' ? 'payments' : 'account_balance' }}</span>
                         {{ $payMethod === 'cash' ? 'Tunai (Cash di Loket)' : 'Transfer Bank (TF)' }}
                     </span>
@@ -340,15 +433,15 @@
                     Rp 400.000
                 @endif
             </div>
-            <div class="db-payment-bank" id="payInfoTransfer" style="{{ $payMethod === 'cash' ? 'display:none;' : '' }}">
+            <div class="db-payment-bank {{ $payMethod === 'cash' ? 'payment-hidden' : '' }}" id="payInfoTransfer">
                 @php $bank = \App\Support\BankSetting::get(); @endphp
                 <span class="db-payment-bank-label">Rekening Tujuan ({{ $bank['bank_name'] }})</span>
                 <span class="db-payment-bank-num">{{ $bank['account_number'] }}</span>
                 <span style="font-size:11px;color:var(--lp-on-surface-variant);display:block;margin-top:2px;">a.n. {{ $bank['account_holder'] }}</span>
             </div>
-            <div class="db-payment-bank" id="payInfoCash" style="{{ $payMethod === 'cash' ? '' : 'display:none;' }};background:rgba(13,148,136,0.06);border-color:rgba(13,148,136,0.25);">
-                <span class="db-payment-bank-label" style="color:#0f766e;">Lokasi Pembayaran Tunai</span>
-                <span class="db-payment-bank-num" style="color:#0f766e;font-size:14px;">Loket TU / Panitia SPMB</span>
+            <div class="db-payment-bank cash {{ $payMethod === 'cash' ? '' : 'payment-hidden' }}" id="payInfoCash">
+                <span class="db-payment-bank-label">Lokasi Pembayaran Tunai</span>
+                <span class="db-payment-bank-num">Loket TU / Panitia SPMB</span>
                 <span style="font-size:11px;color:#115e59;display:block;margin-top:2px;">Gedung SMPS2 Al-Muhajirin</span>
             </div>
         </div>
@@ -454,14 +547,14 @@
             </div>
 
             <!-- Petunjuk Ringkas Berdasarkan Metode Terpilih -->
-            <div id="payTransferGuide" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:0.85rem 1.15rem;margin-bottom:1.25rem;font-size:13px;color:#1e40af;display:{{ $payMethod === 'cash' ? 'none' : 'flex' }};align-items:flex-start;gap:10px;">
+            <div id="payTransferGuide" class="payment-instructions transfer {{ $payMethod === 'cash' ? 'payment-hidden' : '' }}" style="display:flex;">
                 <span class="material-symbols-outlined" style="font-size:20px;flex-shrink:0;color:#2563eb;margin-top:2px;">info</span>
                 <div>
                     <strong>Instruksi Transfer:</strong> Silakan transfer <strong>Rp 400.000</strong> ke Rekening {{ $bank['bank_name'] }} <code>{{ $bank['account_number'] }}</code> a.n. <strong>{{ $bank['account_holder'] }}</strong>. Simpan struk fisik ATM atau screenshot m-Banking Anda, lalu unggah di bawah ini.
                 </div>
             </div>
 
-            <div id="payCashGuide" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:0.85rem 1.15rem;margin-bottom:1.25rem;font-size:13px;color:#166534;display:{{ $payMethod === 'cash' ? 'flex' : 'none' }};align-items:flex-start;gap:10px;">
+            <div id="payCashGuide" class="payment-instructions cash {{ $payMethod === 'cash' ? '' : 'payment-hidden' }}" style="display:flex;">
                 <span class="material-symbols-outlined" style="font-size:20px;flex-shrink:0;color:#16a34a;margin-top:2px;">storefront</span>
                 <div>
                     <strong>Instruksi Bayar Tunai:</strong> Lakukan pembayaran tunai <strong>Rp 400.000</strong> langsung di Loket Tata Usaha / Panitia SPMB SMPS2 Al-Muhajirin. Pastikan Anda menerima <strong>Kuitansi Fisik Resmi</strong> bertanda tangan bendahara/panitia, lalu foto kuitansi tersebut dan unggah di bawah ini.
@@ -473,7 +566,7 @@
                 @csrf
                 <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="{{ $payMethod }}">
 
-                <div id="senderFields" style="display:{{ $payMethod === 'cash' ? 'none' : 'grid' }};grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:1.25rem;">
+                <div id="senderFields" class="payment-sender-fields {{ $payMethod === 'cash' ? 'payment-hidden' : '' }}">
                     <div>
                         <label style="font-size:13px;font-weight:700;color:var(--lp-on-surface);margin-bottom:6px;display:block;">Nama Bank Pengirim <span class="text-danger">*</span></label>
                         <input type="text" name="sender_bank_name" value="{{ old('sender_bank_name') }}" maxlength="100" placeholder="Contoh: BCA, BRI, BNI" class="form-control" {{ $payMethod === 'cash' ? '' : 'required' }}>
@@ -525,7 +618,7 @@
             <span class="db-progress-percent">{{ $progressPercent }}% Selesai</span>
         </div>
         <div class="db-progress-bar-wrap">
-            <div class="db-progress-bar-fill" style="width:{{ $progressPercent }}%;"></div>
+            <div class="db-progress-bar-fill" id="registrationProgressBar" data-progress-percent="{{ $progressPercent }}" style="width:0%;"></div>
         </div>
 
         {{-- 2 Feature Cards: Formulir & Upload Berkas --}}
@@ -652,6 +745,11 @@
             @else
                 <span class="db-action-status" style="background:var(--lp-surface-subtle);color:var(--lp-outline);">Terkunci</span>
             @endif
+        </a>
+        <a href="{{ route('exams.index') }}" class="db-action-card">
+            <div class="db-action-icon" style="background:#7c3aed;color:#fff;"><span class="material-symbols-outlined">quiz</span></div>
+            <h5>Ujian Seleksi</h5>
+            <span class="db-action-status" style="background:rgba(214,227,255,0.6);color:var(--lp-primary);">Lihat Akses</span>
         </a>
         <a href="#pengumuman" class="db-action-card" onclick="document.getElementById('pengumuman').scrollIntoView({behavior:'smooth'});return false;">
             <div class="db-action-icon" style="background:var(--lp-yellow);color:#451a03;"><span class="material-symbols-outlined">campaign</span></div>
@@ -802,16 +900,71 @@
 </div>
 @endsection
 
+@if(!empty($announcement['enabled']))
+    <div class="student-announcement-overlay {{ session('show_announcement_popup') ? 'is-open' : '' }}"
+         id="studentAnnouncementModal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="studentAnnouncementModalTitle"
+         aria-hidden="{{ session('show_announcement_popup') ? 'false' : 'true' }}">
+        <div class="student-announcement-dialog">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                <div class="d-flex align-items-center gap-2 text-primary">
+                    <span class="material-symbols-outlined">campaign</span>
+                    <span class="small fw-bold text-uppercase">Pengumuman Resmi</span>
+                </div>
+                <button type="button" class="btn-close" data-close-announcement aria-label="Tutup"></button>
+            </div>
+            <h5 class="fw-bold text-dark mb-3" id="studentAnnouncementModalTitle">{{ $announcement['title'] }}</h5>
+            <div class="text-secondary mb-4" style="white-space:pre-line;">{{ $announcement['message'] }}</div>
+            <div class="text-end">
+                <button type="button" class="btn btn-primary px-4" data-close-announcement>Saya Mengerti</button>
+            </div>
+        </div>
+    </div>
+@endif
+
 @push('scripts')
 <script>
-    @if($paymentStatus === 'pending_verification')
+    document.addEventListener('DOMContentLoaded', function () {
+        var progressBar = document.getElementById('registrationProgressBar');
+        if (progressBar) {
+            progressBar.style.width = progressBar.dataset.progressPercent + '%';
+        }
+    });
+
     (function () {
-        var current = 'pending_verification';
+        var announcementOverlay = document.getElementById('studentAnnouncementModal');
+        if (!announcementOverlay) return;
+
+        function closeAnnouncement() {
+            announcementOverlay.classList.remove('is-open');
+            announcementOverlay.setAttribute('aria-hidden', 'true');
+        }
+
+        announcementOverlay.querySelectorAll('[data-close-announcement]').forEach(function (button) {
+            button.addEventListener('click', closeAnnouncement);
+        });
+        announcementOverlay.addEventListener('click', function (event) {
+            if (event.target === announcementOverlay) closeAnnouncement();
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && announcementOverlay.classList.contains('is-open')) {
+                closeAnnouncement();
+            }
+        });
+    })();
+
+    (function () {
+        var watcher = document.getElementById('paymentStatusWatcher');
+        if (!watcher || watcher.dataset.paymentStatus !== 'pending_verification') return;
+
+        var current = watcher.dataset.paymentStatus;
         var timer = setInterval(check, 10000);
 
         function check() {
             if (document.hidden) return;
-            fetch(@json(route('ppdb.payment-status')), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            fetch(watcher.dataset.statusUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (d) {
                     if (!d || d.payment_status === current) return;
@@ -836,14 +989,13 @@
 
         document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
     })();
-    @endif
     function selectPaymentMethod(method) {
         var inputMethod = document.getElementById('selectedPaymentMethod');
         if (inputMethod) inputMethod.value = method;
 
         var senderBox = document.getElementById('senderFields');
         if (senderBox) {
-            senderBox.style.display = method === 'cash' ? 'none' : 'grid';
+            senderBox.classList.toggle('payment-hidden', method === 'cash');
             senderBox.querySelectorAll('input').forEach(function(i) { i.required = method !== 'cash'; });
         }
 
@@ -865,18 +1017,18 @@
         var submitBtnText = document.getElementById('paySubmitBtnText');
 
         if (method === 'cash') {
-            if (infoTf) infoTf.style.display = 'none';
-            if (infoCash) infoCash.style.display = 'block';
-            if (guideTf) guideTf.style.display = 'none';
-            if (guideCash) guideCash.style.display = 'flex';
+            if (infoTf) infoTf.classList.add('payment-hidden');
+            if (infoCash) infoCash.classList.remove('payment-hidden');
+            if (guideTf) guideTf.classList.add('payment-hidden');
+            if (guideCash) guideCash.classList.remove('payment-hidden');
             if (uploadTitle) uploadTitle.textContent = 'Klik atau seret foto kuitansi tunai ke sini';
             if (uploadHint) uploadHint.textContent = 'Foto kuitansi fisik resmi pembayaran tunai dari panitia SPMB';
             if (submitBtnText) submitBtnText.textContent = 'Unggah Kuitansi Tunai (Cash)';
         } else {
-            if (infoTf) infoTf.style.display = 'block';
-            if (infoCash) infoCash.style.display = 'none';
-            if (guideTf) guideTf.style.display = 'flex';
-            if (guideCash) guideCash.style.display = 'none';
+            if (infoTf) infoTf.classList.remove('payment-hidden');
+            if (infoCash) infoCash.classList.add('payment-hidden');
+            if (guideTf) guideTf.classList.remove('payment-hidden');
+            if (guideCash) guideCash.classList.add('payment-hidden');
             if (uploadTitle) uploadTitle.textContent = 'Klik atau seret bukti transfer ke sini';
             if (uploadHint) uploadHint.textContent = 'Foto struk ATM, screenshot m-Banking, atau PDF slip setoran';
             if (submitBtnText) submitBtnText.textContent = 'Unggah Bukti Transfer (TF)';

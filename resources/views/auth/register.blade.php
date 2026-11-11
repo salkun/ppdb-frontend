@@ -82,6 +82,27 @@
                     @enderror
                 </div>
 
+                <div class="lp-input-group">
+                    <label for="phone" class="lp-input-label">
+                        Nomor HP Calon Siswa <span style="color: var(--lp-red);">*</span>
+                    </label>
+                    <div class="lp-input-wrapper">
+                        <span class="material-symbols-outlined lp-input-icon">call</span>
+                        <input type="tel"
+                               class="lp-input-field @error('phone') is-invalid @enderror"
+                               id="phone"
+                               name="phone"
+                               value="{{ old('phone') }}"
+                               placeholder="Contoh: 081234567890"
+                               inputmode="tel"
+                               maxlength="20"
+                               required>
+                    </div>
+                    @error('phone')
+                        <div class="text-danger mt-1" style="font-size: 12.5px; font-weight: 600;">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <!-- Password & Confirmation -->
                 <div class="row g-3 mb-4">
                     <div class="col-sm-6">

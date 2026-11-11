@@ -33,6 +33,7 @@ class AuthController extends Controller
         $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:150'],
+            'phone' => ['required', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ], [
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
@@ -45,6 +46,7 @@ class AuthController extends Controller
             if ($account) {
                 $account->update([
                     'full_name' => $request->full_name,
+                    'phone' => $request->phone,
                     'password' => Hash::make($request->password),
                     'sync_status' => 'pending',
                 ]);
@@ -52,6 +54,7 @@ class AuthController extends Controller
                 $account = PpdbAccount::create([
                     'full_name' => $request->full_name,
                     'email' => $request->email,
+                    'phone' => $request->phone,
                     'password' => Hash::make($request->password),
                     'sync_status' => 'pending',
                     'sync_message' => 'Akun baru dibuat secara mandiri oleh calon siswa',
@@ -69,6 +72,7 @@ class AuthController extends Controller
                         'full_name' => $request->full_name,
                         'contact' => [
                             'email' => $request->email,
+                            'mobile_number' => $request->phone,
                         ],
                     ],
                     'sync_status' => 'pending',
@@ -81,6 +85,7 @@ class AuthController extends Controller
                 $response = $this->httpClient()->post($this->backendUrl() . '/api/ppdb/register-account', [
                     'full_name' => $request->full_name,
                     'email' => $request->email,
+                    'phone' => $request->phone,
                     'password' => $request->password,
                 ]);
 
@@ -179,7 +184,9 @@ class AuthController extends Controller
                         'nik' => $data['nik'] ?? $account->nik,
                     ]);
 
-                    return redirect()->route('dashboard')->with('success', 'Selamat datang kembali, ' . ($data['full_name'] ?? $account->full_name) . '!');
+                    return redirect()->route('dashboard')
+                        ->with('success', 'Selamat datang kembali, ' . ($data['full_name'] ?? $account->full_name) . '!')
+                        ->with('show_announcement_popup', true);
                 }
             } catch (\Throwable $apiEx) {
                 Log::info('PPDB Login API note: ' . $apiEx->getMessage());
@@ -210,7 +217,9 @@ class AuthController extends Controller
                     'nik' => $localAccount->nik,
                 ]);
 
-                return redirect()->route('dashboard')->with('success', 'Selamat datang kembali, ' . $localAccount->full_name . '!');
+                return redirect()->route('dashboard')
+                    ->with('success', 'Selamat datang kembali, ' . $localAccount->full_name . '!')
+                    ->with('show_announcement_popup', true);
             }
 
             return back()->withInput($request->except('password'))->with('error', 'Kredensial salah atau akun tidak ditemukan di sistem.');

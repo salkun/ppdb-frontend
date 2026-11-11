@@ -29,6 +29,7 @@ class TelegramVerificationTest extends TestCase
             'full_name' => 'Fauzan Santri Test',
             'nik' => '3201018899220001',
             'email' => 'fauzan@example.com',
+            'phone' => '081234567890',
         ];
 
         $regId = (string) Str::uuid();
@@ -40,7 +41,7 @@ class TelegramVerificationTest extends TestCase
             $isPhoto = str_contains($request->url(), '/sendPhoto');
             $body = $request->body();
             $hasButtons = str_contains($body, 'verif_' . $regId) && str_contains($body, 'tolak_' . $regId);
-            return $isPhoto && $hasButtons;
+            return $isPhoto && $hasButtons && str_contains($body, '081234567890');
         });
     }
 
@@ -71,6 +72,7 @@ class TelegramVerificationTest extends TestCase
             'registration_status' => 'pending',
             'form_data' => [
                 'full_name' => 'Santri Siap Verif',
+                'contact' => ['mobile_number' => '081234567891'],
             ],
         ]);
 
@@ -110,7 +112,8 @@ class TelegramVerificationTest extends TestCase
                 return str_contains($request->url(), '/answerCallbackQuery');
             });
             Http::assertSent(function ($request) {
-                return str_contains($request->url(), '/editMessageCaption');
+                return str_contains($request->url(), '/editMessageCaption')
+                    && str_contains($request->body(), '081234567891');
             });
 
         } finally {
