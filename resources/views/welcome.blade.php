@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Penerimaan Murid Baru — SMPS2 Al-Muhajirin')
+@section('title', 'Penerimaan Murid Baru â€” SMPS2 Al-Muhajirin')
 
 @push('styles')
 <style>
 /* ========================================================
-   LANDING PAGE — PROGRAM SECTION & YOUTUBE SHOWCASE STYLES
+   LANDING PAGE â€” PROGRAM SECTION & YOUTUBE SHOWCASE STYLES
    (Disematkan langsung agar tampilan Program & YouTube Showcase
     langsung aktif saat paste welcome.blade.php di panel hosting)
    ======================================================== */
@@ -740,7 +740,7 @@
     {{-- ============================================================ --}}
     <div class="lp-hero-wrap" id="beranda" style="position:relative;background-color:var(--lp-surface);">
         {{-- Background Foto Sekolah dengan Overlay Elegan --}}
-        <div class="lp-hero-bg-photo" style="position:absolute;inset:0;background-image:url('{{ asset('images/konten/sekolah.jpg') }}');background-size:cover;background-position:center 45%;background-repeat:no-repeat;pointer-events:none;z-index:0;"></div>
+        <img class="lp-hero-bg-photo" src="{{ asset('images/konten/sekolah.jpg') }}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 45%;pointer-events:none;z-index:0;">
         <div class="lp-hero-bg-overlay" style="position:absolute;inset:0;background:linear-gradient(90deg, rgba(248,250,255,0.92) 0%, rgba(248,250,255,0.80) 45%, rgba(248,250,255,0.40) 80%, rgba(248,250,255,0.55) 100%), linear-gradient(180deg, rgba(248,250,255,0.5) 0%, rgba(248,250,255,0.15) 50%, var(--lp-surface) 100%);pointer-events:none;z-index:1;"></div>
 
         <div class="lp-hero-glow-1" style="z-index:2;"></div>
@@ -807,7 +807,7 @@
                         <div class="lp-hero-img-bottom">
                             <div>
                                 <p class="lp-hero-img-bottom-title">Lingkungan Akademik Unggul</p>
-                                <p class="lp-hero-img-bottom-sub">Kampus Ciseureuh, Purwakarta â€” Berakhlak &amp; Berprestasi</p>
+                                <p class="lp-hero-img-bottom-sub">Kampus Ciseureuh, Purwakarta Ã¢â‚¬â€ Berakhlak &amp; Berprestasi</p>
                             </div>
                             <div class="lp-hero-img-star">
                                 <span class="material-symbols-outlined" style="font-size:20px;color:var(--lp-yellow);">stars</span>
@@ -1043,7 +1043,7 @@
                             <div class="lp-prog-card-icon" style="background:var(--lp-green);color:var(--lp-on-primary);">
                                 <span class="material-symbols-outlined" style="font-size:26px;">menu_book</span>
                             </div>
-                            <span class="lp-prog-card-badge" style="background:var(--lp-green-light);color:var(--lp-green);">QUR'ANI â€¢ 10 JUZ</span>
+                            <span class="lp-prog-card-badge" style="background:var(--lp-green-light);color:var(--lp-green);">QUR'ANI Ã¢â‚¬Â¢ 10 JUZ</span>
                         </div>
                         <h3>Kelas Tahfizh</h3>
                         <p>Fokus intensif hafalan Al-Qur'an tartil &amp; mutqin 10 juz, bimbingan tahsin bersanad, serta mutaba'ah halaqah berkala.</p>
@@ -1064,7 +1064,7 @@
                             <div class="lp-prog-card-icon" style="background:var(--lp-primary);color:var(--lp-on-primary);">
                                 <span class="material-symbols-outlined" style="font-size:26px;">terminal</span>
                             </div>
-                            <span class="lp-prog-card-badge" style="background:var(--lp-primary-light);color:var(--lp-primary);">DIGITAL â€¢ CODING</span>
+                            <span class="lp-prog-card-badge" style="background:var(--lp-primary-light);color:var(--lp-primary);">DIGITAL Ã¢â‚¬Â¢ CODING</span>
                         </div>
                         <h3>Kelas ICT / Komputer</h3>
                         <p>Penguasaan teknologi informasi, Web Development, Robotika &amp; IoT, Multimedia digital, dan sertifikasi vokasi.</p>
@@ -1222,7 +1222,7 @@
                                 <div style="background:#fff;border:1px solid var(--lp-surface-container);border-radius:14px;padding:14px;display:flex;align-items:flex-start;gap:12px;">
                                     <div style="width:34px;height:34px;border-radius:10px;background:var(--lp-green-light);color:var(--lp-green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;">1</div>
                                     <div>
-                                        <div style="font-weight:700;font-size:14px;color:var(--lp-on-surface);">Murajaâ€™ah Hafalan Bersama</div>
+                                        <div style="font-weight:700;font-size:14px;color:var(--lp-on-surface);">MurajaÃ¢â‚¬â„¢ah Hafalan Bersama</div>
                                         <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:2px 0 0 0;line-height:1.45;">Membaca dan mengulang hafalan secara serempak bersama asatidz untuk mengunci ingatan ayat.</p>
                                     </div>
                                 </div>
@@ -1799,7 +1799,7 @@
         <div class="lp-section">
             <div style="text-align:center;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;">
                 <span class="lp-section-tag">Transparansi Finansial</span>
-                <h2 class="lp-section-title">Rincian Biaya SPMB TP 2027–2028</h2>
+                <h2 class="lp-section-title">Rincian Biaya SPMB TP 2027â€“2028</h2>
                 <p class="lp-section-desc">Pilih tab peminatan untuk melihat tabel rincian biaya pendidikan secara lengkap antara murid Putra dan Putri.</p>
             </div>
 
@@ -1825,7 +1825,7 @@
                                 <span style="font-size:16px;font-weight:700;color:var(--lp-on-surface);" id="lpActiveProgramName">Program: Kelas Reguler</span>
                                 <span id="lpProgramBadge" style="padding:2px 8px;background:rgba(0,90,180,0.1);color:var(--lp-primary);font-weight:700;font-size:11px;border-radius:6px;">Kelas Reguler</span>
                             </div>
-                            <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:0;" id="lpProgramDesc">Rincian resmi biaya masuk tahun ajaran baru TP 2027–2028</p>
+                            <p style="font-size:12px;color:var(--lp-on-surface-variant);margin:0;" id="lpProgramDesc">Rincian resmi biaya masuk tahun ajaran baru TP 2027â€“2028</p>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -2007,9 +2007,38 @@
     </section>
 
 </div>
+
+@if(!empty($announcement['enabled']) && filled($announcement['title']) && filled($announcement['message']))
+<div class="modal fade" id="landingAnnouncementModal" tabindex="-1" aria-labelledby="landingAnnouncementTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">campaign</span>
+                    <h5 class="modal-title fw-bold" id="landingAnnouncementTitle">{{ $announcement['title'] }}</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" style="white-space:pre-line;">{{ $announcement['message'] }}</div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Mengerti</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @push('scripts')
+@if(!empty($announcement['enabled']) && filled($announcement['title']) && filled($announcement['message']))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const key = "landing_announcement_seen_{{ md5($announcement['title'] . $announcement['message']) }}";
+        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (e) {}
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('landingAnnouncementModal')).show();
+    });
+</script>
+@endif
 <script>
     // ===== Interactive Pricing Tab Logic (Sumber: Rincian Biaya 2728.xlsx) =====
     const regulerFeeItems = [
@@ -2040,7 +2069,7 @@
         reguler: {
             name: "Program: Kelas Reguler",
             badge: "Kelas Reguler",
-            desc: "Rincian resmi biaya masuk tahun ajaran baru TP 2027â€“2028",
+            desc: "Rincian resmi biaya masuk tahun ajaran baru TP 2027Ã¢â‚¬â€œ2028",
             items: regulerFeeItems,
             totalPutra: "Rp10.945.000",
             totalPutri: "Rp11.145.000"
@@ -2048,7 +2077,7 @@
         bahasa: {
             name: "Program: Kelas Bahasa",
             badge: "Kelas Takhosus",
-            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027â€“2028",
+            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027Ã¢â‚¬â€œ2028",
             items: takhosusFeeItems,
             totalPutra: "Rp11.045.000",
             totalPutri: "Rp11.245.000"
@@ -2056,7 +2085,7 @@
         tahfizh: {
             name: "Program: Kelas Tahfizh",
             badge: "Kelas Takhosus",
-            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027â€“2028",
+            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027Ã¢â‚¬â€œ2028",
             items: takhosusFeeItems,
             totalPutra: "Rp11.045.000",
             totalPutri: "Rp11.245.000"
@@ -2064,7 +2093,7 @@
         ict: {
             name: "Program: Kelas ICT",
             badge: "Kelas Takhosus",
-            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027â€“2028",
+            desc: "Rumpun Kelas Takhosus (Bahasa, ICT, Tahfidz) TP 2027Ã¢â‚¬â€œ2028",
             items: takhosusFeeItems,
             totalPutra: "Rp11.045.000",
             totalPutri: "Rp11.245.000"
@@ -2170,4 +2199,3 @@
     });
 </script>
 @endpush
-

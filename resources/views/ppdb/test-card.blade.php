@@ -831,14 +831,13 @@
 @endpush
 
 @push('scripts')
+@if($autoPrint)
 <script>
-    // Auto-print jika parameter ?print=1
-    @if($autoPrint)
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                window.print();
-            }, 500);
-        });
-    @endif
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            window.print();
+        }, 500);
+    });
 </script>
+@endif
 @endpush

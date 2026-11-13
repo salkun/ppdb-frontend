@@ -21,7 +21,7 @@ use App\Http\Controllers\ExamController;
 // 1. Publik / Beranda & Portal Siswa
 // ==========================================
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', ['announcement' => \App\Support\AnnouncementSetting::get('landing')]);
 })->name('home');
 
 // File Server Fallback (Melayani berkas unggahan jika web server Apache/LiteSpeed melempar ke Laravel pada shared hosting)
@@ -166,7 +166,7 @@ Route::get('/generate-key', function () {
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
             <div style='display:flex;align-items:center;gap:10px;margin-bottom:15px;'>
                 <span style='background:#10b981;color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>SUCCESS</span>
-                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>✓ Application Key Berhasil Di-generate</h2>
+                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>Ã¢Å“â€œ Application Key Berhasil Di-generate</h2>
             </div>
             <p style='color:#94a3b8;font-size:14px;margin-bottom:12px;'>Kunci enkripsi aplikasi telah diperbarui di file <code>.env</code> server cPanel Anda.</p>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#34d399;font-size:13px;overflow-x:auto;border:1px solid #334155;'>" . htmlspecialchars($output ?: 'Application key set successfully.') . "</pre>
@@ -178,7 +178,7 @@ Route::get('/generate-key', function () {
     } catch (\Throwable $e) {
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;'>
-            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>✗ Gagal Generate Key</h2>
+            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>Ã¢Å“â€” Gagal Generate Key</h2>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#fca5a5;font-size:13px;overflow-x:auto;'>" . htmlspecialchars($e->getMessage()) . "</pre>
         </div>", 500);
     }
@@ -194,7 +194,7 @@ Route::get('/migrate', function () {
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
             <div style='display:flex;align-items:center;gap:10px;margin-bottom:15px;'>
                 <span style='background:#10b981;color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>SUCCESS</span>
-                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>✓ Database Migration Berhasil Dijalankan</h2>
+                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>Ã¢Å“â€œ Database Migration Berhasil Dijalankan</h2>
             </div>
             <p style='color:#94a3b8;font-size:14px;margin-bottom:12px;'>Seluruh tabel database PPDB telah dibuat / dimigrasikan ke MySQL cPanel.</p>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#34d399;font-size:13px;overflow-x:auto;border:1px solid #334155;'>" . htmlspecialchars($output ?: 'Nothing to migrate.') . "</pre>
@@ -208,7 +208,7 @@ Route::get('/migrate', function () {
     } catch (\Throwable $e) {
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;'>
-            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>✗ Database Migration Gagal</h2>
+            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>Ã¢Å“â€” Database Migration Gagal</h2>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#fca5a5;font-size:13px;overflow-x:auto;'>" . htmlspecialchars($e->getMessage()) . "</pre>
             <p style='color:#94a3b8;font-size:13px;margin-top:12px;'>Pastikan konfigurasi <code>DB_DATABASE</code>, <code>DB_USERNAME</code>, dan <code>DB_PASSWORD</code> di file <code>.env</code> cPanel sudah sesuai dengan database MySQL yang telah Anda buat di cPanel.</p>
         </div>", 500);
@@ -228,7 +228,7 @@ Route::get('/migrate-seed', function () {
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
             <div style='display:flex;align-items:center;gap:10px;margin-bottom:15px;'>
                 <span style='background:#10b981;color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>SUCCESS</span>
-                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>✓ Migrate &amp; Seeder Berhasil Dijalankan</h2>
+                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>Ã¢Å“â€œ Migrate &amp; Seeder Berhasil Dijalankan</h2>
             </div>
             <p style='color:#94a3b8;font-size:13px;margin-bottom:6px;'>Hasil Migration:</p>
             <pre style='background:#1e293b;padding:12px;border-radius:8px;color:#34d399;font-size:12px;overflow-x:auto;border:1px solid #334155;margin-bottom:15px;'>" . htmlspecialchars($migrateOutput ?: 'Nothing to migrate.') . "</pre>
@@ -242,7 +242,7 @@ Route::get('/migrate-seed', function () {
     } catch (\Throwable $e) {
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;'>
-            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>✗ Migrate &amp; Seeder Gagal</h2>
+            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>Ã¢Å“â€” Migrate &amp; Seeder Gagal</h2>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#fca5a5;font-size:13px;overflow-x:auto;'>" . htmlspecialchars($e->getMessage()) . "</pre>
         </div>", 500);
     }
@@ -296,7 +296,7 @@ $storageLinkHandler = function () {
         $allOutput = implode("\n", $messages);
         $badge = $isSuccess ? 'SUCCESS' : 'INFO';
         $badgeBg = $isSuccess ? '#10b981' : '#f59e0b';
-        $title = $isSuccess ? '✓ Storage Symlink Berhasil Diproses' : 'ℹ Info Storage Symlink';
+        $title = $isSuccess ? 'Ã¢Å“â€œ Storage Symlink Berhasil Diproses' : 'Ã¢â€žÂ¹ Info Storage Symlink';
 
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
@@ -315,7 +315,7 @@ $storageLinkHandler = function () {
     } catch (\Throwable $e) {
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;'>
-            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>✗ Storage Link Gagal</h2>
+            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>Ã¢Å“â€” Storage Link Gagal</h2>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#fca5a5;font-size:13px;overflow-x:auto;'>" . htmlspecialchars($e->getMessage()) . "</pre>
             <div style='margin-top:20px;'>
                 <a href='" . url('/') . "' style='padding:8px 16px;background:#334155;color:#f1f5f9;text-decoration:none;border-radius:8px;font-size:13px;'>&larr; Beranda</a>
@@ -339,7 +339,7 @@ Route::get('/clear-cache', function () {
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
             <div style='display:flex;align-items:center;gap:10px;margin-bottom:15px;'>
                 <span style='background:#10b981;color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>SUCCESS</span>
-                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>✓ Seluruh Cache Berhasil Dibersihkan</h2>
+                <h2 style='margin:0;font-size:20px;color:#38bdf8;'>Ã¢Å“â€œ Seluruh Cache Berhasil Dibersihkan</h2>
             </div>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#34d399;font-size:13px;overflow-x:auto;border:1px solid #334155;'>" . htmlspecialchars($output ?: 'Compiled views, config, and route caches cleared.') . "</pre>
             <div style='margin-top:20px;'>
@@ -349,7 +349,7 @@ Route::get('/clear-cache', function () {
     } catch (\Throwable $e) {
         return response("
         <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:700px;margin:50px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;'>
-            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>✗ Gagal Clear Cache</h2>
+            <h2 style='margin:0 0 15px 0;font-size:20px;color:#ef4444;'>Ã¢Å“â€” Gagal Clear Cache</h2>
             <pre style='background:#1e293b;padding:15px;border-radius:10px;color:#fca5a5;font-size:13px;overflow-x:auto;'>" . htmlspecialchars($e->getMessage()) . "</pre>
         </div>", 500);
     }
@@ -420,7 +420,7 @@ Route::get('/sync-uploads', function () {
     <div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;max-width:760px;margin:40px auto;padding:25px;background:#0f172a;color:#f8fafc;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.3);'>
         <div style='display:flex;align-items:center;gap:10px;margin-bottom:15px;'>
             <span style='background:#10b981;color:#fff;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:bold;'>SYNC OK</span>
-            <h2 style='margin:0;font-size:20px;color:#38bdf8;'>✓ Sinkronisasi Berkas Upload PPDB Berhasil</h2>
+            <h2 style='margin:0;font-size:20px;color:#38bdf8;'>Ã¢Å“â€œ Sinkronisasi Berkas Upload PPDB Berhasil</h2>
         </div>
         <p style='color:#94a3b8;font-size:14px;margin-bottom:6px;'>Lokasi <code>public_path()</code>: <span style='color:#f1f5f9;'>{$publicPath}</span></p>
         <p style='color:#94a3b8;font-size:14px;margin-bottom:12px;'>Lokasi <code>DOCUMENT_ROOT</code>: <span style='color:#f1f5f9;'>" . ($docRoot ?: 'Tidak terdeteksi') . "</span></p>

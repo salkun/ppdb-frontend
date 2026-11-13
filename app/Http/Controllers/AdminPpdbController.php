@@ -121,13 +121,17 @@ class AdminPpdbController extends Controller
     public function announcement()
     {
         return view('admin.ppdb.announcement', [
-            'announcement' => AnnouncementSetting::get(),
+            'announcements' => [
+                'dashboard' => AnnouncementSetting::get('dashboard'),
+                'landing' => AnnouncementSetting::get('landing'),
+            ],
         ]);
     }
 
     public function saveAnnouncement(Request $request)
     {
         $data = $request->validate([
+            'scope' => ['required', 'in:dashboard,landing'],
             'enabled' => ['required', 'boolean'],
             'title' => ['required_if:enabled,1', 'nullable', 'string', 'max:150'],
             'message' => ['required_if:enabled,1', 'nullable', 'string', 'max:5000'],
@@ -140,7 +144,7 @@ class AdminPpdbController extends Controller
             'enabled' => $request->boolean('enabled'),
             'title' => trim($data['title'] ?? ''),
             'message' => trim($data['message'] ?? ''),
-        ]);
+        ], $data['scope']);
 
         return redirect()->route('admin.ppdb.announcement')->with('success', 'Pengumuman berhasil diperbarui.');
     }
